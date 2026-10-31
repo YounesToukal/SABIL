@@ -1,24 +1,63 @@
 {
-  "_owner": "Younes (new file, added at sync 1; Youcef reads only). Holds the simulation and smart-controller settings so no number is typed in the code.",
+  "_owner": "Younes (Youcef reads only). Simulation, experiment and smart-controller settings, so no number is typed in the code.",
   "site": {
     "name": "Maiduguri, Borno State, Nigeria",
     "latitude": 11.85,
     "longitude": 13.16,
-    "utc_offset_h": 1,
-    "weather_year": 2023
+    "utc_offset_h": 1
   },
+  "weather_years": [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
+  "weather_mode": "multi_year",
+  "repeat_year": 2023,
   "years": 10,
   "dt_h": 1.0,
   "replace_battery_at_eol": false,
   "headline_forecast": "persistence",
   "critical_eps_kw": 0.001,
+  "diesel_kg_co2_per_l": 2.68,
   "smart": {
     "hot_threshold_c": 30.0,
     "soc_cap_hot": 0.70,
     "sunny_ratio": 1.0,
     "reserve_margin": 0.15,
     "c_rate_hot": 0.25,
-    "lookahead_h": 36
+    "features": {
+      "charge_cap": true,
+      "night_reserve": true,
+      "load_shift": true,
+      "heat_gentle": true,
+      "critical_priority": true
+    }
   },
-  "sources": "Site and weather year from the team contract (shared assumptions). Smart-controller thresholds are design choices, tuned against Youcef's ageing model and reviewed at the 00:45 physics check. headline_forecast: 'persistence' (tomorrow = today, realistic) or 'perfect' (tomorrow's real data, upper bound); both are always run."
+  "experiments": {
+    "sweep_soc_cap_hot": [0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0],
+    "monte_carlo_samples": 96,
+    "seed": 2026,
+    "workers": 4,
+    "uncertain_inputs": [
+      {"path": "battery.aging.cal_k_ref_per_sqrt_s", "dist": "lognormal_scale", "sigma": 0.25,
+       "why": "cell-to-cell and manufacturer spread in calendar ageing rate"},
+      {"path": "battery.aging.cal_ea_j_mol", "dist": "uniform_scale", "low": 0.7, "high": 1.3,
+       "why": "temperature sensitivity of calendar ageing"},
+      {"path": "battery.aging.cal_soc_a", "dist": "uniform_scale", "low": 0.5, "high": 1.5,
+       "why": "how strongly a full battery ages faster (the effect SABIL exploits)"},
+      {"path": "battery.aging.cyc_c_b", "dist": "lognormal_scale", "sigma": 0.25,
+       "why": "cycle ageing rate"},
+      {"path": "battery.temp_offset_c", "dist": "uniform_set", "low": 0.0, "high": 8.0,
+       "why": "battery temperature above outdoor air (indoor siting, enclosure)"},
+      {"path": "household.load_scale", "dist": "uniform_set", "low": 0.8, "high": 1.2,
+       "why": "household consumption +/-20%"},
+      {"path": "system.pv_kwp", "dist": "uniform_scale", "low": 0.8, "high": 1.25,
+       "why": "PV array size and soiling"}
+    ]
+  },
+  "forecast_ml": {
+    "model": "gradient_boosting",
+    "max_iter": 300,
+    "learning_rate": 0.05,
+    "max_leaf_nodes": 15,
+    "dry_months": [11, 12, 1, 2, 3, 4],
+    "wet_months": [6, 7, 8, 9]
+  },
+  "sources": "Site from the team contract. Weather: NASA POWER hourly 2014-2023 (multi_year mode uses each real year once; repeat mode repeats repeat_year as in the original contract). CO2: IPCC 2006 Guidelines default for diesel/gas oil, 74,100 kg CO2/TJ x 43.0 TJ/Gg x 0.84 kg/L = 2.68 kg CO2/L. Smart-controller thresholds are design choices, justified by the soc_cap_hot sweep (results/experiments). Uncertainty ranges are engineering judgement, stated per input."
 }

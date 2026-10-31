@@ -94,13 +94,23 @@ class Smart:
         self.soc_min, self.soc_max_b = b["soc_min_baseline"], b["soc_max_baseline"]
         self.max_c = b["max_c_rate"]
         self.eta_out = b["discharge_eff"] * ctx.inv  # stored kWh -> AC kWh
+        self.f = self.s.get("features", {})
         self.today = None
+
+    def _on(self, feature):
+        return self.f.get(feature, True)
+
+    def _pv_forecast(self, ctx, t0, H):
+        if self.mode == "learned":
+            idx = (t0 + np.arange(H)) % ctx.n
+            return np.concatenate([ctx.pv_fc_same[idx[:24]], ctx.pv_fc_next[idx[24:]]])
+        return forecast(ctx.pv_dc, t0, H, self.mode)
 
     # ---------- daily plan ----------
     def plan_day(self, t0, ctx):
         H = 48
-        pv_ac = forecast(ctx.pv_dc, t0, H, self.mode) * ctx.inv
-        amb = forecast(ctx.ambient_c, t0, 24, self.mode)
+        pv_ac = self._pv_forecast(ctx, t0, H) * ctx.inv
+        amb = forecast(ctx.ambient_c, t0, 24, "persistence" if self.mode == "learned" else self.mode)
         crit = forecast(ctx.crit_fixed, t0, H, "perfect")  # household schedule, known
         nonc = forecast(ctx.nonc_fixed, t0, H, "perfect")
 
@@ -108,7 +118,7 @@ class Smart:
         fc, fnc = np.zeros(24), np.zeros(24)
         surplus = pv_ac[:24] - crit[:24] - nonc[:24]
         for f in sorted(ctx.flex, key=lambda f: -f["kw"]):
-            hours = f["allowed_hours"] or f["use_hours"]
+            hours = (f["allowed_hours"] or f["use_hours"]) if self._on("load_shift") else f["use_hours"]
             best = sorted(hours, key=lambda h: -surplus[h])[: f["n_hours"]]
             for h in best:
                 (fc if f["critical"] else fnc)[h] += f["kw"]
@@ -155,17 +165,21 @@ class Smart:
         h = t - d["t0"]
 
         need_soc = self.soc_min + d["e_night"] * m / (cap * self.eta_out)
-        if d["hot"] and d["sunny_tomorrow"]:
+        if self._on("charge_cap") and d["hot"] and d["sunny_tomorrow"]:
             soc_max = min(self.soc_max_b, max(s["soc_cap_hot"], need_soc))
         else:
             soc_max = self.soc_max_b
 
-        reserve = min(soc_max, self.soc_min + d["rem_crit"][h] * m / (cap * self.eta_out))
+        if self._on("night_reserve"):
+            reserve = min(soc_max, self.soc_min + d["rem_crit"][h] * m / (cap * self.eta_out))
+        else:
+            reserve = self.soc_min
 
         hot_now = state["last_battery_temp_c"] >= s["hot_threshold_c"]
-        gentle = s["c_rate_hot"] if hot_now else self.max_c
+        gentle = s["c_rate_hot"] if (hot_now and self._on("heat_gentle")) else self.max_c
         return dict(soc_max=soc_max, soc_floor_crit=self.soc_min, soc_floor_nonc=reserve,
-                    chg_c=gentle, dis_c_crit=self.max_c, dis_c_nonc=gentle, priority=True,
+                    chg_c=gentle, dis_c_crit=self.max_c, dis_c_nonc=gentle,
+                    priority=self._on("critical_priority"),
                     hot=d["hot"], sunny_tomorrow=d["sunny_tomorrow"])
 
 

@@ -10,12 +10,20 @@
 - Result checks and charts (`src/check_results.py`, `src/plots.py`)
 - Kaggle notebook (`notebooks/sabil_kaggle.ipynb`)
 
+- Ageing model verification, learned forecast, experiments (ablation, trade-off sweep,
+  Monte Carlo) and the auto-generated research report (`src/validate_aging.py`,
+  `src/forecast_ml.py`, `src/experiments.py`, `src/report.py`)
+
 ## Data
-- NASA POWER hourly API (power.larc.nasa.gov), ALLSKY_SFC_SW_DWN and T2M,
-  Maiduguri 11.85° N, 13.16° E, year 2023. Public.
+- NASA POWER hourly API (power.larc.nasa.gov), ALLSKY_SFC_SW_DWN, T2M, RH2M,
+  Maiduguri 11.85° N, 13.16° E, years 2014–2023. Public.
+
+## Published models
+- Battery ageing: Naumann et al. 2018 (calendar) and 2020 (cycle), LFP/graphite;
+  coefficients and method checked against the authors' open-source SimSES (TU Munich).
 
 ## Open-source libraries
-- Python, NumPy, pandas, Matplotlib, Requests
+- Python, NumPy, pandas, Matplotlib, Requests, scikit-learn, SimSES (verification only)
 
 ## Tools
 - Kaggle Notebooks (compute)

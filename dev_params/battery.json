@@ -1,5 +1,5 @@
 {
-  "_status": "Younes's interim values, used only until Youcef pushes params/battery.json. Top-level values: typical 51.2 V 100 Ah LFP home battery (TO CONFIRM with a datasheet). 'aging' block: coefficients after Naumann et al. 2018 (calendar) and 2020 (cycle) - TO CONFIRM against the papers.",
+  "_status": "Younes's interim values, used only until Youcef pushes params/battery.json. Top-level values: typical 51.2 V 100 Ah LFP home battery (TO CONFIRM with a datasheet). 'aging' block: Naumann et al. 2018 (calendar) and 2020 (cycle), checked against the authors' SimSES code.",
   "chemistry": "LFP",
   "capacity_kwh": 5.12,
   "charge_eff": 0.975,
@@ -18,8 +18,7 @@
     "cyc_c_a": 0.0630,
     "cyc_c_b": 0.0971,
     "cyc_dod_c": 4.0253,
-    "cyc_dod_d": 1.0923,
-    "cyc_dod_min": 0.05
+    "cyc_dod_d": 1.0923
   },
-  "sources": "Calendar: Naumann M., Schimpe M., Keil P., Hesse H.C., Jossen A., 'Analysis and modeling of calendar aging of a commercial LiFePO4/graphite cell', J. Energy Storage 17 (2018) 153-169, doi:10.1016/j.est.2018.01.019. Cycle: Naumann M., Spingler F.B., Jossen A., 'Analysis and modeling of cycle aging of a commercial LiFePO4/graphite cell', J. Power Sources 451 (2020) 227666. Coefficient values TO CONFIRM against the papers (Youcef). Efficiencies, C-rate and capacity: typical 51.2 V 100 Ah LFP home battery datasheets (TO CONFIRM)."
+  "sources": "Ageing coefficients: Naumann M., Schimpe M., Keil P., Hesse H.C., Jossen A., 'Analysis and modeling of calendar aging of a commercial LiFePO4/graphite cell', J. Energy Storage 17 (2018) 153-169, doi:10.1016/j.est.2018.01.019; Naumann M., Spingler F.B., Jossen A., 'Analysis and modeling of cycle aging of a commercial LiFePO4/graphite cell', J. Power Sources 451 (2020) 227666. Values checked identical to the authors' open-source implementation SimSES (TU Munich, PyPI simses 2.1.1, sony_lfp_calendar.py / sony_lfp_cyclic.py). Efficiencies, C-rate and capacity: typical 51.2 V 100 Ah LFP home battery datasheets (TO CONFIRM, Youcef)."
 }

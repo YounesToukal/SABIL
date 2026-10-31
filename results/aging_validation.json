@@ -1,0 +1,48 @@
+{
+  "calendar_closed_form": [
+    {
+      "T_c": 25,
+      "soc": 0.5,
+      "model": 0.04251575918918158,
+      "closed_form": 0.0425157591891815
+    },
+    {
+      "T_c": 25,
+      "soc": 1.0,
+      "model": 0.06773136356508144,
+      "closed_form": 0.06773136356508148
+    },
+    {
+      "T_c": 35,
+      "soc": 0.7,
+      "model": 0.05521994910066006,
+      "closed_form": 0.05521994910066006
+    },
+    {
+      "T_c": 40,
+      "soc": 1.0,
+      "model": 0.09429909258277519,
+      "closed_form": 0.09429909258277512
+    }
+  ],
+  "cycle_closed_form": {
+    "model": 0.02324307936889086,
+    "closed_form": 0.02324307936889097
+  },
+  "sanity": {
+    "hotter_ages_faster": true,
+    "fuller_ages_faster": true,
+    "deeper_cycles_age_faster_per_kwh": 1.0
+  },
+  "cross_check": {
+    "available": true,
+    "simses_loss": 0.07172833637255227,
+    "sabil_loss": 0.07172833637255552,
+    "relative_difference": 4.527363258729142e-14,
+    "simses_calendar": 0.05408004913884501,
+    "simses_cycle": 0.01764828723371045,
+    "sabil_calendar": 0.05408004913884501,
+    "sabil_cycle": 0.01764828723371045
+  },
+  "all_passed": true
+}

@@ -18,8 +18,9 @@ def build(household, hours_of_day):
     """hours_of_day: int array (0-23), one entry per simulated hour."""
     n = len(hours_of_day)
     crit, nonc, flex = np.zeros(n), np.zeros(n), []
+    scale = household.get("load_scale", 1.0)   # set only by the uncertainty analysis
     for a in household["appliances"]:
-        kw = a["power_w"] * a["quantity"] / 1000.0
+        kw = a["power_w"] * a["quantity"] / 1000.0 * scale
         if a.get("flexible") and a.get("allowed_hours"):
             flex.append({"name": a["name"], "kw": kw, "n_hours": len(a["use_hours"]),
                          "use_hours": list(a["use_hours"]), "allowed_hours": list(a["allowed_hours"]),
@@ -60,6 +61,10 @@ if __name__ == "__main__":
     summary(P["household"])
     from weather import load_weather
     w = load_weather(P["sim"])
+    hod = w["timestamp_local"].dt.hour.to_numpy()
+    L = build(P["household"], hod)
+    fc, fnc = flex_at_usual_hours(L["flex"], hod)
+    w = w[w["wyear"] == w["wyear"].iloc[-1]].reset_index(drop=True)   # one year is enough
     hod = w["timestamp_local"].dt.hour.to_numpy()
     L = build(P["household"], hod)
     fc, fnc = flex_at_usual_hours(L["flex"], hod)

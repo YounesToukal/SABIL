@@ -1,0 +1,11 @@
+{
+  "source": "NASA POWER hourly API (power.larc.nasa.gov), community RE",
+  "parameters": "ALLSKY_SFC_SW_DWN,T2M,RH2M",
+  "time_standard": "UTC shifted to local by utc_offset_h",
+  "latitude": 11.85,
+  "longitude": 13.16,
+  "utc_offset_h": 1,
+  "year": 2015,
+  "missing_values_interpolated": 0,
+  "downloaded_utc": "2026-10-31T21:13:49"
+}

@@ -1,0 +1,199 @@
+{
+  "runs": {
+    "baseline": {
+      "battery_life_years": 6.16,
+      "capacity_after_10y_frac": 0.7438,
+      "critical_service_frac": 0.9923,
+      "critical_hours_per_year": 6885.7,
+      "energy_served_kwh_per_year": 1357.72,
+      "energy_unmet_kwh_per_year": 6.3,
+      "diesel_avoided_l_per_year": 678.9,
+      "diesel_avoided_l_per_battery_life": 4184.0,
+      "full_cycles_per_year": 216.2,
+      "avg_soc_when_hot": 0.7779
+    },
+    "full": {
+      "battery_life_years": 8.2,
+      "capacity_after_10y_frac": 0.7792,
+      "critical_service_frac": 0.9999,
+      "critical_hours_per_year": 6938.0,
+      "energy_served_kwh_per_year": 1346.32,
+      "energy_unmet_kwh_per_year": 17.7,
+      "diesel_avoided_l_per_year": 673.2,
+      "diesel_avoided_l_per_battery_life": 5523.0,
+      "full_cycles_per_year": 151.1,
+      "avg_soc_when_hot": 0.6682
+    },
+    "all_off": {
+      "battery_life_years": 6.16,
+      "capacity_after_10y_frac": 0.7438,
+      "critical_service_frac": 0.9923,
+      "critical_hours_per_year": 6885.7,
+      "energy_served_kwh_per_year": 1357.72,
+      "energy_unmet_kwh_per_year": 6.3,
+      "diesel_avoided_l_per_year": 678.9,
+      "diesel_avoided_l_per_battery_life": 4184.0,
+      "full_cycles_per_year": 216.2,
+      "avg_soc_when_hot": 0.7779
+    },
+    "without_charge_cap": {
+      "battery_life_years": 6.18,
+      "capacity_after_10y_frac": 0.7446,
+      "critical_service_frac": 1.0,
+      "critical_hours_per_year": 6938.7,
+      "energy_served_kwh_per_year": 1362.22,
+      "energy_unmet_kwh_per_year": 1.8,
+      "diesel_avoided_l_per_year": 681.1,
+      "diesel_avoided_l_per_battery_life": 4208.0,
+      "full_cycles_per_year": 154.4,
+      "avg_soc_when_hot": 0.8919
+    },
+    "only_charge_cap": {
+      "battery_life_years": 6.95,
+      "capacity_after_10y_frac": 0.755,
+      "critical_service_frac": 0.9916,
+      "critical_hours_per_year": 6880.5,
+      "energy_served_kwh_per_year": 1357.02,
+      "energy_unmet_kwh_per_year": 7.0,
+      "diesel_avoided_l_per_year": 678.5,
+      "diesel_avoided_l_per_battery_life": 4716.0,
+      "full_cycles_per_year": 216.0,
+      "avg_soc_when_hot": 0.7284
+    },
+    "without_night_reserve": {
+      "battery_life_years": 8.19,
+      "capacity_after_10y_frac": 0.779,
+      "critical_service_frac": 0.9954,
+      "critical_hours_per_year": 6907.1,
+      "energy_served_kwh_per_year": 1359.27,
+      "energy_unmet_kwh_per_year": 4.75,
+      "diesel_avoided_l_per_year": 679.6,
+      "diesel_avoided_l_per_battery_life": 5566.0,
+      "full_cycles_per_year": 153.8,
+      "avg_soc_when_hot": 0.6641
+    },
+    "only_night_reserve": {
+      "battery_life_years": 6.16,
+      "capacity_after_10y_frac": 0.7438,
+      "critical_service_frac": 0.9923,
+      "critical_hours_per_year": 6885.7,
+      "energy_served_kwh_per_year": 1357.72,
+      "energy_unmet_kwh_per_year": 6.3,
+      "diesel_avoided_l_per_year": 678.9,
+      "diesel_avoided_l_per_battery_life": 4184.0,
+      "full_cycles_per_year": 216.2,
+      "avg_soc_when_hot": 0.7779
+    },
+    "without_load_shift": {
+      "battery_life_years": 6.96,
+      "capacity_after_10y_frac": 0.7552,
+      "critical_service_frac": 1.0,
+      "critical_hours_per_year": 6938.6,
+      "energy_served_kwh_per_year": 1314.22,
+      "energy_unmet_kwh_per_year": 49.8,
+      "diesel_avoided_l_per_year": 657.1,
+      "diesel_avoided_l_per_battery_life": 4572.0,
+      "full_cycles_per_year": 207.0,
+      "avg_soc_when_hot": 0.7452
+    },
+    "only_load_shift": {
+      "battery_life_years": 6.18,
+      "capacity_after_10y_frac": 0.7446,
+      "critical_service_frac": 0.9985,
+      "critical_hours_per_year": 6928.7,
+      "energy_served_kwh_per_year": 1363.08,
+      "energy_unmet_kwh_per_year": 0.94,
+      "diesel_avoided_l_per_year": 681.5,
+      "diesel_avoided_l_per_battery_life": 4211.0,
+      "full_cycles_per_year": 154.6,
+      "avg_soc_when_hot": 0.8913
+    },
+    "without_heat_gentle": {
+      "battery_life_years": 8.2,
+      "capacity_after_10y_frac": 0.7792,
+      "critical_service_frac": 0.9999,
+      "critical_hours_per_year": 6938.0,
+      "energy_served_kwh_per_year": 1346.32,
+      "energy_unmet_kwh_per_year": 17.7,
+      "diesel_avoided_l_per_year": 673.2,
+      "diesel_avoided_l_per_battery_life": 5523.0,
+      "full_cycles_per_year": 151.1,
+      "avg_soc_when_hot": 0.6682
+    },
+    "only_heat_gentle": {
+      "battery_life_years": 6.16,
+      "capacity_after_10y_frac": 0.7438,
+      "critical_service_frac": 0.9923,
+      "critical_hours_per_year": 6885.7,
+      "energy_served_kwh_per_year": 1357.72,
+      "energy_unmet_kwh_per_year": 6.3,
+      "diesel_avoided_l_per_year": 678.9,
+      "diesel_avoided_l_per_battery_life": 4184.0,
+      "full_cycles_per_year": 216.2,
+      "avg_soc_when_hot": 0.7779
+    },
+    "without_critical_priority": {
+      "battery_life_years": 8.19,
+      "capacity_after_10y_frac": 0.779,
+      "critical_service_frac": 0.9945,
+      "critical_hours_per_year": 6900.3,
+      "energy_served_kwh_per_year": 1359.27,
+      "energy_unmet_kwh_per_year": 4.75,
+      "diesel_avoided_l_per_year": 679.6,
+      "diesel_avoided_l_per_battery_life": 5566.0,
+      "full_cycles_per_year": 153.8,
+      "avg_soc_when_hot": 0.6641
+    },
+    "only_critical_priority": {
+      "battery_life_years": 6.16,
+      "capacity_after_10y_frac": 0.7438,
+      "critical_service_frac": 0.9937,
+      "critical_hours_per_year": 6895.1,
+      "energy_served_kwh_per_year": 1357.72,
+      "energy_unmet_kwh_per_year": 6.3,
+      "diesel_avoided_l_per_year": 678.9,
+      "diesel_avoided_l_per_battery_life": 4184.0,
+      "full_cycles_per_year": 216.2,
+      "avg_soc_when_hot": 0.7779
+    }
+  },
+  "contributions": [
+    {
+      "feature": "charge_cap",
+      "life_lost_if_removed_years": 2.02,
+      "life_gain_alone_years": 0.79,
+      "critical_service_if_removed": 1.0,
+      "unmet_kwh_if_removed": 1.8
+    },
+    {
+      "feature": "night_reserve",
+      "life_lost_if_removed_years": 0.01,
+      "life_gain_alone_years": 0.0,
+      "critical_service_if_removed": 0.9954,
+      "unmet_kwh_if_removed": 4.75
+    },
+    {
+      "feature": "load_shift",
+      "life_lost_if_removed_years": 1.24,
+      "life_gain_alone_years": 0.02,
+      "critical_service_if_removed": 1.0,
+      "unmet_kwh_if_removed": 49.8
+    },
+    {
+      "feature": "heat_gentle",
+      "life_lost_if_removed_years": 0.0,
+      "life_gain_alone_years": 0.0,
+      "critical_service_if_removed": 0.9999,
+      "unmet_kwh_if_removed": 17.7
+    },
+    {
+      "feature": "critical_priority",
+      "life_lost_if_removed_years": 0.01,
+      "life_gain_alone_years": 0.0,
+      "critical_service_if_removed": 0.9945,
+      "unmet_kwh_if_removed": 4.75
+    }
+  ],
+  "all_off_equals_baseline": true,
+  "forecast": "persistence"
+}

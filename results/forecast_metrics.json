@@ -1,0 +1,168 @@
+{
+  "model": "gradient_boosting",
+  "validation": "leave-one-year-out over 2014-2023",
+  "features": [
+    "kt_l1",
+    "kt_l2",
+    "kt_l3",
+    "kt_m7",
+    "t_l1",
+    "trange_l1",
+    "rh_l1",
+    "rh_trend",
+    "doy_sin",
+    "doy_cos"
+  ],
+  "metrics": {
+    "same_day": {
+      "all": {
+        "learned": {
+          "mae_kwh_m2_day": 0.6103924105805952,
+          "rmse_kwh_m2_day": 0.8856234251111863,
+          "bias_kwh_m2_day": -0.0025360862199253664
+        },
+        "persistence": {
+          "mae_kwh_m2_day": 0.7446708262784083,
+          "rmse_kwh_m2_day": 1.1795531251394837,
+          "bias_kwh_m2_day": -2.026175438782615e-05
+        },
+        "climatology": {
+          "mae_kwh_m2_day": 0.6386910092476094,
+          "rmse_kwh_m2_day": 0.8900749860502581,
+          "bias_kwh_m2_day": 0.000658738335261896
+        },
+        "skill_vs_persistence": 0.1803191570816428,
+        "skill_vs_climatology": 0.044307181809793206,
+        "mean_daily_sun_kwh_m2": 5.921514340087623
+      },
+      "dry": {
+        "learned": {
+          "mae_kwh_m2_day": 0.34756280567422415,
+          "rmse_kwh_m2_day": 0.48800626881437387,
+          "bias_kwh_m2_day": -0.006999986683785342
+        },
+        "persistence": {
+          "mae_kwh_m2_day": 0.37421142826546916,
+          "rmse_kwh_m2_day": 0.552507632727081,
+          "bias_kwh_m2_day": 0.0033479209625289627
+        },
+        "climatology": {
+          "mae_kwh_m2_day": 0.42308044883140633,
+          "rmse_kwh_m2_day": 0.5861143488367473,
+          "bias_kwh_m2_day": -0.0021574623419317865
+        },
+        "skill_vs_persistence": 0.07121274386184762,
+        "skill_vs_climatology": 0.17849475995823028,
+        "mean_daily_sun_kwh_m2": 6.172813901766005
+      },
+      "wet": {
+        "learned": {
+          "mae_kwh_m2_day": 1.0263629769694487,
+          "rmse_kwh_m2_day": 1.3087839513200832,
+          "bias_kwh_m2_day": 0.005019511753635302
+        },
+        "persistence": {
+          "mae_kwh_m2_day": 1.3582403895573214,
+          "rmse_kwh_m2_day": 1.825480196394059,
+          "bias_kwh_m2_day": -0.0048198529700650755
+        },
+        "climatology": {
+          "mae_kwh_m2_day": 0.9709173888032716,
+          "rmse_kwh_m2_day": 1.2422408207494262,
+          "bias_kwh_m2_day": 0.00553816286990119
+        },
+        "skill_vs_persistence": 0.24434364869390934,
+        "skill_vs_climatology": -0.057106391136446666,
+        "mean_daily_sun_kwh_m2": 5.443547942622951
+      }
+    },
+    "next_day": {
+      "all": {
+        "learned": {
+          "mae_kwh_m2_day": 0.6333761705818205,
+          "rmse_kwh_m2_day": 0.9002937847569359,
+          "bias_kwh_m2_day": -0.0015023408729647725
+        },
+        "persistence": {
+          "mae_kwh_m2_day": 0.7958012005413715,
+          "rmse_kwh_m2_day": 1.1849624860195438,
+          "bias_kwh_m2_day": 0.00021383367406472184
+        },
+        "climatology": {
+          "mae_kwh_m2_day": 0.6389233081999937,
+          "rmse_kwh_m2_day": 0.8902048136922512,
+          "bias_kwh_m2_day": -3.869303103568092e-05
+        },
+        "skill_vs_persistence": 0.20410251938430812,
+        "skill_vs_climatology": 0.008682008539962038,
+        "mean_daily_sun_kwh_m2": 5.921631005204054
+      },
+      "dry": {
+        "learned": {
+          "mae_kwh_m2_day": 0.3942137449896503,
+          "rmse_kwh_m2_day": 0.5436660221014789,
+          "bias_kwh_m2_day": -0.013032542630149918
+        },
+        "persistence": {
+          "mae_kwh_m2_day": 0.46160947735305363,
+          "rmse_kwh_m2_day": 0.6546563490928344,
+          "bias_kwh_m2_day": 0.005521584454939241
+        },
+        "climatology": {
+          "mae_kwh_m2_day": 0.42420926189504066,
+          "rmse_kwh_m2_day": 0.5871457808250089,
+          "bias_kwh_m2_day": -0.005396322041314367
+        },
+        "skill_vs_persistence": 0.14600162186847165,
+        "skill_vs_climatology": 0.0707092456477576,
+        "mean_daily_sun_kwh_m2": 6.177283290999448
+      },
+      "wet": {
+        "learned": {
+          "mae_kwh_m2_day": 1.0019399453308127,
+          "rmse_kwh_m2_day": 1.2918071937613858,
+          "bias_kwh_m2_day": 0.02205884720563071
+        },
+        "persistence": {
+          "mae_kwh_m2_day": 1.3293796141431007,
+          "rmse_kwh_m2_day": 1.7568715626325777,
+          "bias_kwh_m2_day": -0.005672581605520743
+        },
+        "climatology": {
+          "mae_kwh_m2_day": 0.9725848729655615,
+          "rmse_kwh_m2_day": 1.2433478933700084,
+          "bias_kwh_m2_day": 0.005472461376289113
+        },
+        "skill_vs_persistence": 0.24631013243222555,
+        "skill_vs_climatology": -0.030182530266734453,
+        "mean_daily_sun_kwh_m2": 5.441111786885245
+      }
+    }
+  },
+  "permutation_importance_last_fold": {
+    "same_day": {
+      "kt_l1": 0.0150354351116045,
+      "doy_cos": 0.006804463124419066,
+      "kt_m7": 0.0032243298249858277,
+      "t_l1": 0.0028399431579844343,
+      "trange_l1": 0.0027334158446414764,
+      "doy_sin": 0.0011029611404214962,
+      "kt_l3": 0.0006103430418348849,
+      "rh_l1": 0.00042422714527317885,
+      "kt_l2": 8.930984626883132e-05,
+      "rh_trend": -0.00018919715902738777
+    },
+    "next_day": {
+      "doy_cos": 0.015910549117789614,
+      "t_l1": 0.005896727753778336,
+      "kt_l1": 0.004871733918955368,
+      "doy_sin": 0.002715012321568988,
+      "kt_m7": 0.0013459866225432216,
+      "kt_l3": 0.0008010182272598059,
+      "rh_l1": -0.0006522909330398452,
+      "kt_l2": -0.001120117819346339,
+      "rh_trend": -0.0012127602928541452,
+      "trange_l1": -0.001599007295539867
+    }
+  }
+}
