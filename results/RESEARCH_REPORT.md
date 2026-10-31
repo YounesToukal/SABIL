@@ -1,6 +1,6 @@
 # SABIL: battery-aware control for solar home systems in Maiduguri
 
-*Generated 2026-10-31 21:17 UTC from the result files at commit d29b743. Every number below is read from `results/`, not typed.*
+*Generated 2026-10-31 22:07 UTC from the result files at commit 77664b5. Every number below is read from `results/`, not typed.*
 
 > **Provisional:** these inputs still use placeholders (`dev_params/`): household, system, battery, costs.
 
@@ -44,17 +44,71 @@ When the transmission line to Maiduguri is cut (Brief 13), a household solar-plu
 | persistence | 8.20 | 99.99% | 17.7 |
 | learned | 8.21 | 100.00% | 17.7 |
 
-Learned next-day forecast (gradient_boosting, leave-one-year-out over 2014-2023), mean absolute error in kWh/m2/day:
+Learned next-day forecast (ensemble, leave-one-year-out over 2014-2023), mean absolute error in kWh/m2/day:
 
 | Season | Learned | Tomorrow = today | Seasonal average | Skill vs tomorrow = today |
 |---|---|---|---|---|
-| all | 0.633 | 0.796 | 0.639 | +20% |
-| dry | 0.394 | 0.462 | 0.424 | +15% |
-| wet | 1.002 | 1.329 | 0.973 | +25% |
-
-Most informative inputs (permutation importance): doy_cos, t_l1, kt_l1, doy_sin.
+| all | 0.612 | 0.796 | 0.639 | +23% |
+| dry | 0.377 | 0.461 | 0.424 | +18% |
+| wet | 0.970 | 1.329 | 0.973 | +27% |
 
 ![forecast](figures/fig9_forecast_skill.png)
+
+### 4b. Forecasting lab: datasets x features x models
+Data sources: NASA POWER (sun, temperature, humidity), ERA5 reanalysis via Open-Meteo (clouds by layer, dew point, pressure, wind, rain, soil moisture, ERA5 sun), NOAA climate indices (ONI, NAO, TNA). Feature groups used: history (8), season (4), nasa_met (7), era5_cloud (8), era5_dyn (10), era5_sun (2), climate (3).
+
+| Model | Next-day MAE, year | Dry season | Rainy season | DM vs persistence (stat, p) | DM vs climatology (stat, p) |
+|---|---|---|---|---|---|
+| ensemble | 0.612 | 0.377 | 0.970 | -15.1, 0.000 | -5.9, 0.000 |
+| ridge | 0.614 | 0.378 | 0.978 | -15.5, 0.000 | -5.6, 0.000 |
+| xgboost | 0.615 | 0.382 | 0.972 | -14.9, 0.000 | -4.7, 0.000 |
+| random_forest | 0.617 | 0.386 | 0.970 | -14.8, 0.000 | -5.1, 0.000 |
+| extra_trees | 0.618 | 0.386 | 0.973 | -14.6, 0.000 | -5.3, 0.000 |
+| lightgbm | 0.618 | 0.383 | 0.979 | -14.5, 0.000 | -4.0, 0.000 |
+| hist_gb | 0.622 | 0.388 | 0.983 | -14.0, 0.000 | -3.1, 0.002 |
+| gru | 0.631 | 0.389 | 0.977 | -12.2, 0.000 | -1.1, 0.272 |
+| climatology | 0.639 | 0.424 | 0.973 | - | - |
+| chronos_bolt | 0.648 | 0.411 | 1.003 | -13.5, 0.000 | +1.2, 0.222 |
+| mlp | 0.794 | 0.523 | 1.175 | -0.1, 0.898 | +15.2, 0.000 |
+| persistence | 0.796 | 0.461 | 1.329 | - | - |
+
+Diebold-Mariano: negative statistic = more accurate than the reference; p < 0.05 = difference unlikely to be chance.
+
+Probabilistic forecasts (80% intervals): cqr: coverage 76.3%, mean width 1.69 kWh/m2/day; chronos_bolt: coverage 78.6%, mean width 1.98 kWh/m2/day.
+
+| Data source / feature group | Error increase if removed | Error reduction when added to sun history + season |
+|---|---|---|
+| history | +0.0080 | +0.0000 |
+| season | +0.0067 | +0.0000 |
+| climate | +0.0019 | -0.0001 |
+| era5_dyn | +0.0017 | +0.0149 |
+| era5_sun | +0.0015 | -0.0021 |
+| era5_cloud | +0.0014 | +0.0041 |
+| nasa_met | -0.0017 | +0.0091 |
+
+Decision-focused test (each forecast drives SABIL for the whole horizon):
+
+| Forecast | Battery life (y) | Critical hours | Energy not delivered (kWh/y) |
+|---|---|---|---|
+| persistence | 8.19 | 99.99% | 17.4 |
+| climatology | 8.21 | 100.00% | 17.8 |
+| ridge | 8.22 | 100.00% | 17.8 |
+| random_forest | 8.21 | 100.00% | 17.7 |
+| extra_trees | 8.21 | 100.00% | 17.7 |
+| hist_gb | 8.21 | 100.00% | 17.7 |
+| mlp | 8.2 | 100.00% | 17.7 |
+| lightgbm | 8.21 | 100.00% | 17.7 |
+| xgboost | 8.21 | 100.00% | 17.7 |
+| ensemble | 8.21 | 100.00% | 17.7 |
+| gru | 8.22 | 100.00% | 17.9 |
+| chronos_bolt | 8.22 | 99.99% | 17.9 |
+| risk_aware_p10 | 8.16 | 100.00% | 16.6 |
+
+Battery life varies by only 0.06 years across all forecasts: SABIL's benefit does not depend on a sophisticated forecast, which matters for deployment on cheap hardware without internet.
+
+![leaderboard](figures/fig10_forecast_leaderboard.png)
+![groups](figures/fig11_feature_groups.png)
+![decision](figures/fig12_decision_focused.png)
 
 ## 5. Which feature does the work? (ablation)
 All features off reproduces the standard controller exactly: **True** (sanity check).

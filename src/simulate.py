@@ -58,20 +58,26 @@ def weather_series(P, weather):
     return w, year_idx, ts.reset_index(drop=True)
 
 
-def learned_pv_forecast(P, w):
-    """Hourly PV forecasts issued at 00:00 for the same day and for the next day (learned model)."""
-    path = ROOT / "results" / "forecast_learned_hourly.csv"
-    if not path.exists():
-        return None
-    f = pd.read_csv(path, parse_dates=["timestamp_local"]).set_index("timestamp_local")
-    f = f.reindex(w["timestamp_local"])
+def learned_pv_forecast(P, w, risk=False, ghi_forecast=None):
+    """Hourly PV forecasts issued at 00:00 for the same day and for the next day (learned model).
+    risk=True uses the conformal P10 (pessimistic) forecast. ghi_forecast=(same, next) GHI arrays
+    overrides the file (used by the forecasting lab to test every model)."""
     amb_persist = np.roll(w["ambient_c"].to_numpy(float), 24)
-    same = pv_dc_kw(f["ghi_fc_sameday"].fillna(0).to_numpy(), amb_persist, P["system"])
-    nxt = pv_dc_kw(f["ghi_fc_nextday"].fillna(0).to_numpy(), amb_persist, P["system"])
-    return same, nxt
+    if ghi_forecast is not None:
+        g0, g1 = ghi_forecast
+    else:
+        path = ROOT / "results" / "forecast_learned_hourly.csv"
+        if not path.exists():
+            return None
+        f = pd.read_csv(path, parse_dates=["timestamp_local"]).set_index("timestamp_local").reindex(w["timestamp_local"])
+        sfx = "_p10" if risk else ""
+        if f"ghi_fc_sameday{sfx}" not in f:
+            return None
+        g0, g1 = f[f"ghi_fc_sameday{sfx}"].fillna(0).to_numpy(), f[f"ghi_fc_nextday{sfx}"].fillna(0).to_numpy()
+    return pv_dc_kw(np.asarray(g0, float), amb_persist, P["system"]), pv_dc_kw(np.asarray(g1, float), amb_persist, P["system"])
 
 
-def run(name, P, weather, forecast_mode="perfect"):
+def run(name, P, weather, forecast_mode="perfect", ghi_forecast=None):
     sim, bat, system = P["sim"], P["battery"], P["system"]
     dt = sim["dt_h"]
     w, year_idx, ts = weather_series(P, weather)
@@ -81,12 +87,12 @@ def run(name, P, weather, forecast_mode="perfect"):
     pv = pv_dc_kw(ghi, amb, system)
     L = build(P["household"], hod)
     ctx = Context(pv, amb, L["critical_kw"], L["noncritical_kw"], hod, L["flex"], bat, system, sim)
-    if forecast_mode == "learned":
-        fc = learned_pv_forecast(P, w)
+    if forecast_mode in ("learned", "learned_risk"):
+        fc = learned_pv_forecast(P, w, risk=forecast_mode == "learned_risk", ghi_forecast=ghi_forecast)
         if fc is None:
-            raise RuntimeError("run src/forecast_ml.py first (results/forecast_learned_hourly.csv missing)")
+            raise RuntimeError("run src/forecast_lab.py first (results/forecast_learned_hourly.csv missing)")
         ctx.pv_fc_same, ctx.pv_fc_next = fc
-    ctrl = get_controller(name, ctx, forecast_mode)
+    ctrl = get_controller(name, ctx, "learned" if forecast_mode == "learned_risk" else forecast_mode)
 
     inv, ce, de = system["inverter_eff"], bat["charge_eff"], bat["discharge_eff"]
     cap0, eol, max_c = bat["capacity_kwh"], bat["eol_capacity_frac"], bat["max_c_rate"]
@@ -311,8 +317,11 @@ def main():
         print(f"baseline done in {time.time() - t0:.1f} s")
     if a.controller in ("smart", "all"):
         modes = ["perfect", "persistence"]
-        if (ROOT / "results" / "forecast_learned_hourly.csv").exists():
+        fpath = ROOT / "results" / "forecast_learned_hourly.csv"
+        if fpath.exists():
             modes.append("learned")
+            if "ghi_fc_sameday_p10" in pd.read_csv(fpath, nrows=1).columns:
+                modes.append("learned_risk")
         for m in modes:
             t0 = time.time()
             s, hr = run("smart", copy.deepcopy(P), w, forecast_mode=m)

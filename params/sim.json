@@ -51,6 +51,18 @@
        "why": "PV array size and soiling"}
     ]
   },
+  "forecast_lab": {
+    "trees": 200,
+    "gru_window": 14,
+    "gru_hidden": 32,
+    "gru_epochs": 30,
+    "gru_lr": 0.002,
+    "use_chronos": true,
+    "chronos_model": "amazon/chronos-bolt-small",
+    "chronos_context": 64,
+    "conformal_alpha": 0.2,
+    "ablation_model": "hist_gb"
+  },
   "forecast_ml": {
     "model": "gradient_boosting",
     "max_iter": 300,

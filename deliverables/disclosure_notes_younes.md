@@ -18,12 +18,20 @@
 - NASA POWER hourly API (power.larc.nasa.gov), ALLSKY_SFC_SW_DWN, T2M, RH2M,
   Maiduguri 11.85° N, 13.16° E, years 2014–2023. Public.
 
+- ERA5 reanalysis (ECMWF / Copernicus) via the Open-Meteo archive API, hourly 2014–2023:
+  cloud cover by layer, dew point, humidity, pressure, wind, rain, soil moisture, radiation.
+- NOAA climate indices: ONI (CPC), NAO (CPC), TNA (PSL).
+
+## Pretrained models
+- Chronos-Bolt (Amazon, `amazon/chronos-bolt-small`), used zero-shot as a forecasting baseline.
+
 ## Published models
 - Battery ageing: Naumann et al. 2018 (calendar) and 2020 (cycle), LFP/graphite;
   coefficients and method checked against the authors' open-source SimSES (TU Munich).
 
 ## Open-source libraries
-- Python, NumPy, pandas, Matplotlib, Requests, scikit-learn, SimSES (verification only)
+- Python, NumPy, pandas, Matplotlib, Requests, scikit-learn, LightGBM, XGBoost, PyTorch,
+  chronos-forecasting, SimSES (verification only)
 
 ## Tools
 - Kaggle Notebooks (compute)

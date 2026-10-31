@@ -74,7 +74,7 @@ def fig_capacity(base, smart, alt, hb, hs, headline):
     else:
         title = "Battery capacity over 10 years (waiting for the real ageing model)"
     ax.set_title(title, pad=22)
-    _subtitle(ax, f"Same house, same Maiduguri weather (NASA POWER, {base.get('weather', '')}), same battery; "
+    _subtitle(ax, f"NASA POWER weather {base.get('weather', '').split(': ')[-1]}; same house and battery, "
                   "only the controller changes")
     ax.legend(loc="lower left" if lo < eol - 0.01 else "center left")
     ax.set_xlim(0, n_years + 0.8)
@@ -186,7 +186,7 @@ def fig_ablation(ab):
     ax.set_yticklabels([FEATURE_LABEL.get(r["feature"], r["feature"]) for r in rows])
     ax.axvline(0, color=INK2, lw=0.8)
     ax.set_xlabel("Battery life lost when this feature is switched off (years)")
-    ax.set_xlim(min(0, min(vals)) - 0.2, max(vals) * 1.9 + 0.1)
+    ax.set_xlim(min(0, min(vals)) - 0.2, max(vals) * 2.7 + 0.3)
     ax.grid(axis="y", visible=False)
     ax.set_title("What each SABIL feature is worth", pad=10)
     fig.tight_layout()
@@ -283,13 +283,81 @@ def fig_forecast(fm):
     ax.set_xticklabels([s[1] for s in seasons])
     ax.set_ylabel("Forecast error, kWh/m2 per day (lower is better)")
     ax.grid(axis="x", visible=False)
-    sk = m["wet"]["skill_vs_persistence"]
-    ax.set_title(f"Learned sun forecast cuts rainy-season error by {sk:.0%}" if sk > 0
-                 else "Learned sun forecast does not beat 'tomorrow = today'", pad=22)
+    sk_c = m["wet"]["skill_vs_climatology"]
+    ax.set_title(f"Rainy season: learned forecast {sk_c:+.0%} vs the seasonal average", pad=22)
     _subtitle(ax, "Out-of-sample: each year predicted by a model trained on the other 9 years (NASA POWER)")
     ax.legend(fontsize=9, loc="upper left")
     fig.tight_layout()
     fig.savefig(FIG / "fig9_forecast_skill.png")
+    plt.close(fig)
+
+
+BASELINES = {"persistence", "climatology"}
+
+
+def fig_lab(lab):
+    met = pd.read_csv(lab / "metrics.csv")
+    m = met[met["horizon"] == "next_day"]
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4.6), sharey=True)
+    order = m[m["season"] == "all"].sort_values("mae", ascending=False)["model"].tolist()
+    best = m[(m["season"] == "all") & (~m["model"].isin(BASELINES))].sort_values("mae")["model"].iloc[0]
+    for ax, (season, title) in zip(axes, [("all", "Whole year"), ("wet", "Rainy season")]):
+        g = m[m["season"] == season].set_index("model").reindex(order)
+        colors = [GREY if k in BASELINES else (BLUE if k == best else "#7fb0ea") for k in order]
+        ax.barh(np.arange(len(order)), g["mae"], color=colors, height=0.65)
+        for i, v in enumerate(g["mae"]):
+            ax.text(v, i, f" {v:.3f}", va="center", fontsize=8.5)
+        ax.set_title(title, fontsize=11)
+        ax.set_xlabel("Next-day error (kWh/m2/day)")
+        ax.grid(axis="y", visible=False)
+        ax.set_xlim(0, g["mae"].max() * 1.25)
+    axes[0].set_yticks(np.arange(len(order)))
+    axes[0].set_yticklabels(order)
+    fig.suptitle(f"Forecast leaderboard, out-of-sample (best learned model: {best})", x=0.01, ha="left",
+                 fontweight="bold", fontsize=12)
+    fig.tight_layout()
+    fig.savefig(FIG / "fig10_forecast_leaderboard.png")
+    plt.close(fig)
+
+    ab = pd.read_csv(lab / "feature_group_ablation.csv").sort_values("gain_when_added_to_base")
+    fig, ax = plt.subplots(figsize=(8, 3.8))
+    y = np.arange(len(ab))
+    ax.barh(y + 0.18, ab["gain_when_added_to_base"], 0.34, color=BLUE, label="Error reduction when added to sun history + season")
+    ax.barh(y - 0.18, ab["delta_if_removed"], 0.34, color=GREY, label="Error increase when removed from the full model")
+    ax.set_yticks(y)
+    ax.set_yticklabels(ab["group"])
+    ax.axvline(0, color=INK2, lw=0.8)
+    ax.grid(axis="y", visible=False)
+    ax.set_xlabel("kWh/m2/day (positive = the data source helps)")
+    ax.set_title("Which data source improves the sun forecast?", pad=10)
+    ax.legend(fontsize=8.5, loc="lower right")
+    fig.tight_layout()
+    fig.savefig(FIG / "fig11_feature_groups.png")
+    plt.close(fig)
+
+    dec = pd.read_csv(lab / "decision_focused.csv").dropna(subset=["next_day_mae"])
+    fig, ax = plt.subplots(figsize=(8, 4.2))
+    learned = dec[~dec["forecast_model"].isin(BASELINES)]
+    show = set(BASELINES) | {learned.sort_values("next_day_mae")["forecast_model"].iloc[0],
+                             learned.sort_values("next_day_mae")["forecast_model"].iloc[-1]}
+    for r in dec.itertuples():
+        base = r.forecast_model in BASELINES
+        ax.plot(r.next_day_mae, r.battery_life_years, "o", ms=9, color=GREY if base else BLUE, mec=SURFACE, mew=1.5)
+        if r.forecast_model in show:
+            ax.annotate(r.forecast_model, (r.next_day_mae, r.battery_life_years), xytext=(5, 6),
+                        textcoords="offset points", fontsize=8.5, color=INK2)
+    ax.plot([], [], "o", color=BLUE, label="learned models (ML / deep learning)")
+    ax.plot([], [], "o", color=GREY, label="simple baselines")
+    ax.legend(fontsize=8.5, loc="lower right")
+    span = dec["battery_life_years"].max() - dec["battery_life_years"].min()
+    mid = dec["battery_life_years"].mean()
+    ax.set_ylim(mid - max(0.5, span), mid + max(0.5, span))
+    ax.set_xlabel("Next-day forecast error (kWh/m2/day)")
+    ax.set_ylabel("SABIL battery life (years)")
+    ax.set_title("A better forecast barely changes battery life", pad=22)
+    _subtitle(ax, f"Each point: a forecast model driving SABIL for 10 years. Battery-life spread {span:.2f} years")
+    fig.tight_layout()
+    fig.savefig(FIG / "fig12_decision_focused.png")
     plt.close(fig)
 
 
@@ -316,6 +384,8 @@ def make_all():
         fig_uncertainty(pd.read_csv(ex / "montecarlo.csv"), json.load(open(ex / "montecarlo_summary.json")))
     if (RES / "forecast_metrics.json").exists():
         fig_forecast(json.load(open(RES / "forecast_metrics.json")))
+    if (RES / "forecast_lab" / "metrics.csv").exists():
+        fig_lab(RES / "forecast_lab")
     print(f"charts saved in {FIG}")
 
 

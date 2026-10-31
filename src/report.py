@@ -129,6 +129,60 @@ def main():
             w("Most informative inputs (permutation importance): " + ", ".join(list(imp)[:4]) + ".")
         w("")
         w("![forecast](figures/fig9_forecast_skill.png)")
+    lab = RES / "forecast_lab"
+    if (lab / "metrics.csv").exists():
+        import pandas as pd
+        met = pd.read_csv(lab / "metrics.csv")
+        summ = json.load(open(lab / "summary.json"))
+        w("")
+        w("### 4b. Forecasting lab: datasets x features x models")
+        groups = summ.get("feature_groups", {})
+        w("Data sources: NASA POWER (sun, temperature, humidity), ERA5 reanalysis via Open-Meteo (clouds by layer, "
+          "dew point, pressure, wind, rain, soil moisture, ERA5 sun), NOAA climate indices (ONI, NAO, TNA). "
+          f"Feature groups used: {', '.join(f'{g} ({len(v)})' for g, v in groups.items())}"
+          + (f"; unavailable: {', '.join(summ['groups_missing'])}" if summ.get("groups_missing") else "") + ".")
+        w("")
+        w("| Model | Next-day MAE, year | Dry season | Rainy season | DM vs persistence (stat, p) | DM vs climatology (stat, p) |")
+        w("|---|---|---|---|---|---|")
+        nd = met[met["horizon"] == "next_day"].pivot(index="model", columns="season", values="mae").sort_values("all")
+        dm = summ.get("diebold_mariano_next_day", {})
+        for mdl, r in nd.iterrows():
+            a = dm.get(mdl, {}).get("vs_persistence")
+            b = dm.get(mdl, {}).get("vs_climatology")
+            fa = f"{a[0]:+.1f}, {a[1]:.3f}" if a else "-"
+            fb = f"{b[0]:+.1f}, {b[1]:.3f}" if b else "-"
+            w(f"| {mdl} | {r['all']:.3f} | {r['dry']:.3f} | {r['wet']:.3f} | {fa} | {fb} |")
+        w("")
+        w("Diebold-Mariano: negative statistic = more accurate than the reference; p < 0.05 = difference unlikely to be chance.")
+        pr = summ.get("probabilistic_next_day", {})
+        if pr:
+            w("")
+            w("Probabilistic forecasts (80% intervals): " + "; ".join(
+                f"{k}: coverage {v['coverage']:.1%}, mean width {v['mean_width_kwh_m2_day']:.2f} kWh/m2/day" for k, v in pr.items()) + ".")
+        if (lab / "feature_group_ablation.csv").exists():
+            fg = pd.read_csv(lab / "feature_group_ablation.csv").sort_values("delta_if_removed", ascending=False)
+            w("")
+            w("| Data source / feature group | Error increase if removed | Error reduction when added to sun history + season |")
+            w("|---|---|---|")
+            for r in fg.itertuples():
+                w(f"| {r.group} | {r.delta_if_removed:+.4f} | {r.gain_when_added_to_base:+.4f} |")
+        if (lab / "decision_focused.csv").exists():
+            dec = pd.read_csv(lab / "decision_focused.csv")
+            w("")
+            w("Decision-focused test (each forecast drives SABIL for the whole horizon):")
+            w("")
+            w("| Forecast | Battery life (y) | Critical hours | Energy not delivered (kWh/y) |")
+            w("|---|---|---|---|")
+            for r in dec.itertuples():
+                w(f"| {r.forecast_model} | {r.battery_life_years} | {r.critical_service_frac:.2%} | {r.energy_unmet_kwh_per_year:.1f} |")
+            span = dec["battery_life_years"].max() - dec["battery_life_years"].min()
+            w("")
+            w(f"Battery life varies by only {span:.2f} years across all forecasts: SABIL's benefit does not depend on a "
+              "sophisticated forecast, which matters for deployment on cheap hardware without internet.")
+        w("")
+        w("![leaderboard](figures/fig10_forecast_leaderboard.png)")
+        w("![groups](figures/fig11_feature_groups.png)")
+        w("![decision](figures/fig12_decision_focused.png)")
     w("")
     w("## 5. Which feature does the work? (ablation)")
     if ab:
