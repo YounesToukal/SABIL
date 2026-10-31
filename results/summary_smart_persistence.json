@@ -1,0 +1,132 @@
+{
+  "controller": "smart",
+  "forecast": "persistence",
+  "years_simulated": 10,
+  "battery_life_years": null,
+  "battery_life_note": "no capacity fade (ageing model is still the stub)",
+  "capacity_after_10y_frac": 1.0,
+  "energy_served_kwh_per_year": 1344.73,
+  "energy_unmet_kwh_per_year": 18.55,
+  "critical_service_frac": 1.0,
+  "critical_hours_per_year": 6935.0,
+  "critical_demand_hours_per_year": 6935.0,
+  "diesel_avoided_l_per_year": 672.4,
+  "pv_unused_kwh_per_year": 864.99,
+  "full_cycles_per_year": 155.8,
+  "avg_battery_temp_c": 32.63,
+  "battery_replacements_in_sim": 0,
+  "per_year": [
+    {
+      "year": 1,
+      "energy_served_kwh": 1344.73,
+      "energy_unmet_kwh": 18.55,
+      "critical_hours": 6935,
+      "critical_demand_hours": 6935,
+      "critical_service_frac": 1.0,
+      "diesel_avoided_l": 672.4,
+      "capacity_end_frac": 1.0
+    },
+    {
+      "year": 2,
+      "energy_served_kwh": 1344.73,
+      "energy_unmet_kwh": 18.55,
+      "critical_hours": 6935,
+      "critical_demand_hours": 6935,
+      "critical_service_frac": 1.0,
+      "diesel_avoided_l": 672.4,
+      "capacity_end_frac": 1.0
+    },
+    {
+      "year": 3,
+      "energy_served_kwh": 1344.73,
+      "energy_unmet_kwh": 18.55,
+      "critical_hours": 6935,
+      "critical_demand_hours": 6935,
+      "critical_service_frac": 1.0,
+      "diesel_avoided_l": 672.4,
+      "capacity_end_frac": 1.0
+    },
+    {
+      "year": 4,
+      "energy_served_kwh": 1344.73,
+      "energy_unmet_kwh": 18.55,
+      "critical_hours": 6935,
+      "critical_demand_hours": 6935,
+      "critical_service_frac": 1.0,
+      "diesel_avoided_l": 672.4,
+      "capacity_end_frac": 1.0
+    },
+    {
+      "year": 5,
+      "energy_served_kwh": 1344.73,
+      "energy_unmet_kwh": 18.55,
+      "critical_hours": 6935,
+      "critical_demand_hours": 6935,
+      "critical_service_frac": 1.0,
+      "diesel_avoided_l": 672.4,
+      "capacity_end_frac": 1.0
+    },
+    {
+      "year": 6,
+      "energy_served_kwh": 1344.73,
+      "energy_unmet_kwh": 18.55,
+      "critical_hours": 6935,
+      "critical_demand_hours": 6935,
+      "critical_service_frac": 1.0,
+      "diesel_avoided_l": 672.4,
+      "capacity_end_frac": 1.0
+    },
+    {
+      "year": 7,
+      "energy_served_kwh": 1344.73,
+      "energy_unmet_kwh": 18.55,
+      "critical_hours": 6935,
+      "critical_demand_hours": 6935,
+      "critical_service_frac": 1.0,
+      "diesel_avoided_l": 672.4,
+      "capacity_end_frac": 1.0
+    },
+    {
+      "year": 8,
+      "energy_served_kwh": 1344.73,
+      "energy_unmet_kwh": 18.55,
+      "critical_hours": 6935,
+      "critical_demand_hours": 6935,
+      "critical_service_frac": 1.0,
+      "diesel_avoided_l": 672.4,
+      "capacity_end_frac": 1.0
+    },
+    {
+      "year": 9,
+      "energy_served_kwh": 1344.73,
+      "energy_unmet_kwh": 18.55,
+      "critical_hours": 6935,
+      "critical_demand_hours": 6935,
+      "critical_service_frac": 1.0,
+      "diesel_avoided_l": 672.4,
+      "capacity_end_frac": 1.0
+    },
+    {
+      "year": 10,
+      "energy_served_kwh": 1344.73,
+      "energy_unmet_kwh": 18.55,
+      "critical_hours": 6935,
+      "critical_demand_hours": 6935,
+      "critical_service_frac": 1.0,
+      "diesel_avoided_l": 672.4,
+      "capacity_end_frac": 1.0
+    }
+  ],
+  "definitions": {
+    "averages": "per-year values are averages over all simulated years (ageing included)",
+    "critical_service_frac": "hours where every critical load was fully powered / hours with critical demand",
+    "full_cycles_per_year": "energy discharged at the battery terminals / initial capacity, per year",
+    "pv_unused_kwh_per_year": "DC solar energy available but not used (battery at its ceiling, no load)"
+  },
+  "params_from_placeholders": [
+    "household",
+    "system",
+    "battery",
+    "costs"
+  ]
+}

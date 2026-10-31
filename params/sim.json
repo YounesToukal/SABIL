@@ -1,0 +1,24 @@
+{
+  "_owner": "Younes (new file, added at sync 1; Youcef reads only). Holds the simulation and smart-controller settings so no number is typed in the code.",
+  "site": {
+    "name": "Maiduguri, Borno State, Nigeria",
+    "latitude": 11.85,
+    "longitude": 13.16,
+    "utc_offset_h": 1,
+    "weather_year": 2023
+  },
+  "years": 10,
+  "dt_h": 1.0,
+  "replace_battery_at_eol": false,
+  "headline_forecast": "persistence",
+  "critical_eps_kw": 0.001,
+  "smart": {
+    "hot_threshold_c": 30.0,
+    "soc_cap_hot": 0.70,
+    "sunny_ratio": 1.0,
+    "reserve_margin": 0.15,
+    "c_rate_hot": 0.25,
+    "lookahead_h": 36
+  },
+  "sources": "Site and weather year from the team contract (shared assumptions). Smart-controller thresholds are design choices, tuned against Youcef's ageing model and reviewed at the 00:45 physics check. headline_forecast: 'persistence' (tomorrow = today, realistic) or 'perfect' (tomorrow's real data, upper bound); both are always run."
+}

@@ -1,0 +1,14 @@
+{
+  "_status": "TO CONFIRM - placeholder until Youcef pushes params/battery.json.",
+  "chemistry": "LFP",
+  "capacity_kwh": 5.0,
+  "charge_eff": 0.97,
+  "discharge_eff": 0.97,
+  "max_c_rate": 0.5,
+  "soc_min_baseline": 0.10,
+  "soc_max_baseline": 1.0,
+  "eol_capacity_frac": 0.8,
+  "temp_offset_c": 3.0,
+  "aging": {},
+  "sources": "TO CONFIRM"
+}

@@ -1,0 +1,9 @@
+{
+  "_status": "TO CONFIRM - placeholder until Youcef pushes params/system.json.",
+  "pv_kwp": 1.5,
+  "pv_derate": 0.85,
+  "pv_temp_coeff_per_c": -0.004,
+  "noct_c": 45,
+  "inverter_eff": 0.93,
+  "sources": "TO CONFIRM"
+}

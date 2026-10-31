@@ -1,0 +1,18 @@
+{
+  "_status": "TO CONFIRM - placeholder until Youcef pushes params/costs.json. The simulation reads only generator_l_per_kwh.",
+  "pv_usd_per_kwp": 0,
+  "battery_usd_per_kwh": 0,
+  "controller_extra_usd": 0,
+  "other_hardware_usd": 0,
+  "install_usd": 0,
+  "dev_cost_usd": 0,
+  "tariff_usd_per_kwh": 0,
+  "opex_usd_per_year": 0,
+  "diesel_ngn_per_l": 3277,
+  "ngn_per_usd": 0,
+  "fx_source_and_date": "TO CONFIRM",
+  "generator_l_per_kwh": 0.5,
+  "discount_rate": 0,
+  "horizon_years": 10,
+  "sources": "TO CONFIRM"
+}
