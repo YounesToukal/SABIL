@@ -62,7 +62,9 @@ def fig_capacity(base, smart, alt, hb, hs, headline):
                 label=f"SABIL ({alt['forecast']} forecast)")
     eol = load_all(verbose=False)["battery"]["eol_capacity_frac"]
     ax.axhline(eol, color=INK2, lw=1, ls=":")
-    ax.text(0.1, eol, f" end of life ({eol:.0%})", va="bottom", color=INK2, fontsize=9)
+    ax.text(n_years, eol, f"end of life ({eol:.0%}) ", va="bottom", ha="right", color=INK2, fontsize=9)
+    lo = min(float(hb["capacity_frac"].min()), float(hs["capacity_frac"].min()), eol)
+    ax.set_ylim(lo - 0.03, 1.01)
     ax.set_xlabel("Years in service")
     ax.set_ylabel("Battery capacity left")
     ax.yaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(1.0))
@@ -73,7 +75,7 @@ def fig_capacity(base, smart, alt, hb, hs, headline):
         title = "Battery capacity over 10 years (waiting for the real ageing model)"
     ax.set_title(title, pad=22)
     _subtitle(ax, "Same house, same Maiduguri weather (NASA POWER 2023), same battery; only the controller changes")
-    ax.legend(loc="lower left")
+    ax.legend(loc="lower left" if lo < eol - 0.01 else "center left")
     ax.set_xlim(0, n_years + 0.8)
     fig.tight_layout()
     fig.savefig(FIG / "fig1_battery_capacity.png")
@@ -98,7 +100,7 @@ def fig_critical(base, smart, headline):
     lo = float(min(yb.min(), ys.min()))
     ax.set_ylim(min(lo - 0.02, 0.9), 1.01)
     lost = (smart["critical_hours_per_year"] - base["critical_hours_per_year"]) * base["years_simulated"]
-    ax.set_title(f"Over 10 years SABIL keeps {lost:,.0f} more hours of critical service per home", pad=22)
+    ax.set_title(f"{lost:,.0f} more hours of critical service per home over 10 years", pad=22)
     _subtitle(ax, "Hours where every critical load was fully powered / hours they were needed; grid down all year")
     ax.legend(loc="lower left", fontsize=9.5)
     fig.tight_layout()
@@ -119,7 +121,7 @@ def fig_days(hb, hs, headline):
     a1.plot(s["timestamp_local"], s["load_kw"], color=BLUE, lw=1.4, label="Load, SABIL (iron moved to noon)")
     a1.set_ylabel("kW")
     a1.legend(loc="upper right", fontsize=8.5, ncol=3)
-    a1.set_title("On hot days SABIL keeps the battery less full, without cutting the lights", pad=8)
+    a1.set_title("Hot days: SABIL holds the battery lower, the lights stay on", pad=8)
     a2.plot(b["timestamp_local"], b["soc"], color=GREY, label="Standard: charges to the top every day")
     a2.plot(s["timestamp_local"], s["soc"], color=BLUE, label=f"SABIL ({headline} forecast)")
     a2.set_ylabel("Battery state of charge")

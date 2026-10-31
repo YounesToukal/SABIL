@@ -2,119 +2,119 @@
   "controller": "smart",
   "forecast": "persistence",
   "years_simulated": 10,
-  "battery_life_years": null,
-  "battery_life_note": "no capacity fade (ageing model is still the stub)",
-  "capacity_after_10y_frac": 1.0,
-  "energy_served_kwh_per_year": 1344.73,
-  "energy_unmet_kwh_per_year": 18.55,
+  "battery_life_years": 8.48,
+  "battery_life_note": "reached in simulation",
+  "capacity_after_10y_frac": 0.7831,
+  "energy_served_kwh_per_year": 1341.33,
+  "energy_unmet_kwh_per_year": 21.95,
   "critical_service_frac": 1.0,
   "critical_hours_per_year": 6935.0,
   "critical_demand_hours_per_year": 6935.0,
-  "diesel_avoided_l_per_year": 672.4,
-  "pv_unused_kwh_per_year": 864.99,
-  "full_cycles_per_year": 155.8,
+  "diesel_avoided_l_per_year": 670.7,
+  "pv_unused_kwh_per_year": 877.34,
+  "full_cycles_per_year": 151.4,
   "avg_battery_temp_c": 32.63,
   "battery_replacements_in_sim": 0,
   "per_year": [
     {
       "year": 1,
-      "energy_served_kwh": 1344.73,
-      "energy_unmet_kwh": 18.55,
+      "energy_served_kwh": 1344.21,
+      "energy_unmet_kwh": 19.07,
       "critical_hours": 6935,
       "critical_demand_hours": 6935,
       "critical_service_frac": 1.0,
-      "diesel_avoided_l": 672.4,
-      "capacity_end_frac": 1.0
+      "diesel_avoided_l": 672.1,
+      "capacity_end_frac": 0.9314
     },
     {
       "year": 2,
-      "energy_served_kwh": 1344.73,
-      "energy_unmet_kwh": 18.55,
+      "energy_served_kwh": 1343.29,
+      "energy_unmet_kwh": 19.98,
       "critical_hours": 6935,
       "critical_demand_hours": 6935,
       "critical_service_frac": 1.0,
-      "diesel_avoided_l": 672.4,
-      "capacity_end_frac": 1.0
+      "diesel_avoided_l": 671.6,
+      "capacity_end_frac": 0.9029
     },
     {
       "year": 3,
-      "energy_served_kwh": 1344.73,
-      "energy_unmet_kwh": 18.55,
+      "energy_served_kwh": 1342.59,
+      "energy_unmet_kwh": 20.68,
       "critical_hours": 6935,
       "critical_demand_hours": 6935,
       "critical_service_frac": 1.0,
-      "diesel_avoided_l": 672.4,
-      "capacity_end_frac": 1.0
+      "diesel_avoided_l": 671.3,
+      "capacity_end_frac": 0.8811
     },
     {
       "year": 4,
-      "energy_served_kwh": 1344.73,
-      "energy_unmet_kwh": 18.55,
+      "energy_served_kwh": 1341.92,
+      "energy_unmet_kwh": 21.35,
       "critical_hours": 6935,
       "critical_demand_hours": 6935,
       "critical_service_frac": 1.0,
-      "diesel_avoided_l": 672.4,
-      "capacity_end_frac": 1.0
+      "diesel_avoided_l": 671.0,
+      "capacity_end_frac": 0.8628
     },
     {
       "year": 5,
-      "energy_served_kwh": 1344.73,
-      "energy_unmet_kwh": 18.55,
+      "energy_served_kwh": 1341.36,
+      "energy_unmet_kwh": 21.92,
       "critical_hours": 6935,
       "critical_demand_hours": 6935,
       "critical_service_frac": 1.0,
-      "diesel_avoided_l": 672.4,
-      "capacity_end_frac": 1.0
+      "diesel_avoided_l": 670.7,
+      "capacity_end_frac": 0.8466
     },
     {
       "year": 6,
-      "energy_served_kwh": 1344.73,
-      "energy_unmet_kwh": 18.55,
+      "energy_served_kwh": 1340.82,
+      "energy_unmet_kwh": 22.45,
       "critical_hours": 6935,
       "critical_demand_hours": 6935,
       "critical_service_frac": 1.0,
-      "diesel_avoided_l": 672.4,
-      "capacity_end_frac": 1.0
+      "diesel_avoided_l": 670.4,
+      "capacity_end_frac": 0.8319
     },
     {
       "year": 7,
-      "energy_served_kwh": 1344.73,
-      "energy_unmet_kwh": 18.55,
+      "energy_served_kwh": 1340.34,
+      "energy_unmet_kwh": 22.93,
       "critical_hours": 6935,
       "critical_demand_hours": 6935,
       "critical_service_frac": 1.0,
-      "diesel_avoided_l": 672.4,
-      "capacity_end_frac": 1.0
+      "diesel_avoided_l": 670.2,
+      "capacity_end_frac": 0.8185
     },
     {
       "year": 8,
-      "energy_served_kwh": 1344.73,
-      "energy_unmet_kwh": 18.55,
+      "energy_served_kwh": 1339.95,
+      "energy_unmet_kwh": 23.32,
       "critical_hours": 6935,
       "critical_demand_hours": 6935,
       "critical_service_frac": 1.0,
-      "diesel_avoided_l": 672.4,
-      "capacity_end_frac": 1.0
+      "diesel_avoided_l": 670.0,
+      "capacity_end_frac": 0.806
     },
     {
       "year": 9,
-      "energy_served_kwh": 1344.73,
-      "energy_unmet_kwh": 18.55,
+      "energy_served_kwh": 1339.58,
+      "energy_unmet_kwh": 23.69,
       "critical_hours": 6935,
       "critical_demand_hours": 6935,
       "critical_service_frac": 1.0,
-      "diesel_avoided_l": 672.4,
-      "capacity_end_frac": 1.0
+      "diesel_avoided_l": 669.8,
+      "capacity_end_frac": 0.7942
     },
     {
       "year": 10,
-      "energy_served_kwh": 1344.73,
-      "energy_unmet_kwh": 18.55,
+      "energy_served_kwh": 1339.22,
+      "energy_unmet_kwh": 24.06,
       "critical_hours": 6935,
       "critical_demand_hours": 6935,
       "critical_service_frac": 1.0,
-      "diesel_avoided_l": 672.4,
-      "capacity_end_frac": 1.0
+      "diesel_avoided_l": 669.6,
+      "capacity_end_frac": 0.7831
     }
   ],
   "definitions": {

@@ -1,14 +1,25 @@
 {
-  "_status": "TO CONFIRM - placeholder until Youcef pushes params/battery.json.",
+  "_status": "Younes's interim values, used only until Youcef pushes params/battery.json. Top-level values: typical 51.2 V 100 Ah LFP home battery (TO CONFIRM with a datasheet). 'aging' block: coefficients after Naumann et al. 2018 (calendar) and 2020 (cycle) - TO CONFIRM against the papers.",
   "chemistry": "LFP",
-  "capacity_kwh": 5.0,
-  "charge_eff": 0.97,
-  "discharge_eff": 0.97,
+  "capacity_kwh": 5.12,
+  "charge_eff": 0.975,
+  "discharge_eff": 0.975,
   "max_c_rate": 0.5,
   "soc_min_baseline": 0.10,
   "soc_max_baseline": 1.0,
   "eol_capacity_frac": 0.8,
   "temp_offset_c": 3.0,
-  "aging": {},
-  "sources": "TO CONFIRM"
+  "aging": {
+    "cal_k_ref_per_sqrt_s": 1.2571e-5,
+    "cal_ea_j_mol": 17126,
+    "cal_t_ref_k": 298.15,
+    "cal_soc_a": 2.8575,
+    "cal_soc_b": 0.60225,
+    "cyc_c_a": 0.0630,
+    "cyc_c_b": 0.0971,
+    "cyc_dod_c": 4.0253,
+    "cyc_dod_d": 1.0923,
+    "cyc_dod_min": 0.05
+  },
+  "sources": "Calendar: Naumann M., Schimpe M., Keil P., Hesse H.C., Jossen A., 'Analysis and modeling of calendar aging of a commercial LiFePO4/graphite cell', J. Energy Storage 17 (2018) 153-169, doi:10.1016/j.est.2018.01.019. Cycle: Naumann M., Spingler F.B., Jossen A., 'Analysis and modeling of cycle aging of a commercial LiFePO4/graphite cell', J. Power Sources 451 (2020) 227666. Coefficient values TO CONFIRM against the papers (Youcef). Efficiencies, C-rate and capacity: typical 51.2 V 100 Ah LFP home battery datasheets (TO CONFIRM)."
 }

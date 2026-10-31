@@ -60,6 +60,8 @@ def run(name, P, weather, forecast_mode="perfect", years=None):
     replace = sim["replace_battery_at_eol"]
     eps = sim["critical_eps_kw"]
 
+    if hasattr(aging_model, "reset"):  # optional hook: models that keep internal state start fresh
+        aging_model.reset()
     cap_frac, soc = 1.0, bat["soc_max_baseline"]
     life_h, replacements = None, 0
     state = {"last_battery_temp_c": aging_model.battery_temp(amb[0], 0.0, bat)}
