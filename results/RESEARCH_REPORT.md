@@ -1,6 +1,6 @@
 # SABIL: battery-aware control for solar home systems in Maiduguri
 
-*Generated 2026-10-31 22:07 UTC from the result files at commit 77664b5. Every number below is read from `results/`, not typed.*
+*Generated 2026-10-31 22:30 UTC from the result files at commit e75bde9. Every number below is read from `results/`, not typed.*
 
 > **Provisional:** these inputs still use placeholders (`dev_params/`): household, system, battery, costs.
 
@@ -139,9 +139,43 @@ From a cap of 100% to 40%, battery life goes from 6.18 to 8.37 years while energ
 ![uncertainty](figures/fig7_uncertainty.png)
 ![drivers](figures/fig8_gain_drivers.png)
 
+## 7b. How far from optimal? (dynamic-programming benchmark)
+A degradation-aware dynamic program with **perfect foresight** re-plans the battery every day over 48 hours, minimising weighted unmet energy (critical loads x50) plus the value of capacity lost (same ageing model). It is an upper bound, not a product.
+
+| Controller | Battery life (y) | Energy delivered (kWh/y) | Critical hours |
+|---|---|---|---|
+| Standard | 6.16 | 1358 | 99.23% |
+| SABIL | 8.20 | 1346 | 99.99% |
+| Optimal, wear weight 0 | 10.02 | 1363 | 99.97% |
+| Optimal, wear weight 1500 | 10.07 | 1363 | 99.97% |
+| Optimal, wear weight 3700 | 10.11 | 1363 | 99.96% |
+| Optimal, wear weight 10000 | 10.23 | 1362 | 99.92% |
+| Optimal, wear weight 30000 | 10.59 | 1358 | 99.77% |
+| Optimal, wear weight 100000 | 11.37 | 1326 | 98.00% |
+
+At the economic wear weight (3700), SABIL's rules capture **52%** of the battery-life gain that a perfect controller achieves. The remaining headroom is the roadmap: model-predictive control on the device.
+
+![headroom](figures/fig14_headroom.png)
+
+## 7c. Where to put the battery (thermal model with self-heating)
+| Placement | Battery mean temp (C) | Life, standard (y) | Life, SABIL (y) | Assumption |
+|---|---|---|---|---|
+| outdoor_shaded_box | 32.0 | 6.23 | 8.31 | metal box outside in the shade: follows air temperature, enclosure adds heat |
+| indoor_metal_roof | 31.3 | 6.56 | 8.33 | room under a corrugated metal roof: some damping, roof heat gain |
+| indoor_masonry | 29.3 | 7.17 | 8.42 | thick mud-brick or block room: daily swing damped, same mean |
+| cool_interior_floor | 27.3 | 7.69 | 8.67 | on the floor of the coolest interior room, ground-coupled |
+
+Placement is free advice for every household and stacks with SABIL. Placement parameters are scenario assumptions; a temperature logger in pilot homes would measure them.
+
+![placement](figures/fig13_placement.png)
+
+## 7d. Random household demand
+24 random demand realisations (RAMP-style: shifted usage times, skipped days, variable intensity): battery-life gain median 2.10 years (2.09-2.11); SABIL better in 100%; hours with all critical loads on: standard 99.35%, SABIL 99.98% (worst case 99.97%).
+
 ## 8. Limitations
 - Simulation, not field data: the ageing model is fitted on one commercial LFP cell (Sony/Murata US26650) in the lab; real packs, cell imbalance and BMS behaviour differ. A 20-50 home pilot with logged SoC and temperature is the test.
-- Battery temperature = air temperature + a fixed offset; no self-heating or enclosure thermal model, so the 'gentler when hot' feature has no effect by construction.
+- Headline runs use battery temperature = air temperature + a fixed offset; the placement study adds a two-node thermal model with self-heating, whose placement parameters are assumptions to be measured in the field.
+- The optimal benchmark uses perfect foresight and marginal (linearised) ageing rates; it bounds what any controller could achieve, it is not deployable as is.
 - Household demand is a fixed daily schedule; real behaviour varies day to day and grows over time.
 - Battery life beyond the simulated horizon is extrapolated with the last year's fade rate (conservative for square-root ageing).
 - Weather years are treated as independent blocks in the forecast cross-validation; NASA POWER is a reanalysis product with known bias versus ground stations.

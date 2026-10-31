@@ -29,7 +29,30 @@
       "critical_priority": true
     }
   },
+  "demand": {
+    "stochastic": false,
+    "seed": 1,
+    "time_jitter_h": 1,
+    "noncritical_use_prob": 0.85,
+    "intensity_cv": 0.2,
+    "sources": "RAMP-style stochastic demand (Lombardi et al., Energy 177 (2019) 433-444): each day every appliance's usage window shifts by up to time_jitter_h, non-critical appliances are used with probability noncritical_use_prob, and usage intensity varies with coefficient of variation intensity_cv. Parameters are assumptions to be replaced by survey or meter data."
+  },
   "experiments": {
+    "demand_seeds": 24,
+    "placement_study": {
+      "thermal": {"model": "rc", "v_nominal": 51.2, "r_internal_ohm": 0.025, "mass_kg": 45.0, "cp_j_kg_k": 1100.0},
+      "placements": {
+        "outdoor_shaded_box": {"tau_room_h": 1.0, "room_offset_c": 3.0, "ua_w_k": 3.0,
+                               "why": "metal box outside in the shade: follows air temperature, enclosure adds heat"},
+        "indoor_metal_roof": {"tau_room_h": 3.0, "room_offset_c": 2.0, "ua_w_k": 2.0,
+                              "why": "room under a corrugated metal roof: some damping, roof heat gain"},
+        "indoor_masonry": {"tau_room_h": 6.0, "room_offset_c": 0.0, "ua_w_k": 2.0,
+                           "why": "thick mud-brick or block room: daily swing damped, same mean"},
+        "cool_interior_floor": {"tau_room_h": 24.0, "room_offset_c": -2.0, "ua_w_k": 2.0,
+                                "why": "on the floor of the coolest interior room, ground-coupled"}
+      },
+      "sources": "Lumped two-node thermal model. Pack: 51.2 V, 100 Ah LFP, ~45 kg, cp ~1100 J/(kg K), ~25 mOhm. Placement time constants and offsets are scenario assumptions (engineering judgement), to be measured with a temperature logger in pilot homes."
+    },
     "sweep_soc_cap_hot": [0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0],
     "monte_carlo_samples": 96,
     "seed": 2026,
@@ -50,6 +73,15 @@
       {"path": "system.pv_kwp", "dist": "uniform_scale", "low": 0.8, "high": 1.25,
        "why": "PV array size and soiling"}
     ]
+  },
+  "oracle": {
+    "lambda_critical": 50.0,
+    "lambda_noncritical": 1.0,
+    "lambda_degradation": 3700.0,
+    "lambda_degradation_sweep": [0, 1500, 3700, 10000, 30000, 100000],
+    "grid_levels": 61,
+    "horizon_h": 48,
+    "sources": "Benchmark only. Costs in kWh-equivalents of non-critical energy (valued at diesel generation, ~USD 1/kWh: NGN 3,277/L x 0.5 L/kWh at ~NGN 1,550/USD). Critical energy weighted 50x. lambda_degradation = value of the whole capacity fraction: replacing a 5.12 kWh LFP pack at ~USD 150/kWh (~USD 770) when 20% is lost -> ~USD 3,850 per unit fraction -> ~3,700 kWh-equivalents. TO CONFIRM against Youcef's costs.json."
   },
   "forecast_lab": {
     "trees": 200,

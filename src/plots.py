@@ -361,6 +361,56 @@ def fig_lab(lab):
     plt.close(fig)
 
 
+def fig_placement(pl):
+    rows = pl["rows"]
+    fig, ax = plt.subplots(figsize=(8, 3.8))
+    y = np.arange(len(rows))[::-1]
+    lb = [r["life_baseline"] or 0 for r in rows]
+    ls_ = [r["life_smart"] or 0 for r in rows]
+    ax.barh(y + 0.19, lb, 0.36, color=GREY, label="Standard controller")
+    ax.barh(y - 0.19, ls_, 0.36, color=BLUE, label="SABIL")
+    for yi, a, b in zip(y, lb, ls_):
+        ax.text(a, yi + 0.19, f" {a:.1f}", va="center", fontsize=8.5)
+        ax.text(b, yi - 0.19, f" {b:.1f}", va="center", fontsize=8.5)
+    ax.set_yticks(y)
+    ax.set_yticklabels([f"{r['placement'].replace('_', ' ')}\n(battery {r['avg_battery_temp_c']:.1f} C avg)" for r in rows],
+                       fontsize=8.5)
+    ax.set_xlabel("Battery life (years)")
+    ax.set_xlim(0, max(ls_ + lb) * 1.18)
+    ax.grid(axis="y", visible=False)
+    ax.set_title("Where the battery sits matters as much as how it is charged", pad=10)
+    ax.legend(fontsize=8.5, loc="upper right")
+    fig.tight_layout()
+    fig.savefig(FIG / "fig13_placement.png")
+    plt.close(fig)
+
+
+def fig_headroom(orc):
+    lam = orc["chosen_lambda"]
+    o = min(orc["oracle"], key=lambda p: abs(p["lambda_degradation"] - lam))
+    b, s = orc["baseline"], orc["smart"]
+    if not (b["battery_life_years"] and s["battery_life_years"] and o["battery_life_years"]):
+        return
+    share = (s["battery_life_years"] - b["battery_life_years"]) / (o["battery_life_years"] - b["battery_life_years"])
+    fig, ax = plt.subplots(figsize=(8, 3.2))
+    names = ["Standard controller", "SABIL (simple rules)", "Optimal (perfect foresight)"]
+    vals = [b["battery_life_years"], s["battery_life_years"], o["battery_life_years"]]
+    y = np.arange(3)[::-1]
+    ax.barh(y, vals, color=[GREY, BLUE, "#1f3f6e"], height=0.6)
+    for yi, v, r in zip(y, vals, [b, s, o]):
+        ax.text(v, yi, f" {v:.1f} y  (lights on {r['critical_service_frac']:.1%}, {r['energy_served_kwh_per_year']:.0f} kWh/y)",
+                va="center", fontsize=8.5)
+    ax.set_yticks(y)
+    ax.set_yticklabels(names)
+    ax.set_xlim(0, max(vals) * 1.7)
+    ax.set_xlabel("Battery life (years)")
+    ax.grid(axis="y", visible=False)
+    ax.set_title(f"SABIL's simple rules capture {share:.0%} of the possible gain", pad=10)
+    fig.tight_layout()
+    fig.savefig(FIG / "fig14_headroom.png")
+    plt.close(fig)
+
+
 def make_all():
     _style()
     FIG.mkdir(parents=True, exist_ok=True)
@@ -386,6 +436,10 @@ def make_all():
         fig_forecast(json.load(open(RES / "forecast_metrics.json")))
     if (RES / "forecast_lab" / "metrics.csv").exists():
         fig_lab(RES / "forecast_lab")
+    if (ex / "placement.json").exists():
+        fig_placement(json.load(open(ex / "placement.json")))
+    if (ex / "oracle.json").exists():
+        fig_headroom(json.load(open(ex / "oracle.json")))
     print(f"charts saved in {FIG}")
 
 

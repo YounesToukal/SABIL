@@ -14,20 +14,42 @@ import pandas as pd
 from params_io import ROOT, load_all
 
 
-def build(household, hours_of_day):
-    """hours_of_day: int array (0-23), one entry per simulated hour."""
+def build(household, hours_of_day, demand=None):
+    """hours_of_day: int array (0-23), one entry per simulated hour.
+    demand (params/sim.json "demand"): if demand["stochastic"], each day every fixed appliance's
+    window shifts by a random whole number of hours (|shift| <= time_jitter_h), non-critical
+    appliances are skipped with probability 1 - noncritical_use_prob, and power varies with a
+    lognormal factor (coefficient of variation intensity_cv). RAMP-style (Lombardi et al. 2019)."""
     n = len(hours_of_day)
     crit, nonc, flex = np.zeros(n), np.zeros(n), []
     scale = household.get("load_scale", 1.0)   # set only by the uncertainty analysis
+    stoch = bool(demand and demand.get("stochastic"))
+    if stoch:
+        rng = np.random.default_rng(demand["seed"])
+        day = np.cumsum(np.r_[0, (np.diff(hours_of_day) < 0).astype(int)])
+        n_days = int(day[-1]) + 1
+        sig = np.sqrt(np.log(1 + demand["intensity_cv"] ** 2))
     for a in household["appliances"]:
         kw = a["power_w"] * a["quantity"] / 1000.0 * scale
         if a.get("flexible") and a.get("allowed_hours"):
             flex.append({"name": a["name"], "kw": kw, "n_hours": len(a["use_hours"]),
                          "use_hours": list(a["use_hours"]), "allowed_hours": list(a["allowed_hours"]),
                          "critical": bool(a.get("critical"))})
-        else:
-            mask = np.isin(hours_of_day, a["use_hours"])
-            (crit if a.get("critical") else nonc)[mask] += kw
+            continue
+        target = crit if a.get("critical") else nonc
+        if not stoch:
+            target[np.isin(hours_of_day, a["use_hours"])] += kw
+            continue
+        j = demand["time_jitter_h"]
+        shift = rng.integers(-j, j + 1, n_days)
+        used = np.ones(n_days, bool) if a.get("critical") else rng.random(n_days) < demand["noncritical_use_prob"]
+        inten = rng.lognormal(-sig ** 2 / 2, sig, n_days)
+        hrs = np.asarray(a["use_hours"])
+        if len(hrs) == 24:                                   # always-on appliance: no shift
+            target += kw * (used * inten)[day]
+            continue
+        on = np.isin((hours_of_day[:, None] - shift[day][:, None]) % 24, hrs).any(axis=1)
+        target += kw * on * (used * inten)[day]
     return {"critical_kw": crit, "noncritical_kw": nonc, "flex": flex}
 
 

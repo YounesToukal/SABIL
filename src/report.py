@@ -226,12 +226,59 @@ def main():
         w("")
         w("![uncertainty](figures/fig7_uncertainty.png)")
         w("![drivers](figures/fig8_gain_drivers.png)")
+    exd = RES / "experiments"
+    if (exd / "oracle.json").exists():
+        orc = json.load(open(exd / "oracle.json"))
+        w("")
+        w("## 7b. How far from optimal? (dynamic-programming benchmark)")
+        w("A degradation-aware dynamic program with **perfect foresight** re-plans the battery every day over 48 hours, "
+          "minimising weighted unmet energy (critical loads x50) plus the value of capacity lost (same ageing model). "
+          "It is an upper bound, not a product.")
+        w("")
+        w("| Controller | Battery life (y) | Energy delivered (kWh/y) | Critical hours |")
+        w("|---|---|---|---|")
+        for nm, r in [("Standard", orc["baseline"]), ("SABIL", orc["smart"])] + \
+                [(f"Optimal, wear weight {p['lambda_degradation']:g}", p) for p in orc["oracle"]]:
+            w(f"| {nm} | {_f(r['battery_life_years'])} | {r['energy_served_kwh_per_year']:.0f} | {r['critical_service_frac']:.2%} |")
+        o = min(orc["oracle"], key=lambda p: abs(p["lambda_degradation"] - orc["chosen_lambda"]))
+        b, s = orc["baseline"], orc["smart"]
+        if b["battery_life_years"] and s["battery_life_years"] and o["battery_life_years"]:
+            share = (s["battery_life_years"] - b["battery_life_years"]) / (o["battery_life_years"] - b["battery_life_years"])
+            w("")
+            w(f"At the economic wear weight ({orc['chosen_lambda']:g}), SABIL's rules capture **{share:.0%}** of the "
+              "battery-life gain that a perfect controller achieves. The remaining headroom is the roadmap: model-predictive "
+              "control on the device.")
+        w("")
+        w("![headroom](figures/fig14_headroom.png)")
+    if (exd / "placement.json").exists():
+        pl = json.load(open(exd / "placement.json"))
+        w("")
+        w("## 7c. Where to put the battery (thermal model with self-heating)")
+        w("| Placement | Battery mean temp (C) | Life, standard (y) | Life, SABIL (y) | Assumption |")
+        w("|---|---|---|---|---|")
+        for r in pl["rows"]:
+            w(f"| {r['placement']} | {r['avg_battery_temp_c']:.1f} | {_f(r['life_baseline'])} | {_f(r['life_smart'])} | {r['why']} |")
+        w("")
+        w("Placement is free advice for every household and stacks with SABIL. Placement parameters are scenario "
+          "assumptions; a temperature logger in pilot homes would measure them.")
+        w("")
+        w("![placement](figures/fig13_placement.png)")
+    if (exd / "demand_variability_summary.json").exists():
+        dv = json.load(open(exd / "demand_variability_summary.json"))
+        w("")
+        w("## 7d. Random household demand")
+        w(f"{dv['n']} random demand realisations (RAMP-style: shifted usage times, skipped days, variable intensity): "
+          f"battery-life gain median {dv['gain_years_median']:.2f} years ({dv['gain_years_p5']:.2f}-{dv['gain_years_p95']:.2f}); "
+          f"SABIL better in {dv['share_smart_better']:.0%}; hours with all critical loads on: standard "
+          f"{dv['critical_baseline_mean']:.2%}, SABIL {dv['critical_smart_mean']:.2%} (worst case {dv['critical_smart_min']:.2%}).")
     w("")
     w("## 8. Limitations")
     w("- Simulation, not field data: the ageing model is fitted on one commercial LFP cell (Sony/Murata US26650) in the lab; "
       "real packs, cell imbalance and BMS behaviour differ. A 20-50 home pilot with logged SoC and temperature is the test.")
-    w("- Battery temperature = air temperature + a fixed offset; no self-heating or enclosure thermal model, so the "
-      "'gentler when hot' feature has no effect by construction.")
+    w("- Headline runs use battery temperature = air temperature + a fixed offset; the placement study adds a two-node "
+      "thermal model with self-heating, whose placement parameters are assumptions to be measured in the field.")
+    w("- The optimal benchmark uses perfect foresight and marginal (linearised) ageing rates; it bounds what any "
+      "controller could achieve, it is not deployable as is.")
     w("- Household demand is a fixed daily schedule; real behaviour varies day to day and grows over time.")
     w("- Battery life beyond the simulated horizon is extrapolated with the last year's fade rate (conservative for "
       "square-root ageing).")

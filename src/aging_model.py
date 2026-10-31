@@ -25,10 +25,10 @@ _s = {}
 
 
 def reset():
-    """Fresh battery: no accumulated loss, empty half-cycle detector."""
+    """Fresh battery: no accumulated loss, empty half-cycle detector, thermal state unset."""
     _s.clear()
     _s.update(q_cal=0.0, q_cyc=0.0, fec=0.0, prev=None, start=None, direction=0,
-              hours=0.0, pending=[])
+              hours=0.0, pending=[], t_room=None, t_bat=None)
 
 
 reset()
@@ -56,8 +56,35 @@ def observe_soc(soc_end, dt_h=1.0):
 
 
 def battery_temp(ambient_c, power_kw, battery):
-    """Battery temperature during one hour, in °C: indoor air + a fixed offset."""
-    return ambient_c + battery["temp_offset_c"]
+    """Battery temperature during one hour, in °C.
+    Default: outdoor air + a fixed offset (contract version).
+    If battery.json has a "thermal" block with "model": "rc", a two-node lumped model is used:
+      room:    T_room += dt/tau_room * (T_out - T_room)      (+ room_offset_c: roof gain or ground cooling)
+      battery: C dT/dt = UA (T_room - T_bat) + I^2 R,  I = P / V_nominal   (self-heating)
+    The placement (outdoor box, indoor room, cool interior...) sets tau_room and room_offset_c.
+    This version keeps state, so it must be called exactly once per simulated hour."""
+    th = battery.get("thermal")
+    if not th or th.get("model") != "rc":
+        return ambient_c + battery["temp_offset_c"]
+    pl = th["placements"][th["placement"]]
+    s = _s
+    if s["t_room"] is None:
+        s["t_room"] = s["t_bat"] = ambient_c + pl["room_offset_c"]
+    dt_s = 3600.0
+    s["t_room"] += min(1.0, 1.0 / pl["tau_room_h"]) * (ambient_c + pl["room_offset_c"] - s["t_room"])
+    current = abs(power_kw) * 1000.0 / th["v_nominal"]
+    q_heat = current ** 2 * th["r_internal_ohm"]
+    c_j_k = th["mass_kg"] * th["cp_j_kg_k"]
+    s["t_bat"] += dt_s / c_j_k * (pl["ua_w_k"] * (s["t_room"] - s["t_bat"]) + q_heat)
+    return s["t_bat"]
+
+
+def battery_temp_estimate(ambient_c, battery):
+    """Stateless estimate for the controller's planning (does not advance the thermal state)."""
+    th = battery.get("thermal")
+    if not th or th.get("model") != "rc":
+        return ambient_c + battery["temp_offset_c"]
+    return ambient_c + th["placements"][th["placement"]]["room_offset_c"]
 
 
 def step_loss(dt_h, soc, temp_c, throughput_kwh, capacity_kwh, battery):

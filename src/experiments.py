@@ -26,7 +26,7 @@ from params_io import ROOT, load_all
 
 OUT = ROOT / "results" / "experiments"
 FEATURES = ["charge_cap", "night_reserve", "load_shift", "heat_gentle", "critical_priority"]
-KEEP = ["battery_life_years", "capacity_after_10y_frac", "critical_service_frac", "critical_hours_per_year",
+KEEP = ["avg_battery_temp_c", "battery_life_years", "capacity_after_10y_frac", "critical_service_frac", "critical_hours_per_year",
         "energy_served_kwh_per_year", "energy_unmet_kwh_per_year", "diesel_avoided_l_per_year",
         "diesel_avoided_l_per_battery_life", "full_cycles_per_year", "avg_soc_when_hot"]
 
@@ -139,7 +139,7 @@ def spearman(x, y):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--only", choices=["ablation", "sweep", "mc"], default=None)
+    ap.add_argument("--only", choices=["ablation", "sweep", "mc", "placement", "demand", "oracle"], default=None)
     ap.add_argument("--samples", type=int, default=None)
     ap.add_argument("--workers", type=int, default=None)
     a = ap.parse_args()
@@ -229,6 +229,85 @@ def main():
             print("what drives the gain (Spearman rank correlation):")
             for k, v in sorted(summ["spearman_with_gain_years"].items(), key=lambda kv: -abs(kv[1])):
                 print(f"   {k:<40}{v:+.2f}")
+
+    if a.only in (None, "placement"):
+        import aging_model
+        st = ex.get("placement_study")
+        if st and hasattr(aging_model, "battery_temp_estimate"):
+            jobs = []
+            for name in st["placements"]:
+                Q = copy.deepcopy(P)
+                Q["battery"]["thermal"] = {**st["thermal"], "placement": name, "placements": st["placements"]}
+                jobs += [(f"{name}|baseline", "baseline", Q, "none"), (f"{name}|smart", "smart", Q, mode)]
+            res = dict(_pool_map(jobs, workers))
+            rows = []
+            for name in st["placements"]:
+                b, s_ = res[f"{name}|baseline"], res[f"{name}|smart"]
+                rows.append({"placement": name, "why": st["placements"][name].get("why", ""),
+                             "avg_battery_temp_c": b["avg_battery_temp_c"],
+                             "life_baseline": b["battery_life_years"], "life_smart": s_["battery_life_years"],
+                             "critical_baseline": b["critical_service_frac"], "critical_smart": s_["critical_service_frac"]})
+            json.dump({"rows": rows, "forecast": mode, "sources": st.get("sources", "")},
+                      open(OUT / "placement.json", "w"), indent=2)
+            print("\nBATTERY PLACEMENT (thermal model with self-heating)")
+            print(f"{'placement':<22}{'mean battery C':>15}{'life standard':>15}{'life SABIL':>12}")
+            for r in rows:
+                print(f"{r['placement']:<22}{r['avg_battery_temp_c']:>15.1f}{(r['life_baseline'] or 0):>15.2f}{(r['life_smart'] or 0):>12.2f}")
+        else:
+            print("placement study skipped (needs the interim ageing model's thermal option)")
+
+    if a.only in (None, "demand"):
+        n = ex.get("demand_seeds", 0)
+        if n:
+            jobs = []
+            for i in range(n):
+                Q = copy.deepcopy(P)
+                Q["sim"]["demand"] = {**P["sim"]["demand"], "stochastic": True, "seed": 1000 + i}
+                jobs += [(f"d{i}|baseline", "baseline", Q, "none"), (f"d{i}|smart", "smart", Q, mode)]
+            res = dict(_pool_map(jobs, workers))
+            recs = []
+            for i in range(n):
+                b, s_ = res[f"d{i}|baseline"], res[f"d{i}|smart"]
+                if b["battery_life_years"] and s_["battery_life_years"]:
+                    recs.append({"seed": 1000 + i, "life_baseline": b["battery_life_years"], "life_smart": s_["battery_life_years"],
+                                 "gain_years": s_["battery_life_years"] - b["battery_life_years"],
+                                 "critical_baseline": b["critical_service_frac"], "critical_smart": s_["critical_service_frac"],
+                                 "unmet_baseline": b["energy_unmet_kwh_per_year"], "unmet_smart": s_["energy_unmet_kwh_per_year"]})
+            df = pd.DataFrame(recs)
+            df.to_csv(OUT / "demand_variability.csv", index=False)
+            if len(df):
+                summ = {"n": len(df), "gain_years_median": float(df["gain_years"].median()),
+                        "gain_years_p5": float(df["gain_years"].quantile(0.05)), "gain_years_p95": float(df["gain_years"].quantile(0.95)),
+                        "share_smart_better": float((df["gain_years"] > 0).mean()),
+                        "critical_baseline_mean": float(df["critical_baseline"].mean()),
+                        "critical_smart_mean": float(df["critical_smart"].mean()),
+                        "critical_smart_min": float(df["critical_smart"].min()),
+                        "unmet_baseline_mean": float(df["unmet_baseline"].mean()), "unmet_smart_mean": float(df["unmet_smart"].mean())}
+                json.dump(summ, open(OUT / "demand_variability_summary.json", "w"), indent=2)
+                print(f"\nRANDOM DEMAND ({len(df)} realisations): gain median {summ['gain_years_median']:.2f} y "
+                      f"({summ['gain_years_p5']:.2f}-{summ['gain_years_p95']:.2f}), SABIL better in {summ['share_smart_better']:.0%}; "
+                      f"critical hours standard {summ['critical_baseline_mean']:.2%} vs SABIL {summ['critical_smart_mean']:.2%}")
+
+    if a.only in (None, "oracle"):
+        import aging_model
+        if "oracle" in P["sim"] and hasattr(aging_model, "breakdown") and "cal_k_ref_per_sqrt_s" in P["battery"].get("aging", {}):
+            lams = P["sim"]["oracle"]["lambda_degradation_sweep"]
+            jobs = [(f"oracle:{l}", f"oracle:{l}", P, "perfect") for l in lams]
+            jobs += [("baseline", "baseline", P, "none"), ("smart", "smart", P, mode)]
+            res = dict(_pool_map(jobs, workers))
+            pts = [{"lambda_degradation": l, **res[f"oracle:{l}"]} for l in lams]
+            json.dump({"oracle": pts, "baseline": res["baseline"], "smart": res["smart"], "forecast": mode,
+                       "chosen_lambda": P["sim"]["oracle"]["lambda_degradation"]},
+                      open(OUT / "oracle.json", "w"), indent=2)
+            sm = res["smart"]
+            print("\nOPTIMAL BENCHMARK (dynamic programming, perfect foresight)")
+            print(f"{'controller':<22}{'life (y)':>10}{'served kWh/y':>14}{'unmet kWh/y':>13}{'critical':>10}")
+            for name, r in [("standard", res["baseline"]), (f"SABIL ({mode})", sm)] + \
+                           [(f"oracle lambda={p['lambda_degradation']:g}", p) for p in pts]:
+                print(f"{name:<22}{(r['battery_life_years'] or 0):>10.2f}{r['energy_served_kwh_per_year']:>14.1f}"
+                      f"{r['energy_unmet_kwh_per_year']:>13.1f}{r['critical_service_frac']:>10.2%}")
+        else:
+            print("oracle benchmark skipped (needs the interim ageing model)")
     print(f"\nexperiments done in {time.time() - t0:.0f} s -> {OUT}")
 
 

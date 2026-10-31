@@ -2,6 +2,7 @@
   "points": [
     {
       "soc_cap_hot": 0.4,
+      "avg_battery_temp_c": 31.46,
       "battery_life_years": 8.37,
       "capacity_after_10y_frac": 0.7811,
       "critical_service_frac": 0.9998,
@@ -15,6 +16,7 @@
     },
     {
       "soc_cap_hot": 0.45,
+      "avg_battery_temp_c": 31.46,
       "battery_life_years": 8.37,
       "capacity_after_10y_frac": 0.7811,
       "critical_service_frac": 0.9998,
@@ -28,6 +30,7 @@
     },
     {
       "soc_cap_hot": 0.5,
+      "avg_battery_temp_c": 31.46,
       "battery_life_years": 8.37,
       "capacity_after_10y_frac": 0.7811,
       "critical_service_frac": 0.9998,
@@ -41,6 +44,7 @@
     },
     {
       "soc_cap_hot": 0.55,
+      "avg_battery_temp_c": 31.46,
       "battery_life_years": 8.37,
       "capacity_after_10y_frac": 0.7811,
       "critical_service_frac": 0.9998,
@@ -54,6 +58,7 @@
     },
     {
       "soc_cap_hot": 0.6,
+      "avg_battery_temp_c": 31.46,
       "battery_life_years": 8.36,
       "capacity_after_10y_frac": 0.7811,
       "critical_service_frac": 0.9998,
@@ -67,6 +72,7 @@
     },
     {
       "soc_cap_hot": 0.65,
+      "avg_battery_temp_c": 31.46,
       "battery_life_years": 8.32,
       "capacity_after_10y_frac": 0.7806,
       "critical_service_frac": 0.9998,
@@ -80,6 +86,7 @@
     },
     {
       "soc_cap_hot": 0.7,
+      "avg_battery_temp_c": 31.46,
       "battery_life_years": 8.2,
       "capacity_after_10y_frac": 0.7792,
       "critical_service_frac": 0.9999,
@@ -93,6 +100,7 @@
     },
     {
       "soc_cap_hot": 0.75,
+      "avg_battery_temp_c": 31.46,
       "battery_life_years": 8.06,
       "capacity_after_10y_frac": 0.777,
       "critical_service_frac": 0.9999,
@@ -106,6 +114,7 @@
     },
     {
       "soc_cap_hot": 0.8,
+      "avg_battery_temp_c": 31.46,
       "battery_life_years": 7.86,
       "capacity_after_10y_frac": 0.7739,
       "critical_service_frac": 1.0,
@@ -119,6 +128,7 @@
     },
     {
       "soc_cap_hot": 0.85,
+      "avg_battery_temp_c": 31.46,
       "battery_life_years": 7.54,
       "capacity_after_10y_frac": 0.7695,
       "critical_service_frac": 1.0,
@@ -132,6 +142,7 @@
     },
     {
       "soc_cap_hot": 0.9,
+      "avg_battery_temp_c": 31.46,
       "battery_life_years": 7.17,
       "capacity_after_10y_frac": 0.7635,
       "critical_service_frac": 1.0,
@@ -145,6 +156,7 @@
     },
     {
       "soc_cap_hot": 0.95,
+      "avg_battery_temp_c": 31.46,
       "battery_life_years": 6.71,
       "capacity_after_10y_frac": 0.7554,
       "critical_service_frac": 1.0,
@@ -158,6 +170,7 @@
     },
     {
       "soc_cap_hot": 1.0,
+      "avg_battery_temp_c": 31.46,
       "battery_life_years": 6.18,
       "capacity_after_10y_frac": 0.7446,
       "critical_service_frac": 1.0,
@@ -171,6 +184,7 @@
     }
   ],
   "baseline": {
+    "avg_battery_temp_c": 31.46,
     "battery_life_years": 6.16,
     "capacity_after_10y_frac": 0.7438,
     "critical_service_frac": 0.9923,

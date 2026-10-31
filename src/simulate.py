@@ -85,7 +85,7 @@ def run(name, P, weather, forecast_mode="perfect", ghi_forecast=None):
     ghi, amb = w["ghi_w_m2"].to_numpy(float), w["ambient_c"].to_numpy(float)
     hod = ts.dt.hour.to_numpy()
     pv = pv_dc_kw(ghi, amb, system)
-    L = build(P["household"], hod)
+    L = build(P["household"], hod, P["sim"].get("demand"))
     ctx = Context(pv, amb, L["critical_kw"], L["noncritical_kw"], hod, L["flex"], bat, system, sim)
     if forecast_mode in ("learned", "learned_risk"):
         fc = learned_pv_forecast(P, w, risk=forecast_mode == "learned_risk", ghi_forecast=ghi_forecast)
@@ -105,7 +105,8 @@ def run(name, P, weather, forecast_mode="perfect", ghi_forecast=None):
     if has_observe:
         aging_model.observe_soc(soc, dt)
     life_t, replacements = None, 0
-    state = {"last_battery_temp_c": aging_model.battery_temp(amb[0], 0.0, bat)}
+    est = getattr(aging_model, "battery_temp_estimate", None)
+    state = {"last_battery_temp_c": est(amb[0], bat) if est else aging_model.battery_temp(amb[0], 0.0, bat)}
 
     out = {k: np.zeros(n) for k in ["load", "served", "unmet", "bat_kw", "soc", "temp", "cap",
                                      "crit_dem", "crit_srv", "curt", "dis_dc", "chg_dc"]}
