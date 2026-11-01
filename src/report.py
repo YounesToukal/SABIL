@@ -108,6 +108,8 @@ def main():
     w("")
     w("![capacity](figures/fig1_battery_capacity.png)")
     w("![critical](figures/fig2_critical_hours.png)")
+    w("![essentials and battery fade](figures/fig18_essentials_vs_fade.png)")
+    w("![two hot days](figures/fig19_hot_days.png)")
     w("")
     w("## 4. Does the forecast matter?")
     if any(others.values()):
@@ -233,6 +235,7 @@ def main():
             w(f"- Not varied (not present in the current ageing model): {', '.join(mc['skipped_inputs'])}.")
         w("")
         w("![uncertainty](figures/fig7_uncertainty.png)")
+        w("![robustness](figures/fig20_robustness.png)")
         w("![drivers](figures/fig8_gain_drivers.png)")
     exd = RES / "experiments"
     if (exd / "oracle.json").exists():
@@ -279,6 +282,66 @@ def main():
           f"battery-life gain median {dv['gain_years_median']:.2f} years ({dv['gain_years_p5']:.2f}-{dv['gain_years_p95']:.2f}); "
           f"SABIL better in {dv['share_smart_better']:.0%}; hours with all critical loads on: standard "
           f"{dv['critical_baseline_mean']:.2%}, SABIL {dv['critical_smart_mean']:.2%} (worst case {dv['critical_smart_min']:.2%}).")
+    cs_path = ROOT / "results" / "costs_summary.json"
+    if cs_path.exists():
+        cs = json.load(open(cs_path))
+        t, fam, gen, cv = cs["tariff_ngn_per_kwh"], cs["family"], cs["petrol_generator"], cs["controller_value"]
+        fx = cs["inputs_used"]["ngn_per_usd"]
+        w("")
+        w("## 7e. Cost (src/cost_model.py, inputs and sources in params/costs.json)")
+        w(f"Equivalent annual cost of each part of the kit at a {cs['inputs_used']['real_discount_rate']:.0%} real cost of "
+          f"capital; the battery's life is the simulated one, so the controller's effect on ageing flows into the price. "
+          f"N{fx:,}/USD.")
+        w("")
+        w("| | Standard | SABIL |")
+        w("|---|---|---|")
+        w(f"| Up-front cost of the kit (USD) | {cs['standard']['capex_usd']:.0f} | {cs['sabil']['capex_usd']:.0f} |")
+        w(f"| Battery life used (years) | {cs['inputs_used']['battery_life_years']['baseline']} | "
+          f"{cs['inputs_used']['battery_life_years']['smart']} |")
+        w(f"| Cost per kWh delivered (USD) | {cs['standard']['cost_usd_per_kwh']:.3f} | {cs['sabil']['cost_usd_per_kwh']:.3f} |")
+        w(f"| Break-even tariff (N/kWh) | {t['standard']:,.0f} | {t['sabil']:,.0f} |")
+        w("")
+        w(f"- **Family bill:** N{fam['bill_ngn_per_month']:,.0f} a month for the full designed use "
+          f"({fam['kwh_per_month']:.1f} kWh); N{fam['lights_phones_fans_bill_ngn_per_month']:,.0f} for lights, phones and "
+          f"fans only. With the DARES grant the tariff falls to N{t['sabil_with_dares_grant']:,.0f}/kWh.")
+        w(f"- **Against a petrol generator (fuel only, Borno pump price):** N{gen['best_case']['fuel_ngn_per_kwh']:,.0f}/kWh "
+          f"at the best case ({gen['best_case']['l_per_kwh']} L/kWh) and N{gen['typical_small_set']['fuel_ngn_per_kwh']:,.0f}/kWh "
+          f"for a typical small set ({gen['typical_small_set']['l_per_kwh']:.0f} L/kWh): SABIL is "
+          f"{gen['best_case']['sabil_cheaper_by_frac']:.0%} to {gen['typical_small_set']['sabil_cheaper_by_frac']:.0%} cheaper, "
+          f"and {gen['best_case']['litres_avoided_per_year']:.0f} to {gen['typical_small_set']['litres_avoided_per_year']:.0f} "
+          f"litres of fuel are avoided per home per year.")
+        w(f"- **What the controller is worth:** +${cv['extra_hardware_usd']:.0f} of hardware, repaid in "
+          f"{cv['payback_of_extra_hardware_years']:.1f} years by the slower battery wear; cost per kWh "
+          f"{cv['cost_per_kwh_reduction_frac']:.1%} lower; ${cv['npv_usd_per_1000_homes']:,.0f} of present value and "
+          f"{cv['battery_modules_avoided_per_1000_homes']:.0f} battery modules ({cv['battery_waste_avoided_t_per_1000_homes']:.1f} t) "
+          f"avoided per 1,000 homes over {cs['inputs_used']['horizon_years']} years.")
+        sens = cs["sensitivity_sabil_tariff"]
+        lo = min(min(x["tariff_ngn_per_kwh"]) for x in sens)
+        hi = max(max(x["tariff_ngn_per_kwh"]) for x in sens)
+        w(f"- **Sensitivity:** across all the ranges tested the SABIL tariff stays between N{lo:,.0f} and N{hi:,.0f}/kWh; "
+          f"battery price, use and cost of capital move it most.")
+        w("")
+        w("![cost](figures/fig15_cost_per_kwh.png)")
+        w("![sensitivity](figures/fig16_cost_sensitivity.png)")
+    tp = ROOT / "results" / "controller_tuning.json"
+    if tp.exists():
+        tu = json.load(open(tp))
+        te = tu["test_unseen_weather"]
+        w("")
+        w("## 7f. Can the rules be tuned? (Bayesian optimization, src/tune_controller.py)")
+        w(f"{tu['method']}. Objective: capacity left after 10 years, penalised if critical hours or delivered energy get worse.")
+        w("")
+        w("| Unseen weather 2019-2023 | Capacity after 10 years | Critical hours lost (10 years) | Energy not delivered (kWh/y) |")
+        w("|---|---|---|---|")
+        for k, lab in (("standard", "Standard"), ("sabil_hand_set", "SABIL, hand-set rules"), ("sabil_tuned", "SABIL, tuned rules")):
+            r = te[k]
+            w(f"| {lab} | {r['capacity_after_10y']:.1%} | {r['critical_hours_lost']} | {r['energy_unmet_kwh_per_year']} |")
+        w("")
+        w("The tuned rules keep slightly more capacity but lose more critical hours on weather they never saw, so the "
+          "hand-set rules are kept: on this rule family, more battery life costs reliability. The remaining gap to the "
+          "perfect-foresight benchmark (section 7b) is the value of better forecasts, not of retuning.")
+        w("")
+        w("![tuning](figures/fig17_tuning.png)")
     w("")
     w("## 8. Limitations")
     w("- Simulation, not field data: the ageing model is fitted on one commercial LFP cell (Sony/Murata US26650) in the lab; "
@@ -288,6 +351,9 @@ def main():
     w("- The optimal benchmark uses perfect foresight and marginal (linearised) ageing rates; it bounds what any "
       "controller could achieve, it is not deployable as is.")
     w("- Household demand is a fixed daily schedule; real behaviour varies day to day and grows over time.")
+    w("- Costs: equipment prices are Lagos retail or international benchmarks adjusted by assumption; installation, "
+      "running costs, unpaid bills and the cost of capital are assumptions with stated ranges, to be replaced by "
+      "supplier quotes and pilot data. The generator comparison counts fuel only (no generator purchase or repairs).")
     w("- Battery life beyond the simulated horizon is extrapolated with the last year's fade rate (conservative for "
       "square-root ageing).")
     w("- Weather years are treated as independent blocks in the forecast cross-validation; NASA POWER is a reanalysis "
@@ -296,7 +362,7 @@ def main():
     w("## 9. Reproduce")
     w("```")
     w("python src/weather.py && python src/validate_aging.py && python src/forecast_ml.py")
-    w("python src/simulate.py && python src/experiments.py && python src/plots.py && python src/report.py")
+    w("python src/simulate.py && python src/experiments.py && python src/plots.py && python src/cost_model.py && python src/report.py")
     w("```")
     w(f"Python {platform.python_version()}. Data: NASA POWER (public). Ageing model reference implementation: "
       "SimSES (TU Munich).")

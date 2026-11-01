@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/sabil-horizontal-reversed.svg">
+    <img src="assets/brand/sabil-horizontal-colour.svg" alt="SABIL: Solar Access Builds Independent Lives" width="420">
+  </picture>
+</p>
+
 # SABIL
 
 A home solar-plus-storage kit whose controller is designed to make the battery last,
@@ -33,6 +40,9 @@ python src/sizing_map.py         # reliability of the aged system: 4 PV x 4 batt
 python src/robustness_aging.py   # controller results under both ageing models
 python src/experiments.py        # ablation, charge-cap sweep, Monte Carlo, battery placement, random demand, optimal benchmark
 python src/plots.py              # all figures
+python src/cost_model.py         # cost per kWh, family bill, generator comparison, value of the controller
+python src/tune_controller.py    # Bayesian optimization of the controller rules, tested on unseen weather (needs optuna)
+python src/exhibits.py           # report and slide exhibits (fig15-fig20, results/figures/deck/)
 python src/report.py             # results/RESEARCH_REPORT.md
 ```
 
@@ -44,9 +54,10 @@ python src/report.py             # results/RESEARCH_REPORT.md
 | `params/sim.json` | Younes | site, years, forecast choice, smart-controller settings |
 | `dev_params/` | Younes | TO CONFIRM placeholders, used only while a `params/` file is missing |
 | `src/sizing.py`, `src/sizing_map.py` | Youcef | household load, kit sizing from NASA POWER, reliability map of the aged system |
-| `src/aging_model.py`, `src/aging_nrel.py`, `src/validate_aging_nrel.py`, `src/robustness_aging.py`, `src/cost_model.py` | Youcef | ageing entry point (picks the model in `battery.json`), NREL prismatic LFP model and its checks, robustness across ageing datasets, cost model |
+| `src/aging_model.py`, `src/aging_nrel.py`, `src/validate_aging_nrel.py`, `src/robustness_aging.py`, `src/cost_model.py`, `src/tune_controller.py`, `src/exhibits.py` | Youcef | ageing entry point (picks the model in `battery.json`), NREL prismatic LFP model and its checks, robustness across ageing datasets, cost model |
 | `src/aging_naumann.py`, `src/validate_aging.py` | Younes | TU Munich LFP ageing model (default) and its check against SimSES |
 | `src/weather.py`, `load_profile.py`, `controllers.py`, `simulate.py`, `plots.py`, `check_results.py`, `params_io.py`, `forecast_ml.py`, `forecast_lab.py`, `datasets.py`, `experiments.py`, `report.py` | Younes | data, simulation, controllers, forecasts and forecasting lab, experiments, charts, report |
+| `assets/brand/` | Youcef | logo (Solar Access Builds Independent Lives) |
 | `results/` | Younes (summaries, hourly CSVs, experiments, figures, report), Youcef (`sizing_map.csv`, `aging_robustness.json`, `aging_validation_nrel.json`, `load_profile_24h.csv`, `costs_summary.json`) | outputs |
 
 No number is typed into the code: every value lives in `params/`.

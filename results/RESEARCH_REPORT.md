@@ -1,8 +1,6 @@
 # SABIL: battery-aware control for solar home systems in Maiduguri
 
-*Generated 2026-11-01 09:07 UTC from the result files at commit 49399d2. Every number below is read from `results/`, not typed.*
-
-> **Provisional:** these inputs still use placeholders (`dev_params/`): costs.
+*Generated 2026-11-01 10:50 UTC from the result files at commit bff04f2. Every number below is read from `results/`, not typed.*
 
 ## 1. Question
 When the transmission line to Maiduguri is cut (Brief 13), a household solar-plus-battery kit replaces diesel only as long as its battery lasts. Can a controller that knows how batteries age extend battery life in Maiduguri's heat without reducing the hours that lights, phones and fans stay on?
@@ -36,6 +34,8 @@ When the transmission line to Maiduguri is cut (Brief 13), a household solar-plu
 
 ![capacity](figures/fig1_battery_capacity.png)
 ![critical](figures/fig2_critical_hours.png)
+![essentials and battery fade](figures/fig18_essentials_vs_fade.png)
+![two hot days](figures/fig19_hot_days.png)
 
 ## 4. Does the forecast matter?
 | Forecast used by SABIL | Battery life (y) | Critical hours | Energy not delivered (kWh/y) |
@@ -139,6 +139,7 @@ From a cap of 100% to 40%, battery life goes from 6.27 to 7.51 years while energ
 - What drives the gain (Spearman rank correlation with years gained): load_scale -0.80, cal_k_ref_per_sqrt_s -0.40, temp_offset_c +0.32, cyc_c_b -0.16.
 
 ![uncertainty](figures/fig7_uncertainty.png)
+![robustness](figures/fig20_robustness.png)
 ![drivers](figures/fig8_gain_drivers.png)
 
 ## 7b. How far from optimal? (dynamic-programming benchmark)
@@ -174,18 +175,50 @@ Placement is free advice for every household and stacks with SABIL. Placement pa
 ## 7d. Random household demand
 24 random demand realisations (RAMP-style: shifted usage times, skipped days, variable intensity): battery-life gain median 1.25 years (1.23-1.29); SABIL better in 100%; hours with all critical loads on: standard 99.88%, SABIL 99.98% (worst case 99.98%).
 
+## 7e. Cost (src/cost_model.py, inputs and sources in params/costs.json)
+Equivalent annual cost of each part of the kit at a 12% real cost of capital; the battery's life is the simulated one, so the controller's effect on ageing flows into the price. N1,332/USD.
+
+| | Standard | SABIL |
+|---|---|---|
+| Up-front cost of the kit (USD) | 626 | 638 |
+| Battery life used (years) | 6.24 | 7.51 |
+| Cost per kWh delivered (USD) | 0.350 | 0.334 |
+| Break-even tariff (N/kWh) | 530 | 505 |
+
+- **Family bill:** N17,853 a month for the full designed use (35.4 kWh); N5,404 for lights, phones and fans only. With the DARES grant the tariff falls to N465/kWh.
+- **Against a petrol generator (fuel only, Borno pump price):** N715/kWh at the best case (0.5 L/kWh) and N2,860/kWh for a typical small set (2 L/kWh): SABIL is 29% to 82% cheaper, and 212 to 849 litres of fuel are avoided per home per year.
+- **What the controller is worth:** +$12 of hardware, repaid in 1.3 years by the slower battery wear; cost per kWh 4.7% lower; $52,816 of present value and 542 battery modules (9.8 t) avoided per 1,000 homes over 20 years.
+- **Sensitivity:** across all the ranges tested the SABIL tariff stays between N408 and N643/kWh; battery price, use and cost of capital move it most.
+
+![cost](figures/fig15_cost_per_kwh.png)
+![sensitivity](figures/fig16_cost_sensitivity.png)
+
+## 7f. Can the rules be tuned? (Bayesian optimization, src/tune_controller.py)
+Optuna TPE (Bayesian optimization), seed 2026, 80 trials, tuned on 2014-2018 weather, tested on 2019-2023 (each played twice = 10 years of ageing). Objective: capacity left after 10 years, penalised if critical hours or delivered energy get worse.
+
+| Unseen weather 2019-2023 | Capacity after 10 years | Critical hours lost (10 years) | Energy not delivered (kWh/y) |
+|---|---|---|---|
+| Standard | 74.6% | 120 | 0.7 |
+| SABIL, hand-set rules | 76.6% | 26 | 1.52 |
+| SABIL, tuned rules | 77.3% | 36 | 1.8 |
+
+The tuned rules keep slightly more capacity but lose more critical hours on weather they never saw, so the hand-set rules are kept: on this rule family, more battery life costs reliability. The remaining gap to the perfect-foresight benchmark (section 7b) is the value of better forecasts, not of retuning.
+
+![tuning](figures/fig17_tuning.png)
+
 ## 8. Limitations
 - Simulation, not field data: the ageing model is fitted on one commercial LFP cell (Sony/Murata US26650) in the lab; real packs, cell imbalance and BMS behaviour differ. A 20-50 home pilot with logged SoC and temperature is the test.
 - Headline runs use battery temperature = air temperature + a fixed offset; the placement study adds a two-node thermal model with self-heating, whose placement parameters are assumptions to be measured in the field.
 - The optimal benchmark uses perfect foresight and marginal (linearised) ageing rates; it bounds what any controller could achieve, it is not deployable as is.
 - Household demand is a fixed daily schedule; real behaviour varies day to day and grows over time.
+- Costs: equipment prices are Lagos retail or international benchmarks adjusted by assumption; installation, running costs, unpaid bills and the cost of capital are assumptions with stated ranges, to be replaced by supplier quotes and pilot data. The generator comparison counts fuel only (no generator purchase or repairs).
 - Battery life beyond the simulated horizon is extrapolated with the last year's fade rate (conservative for square-root ageing).
 - Weather years are treated as independent blocks in the forecast cross-validation; NASA POWER is a reanalysis product with known bias versus ground stations.
 
 ## 9. Reproduce
 ```
 python src/weather.py && python src/validate_aging.py && python src/forecast_ml.py
-python src/simulate.py && python src/experiments.py && python src/plots.py && python src/report.py
+python src/simulate.py && python src/experiments.py && python src/plots.py && python src/cost_model.py && python src/report.py
 ```
 Python 3.13.18. Data: NASA POWER (public). Ageing model reference implementation: SimSES (TU Munich).
 

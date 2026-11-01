@@ -146,7 +146,5 @@
     "diesel_avoided_l_per_battery_life": "diesel_avoided_l_per_year x battery_life_years",
     "co2_avoided_t_per_year": "diesel avoided x diesel_kg_co2_per_l (IPCC 2006 default)"
   },
-  "params_from_placeholders": [
-    "costs"
-  ]
+  "params_from_placeholders": []
 }

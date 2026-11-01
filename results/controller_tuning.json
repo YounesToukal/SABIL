@@ -1,0 +1,871 @@
+{
+  "method": "Optuna TPE (Bayesian optimization), seed 2026, 80 trials, tuned on 2014-2018 weather, tested on 2019-2023 (each played twice = 10 years of ageing)",
+  "search_space": {
+    "hot_threshold_c": [
+      22.0,
+      36.0
+    ],
+    "soc_cap_hot": [
+      0.35,
+      1.0
+    ],
+    "sunny_ratio": [
+      0.6,
+      1.4
+    ],
+    "reserve_margin": [
+      0.0,
+      0.5
+    ],
+    "c_rate_hot": [
+      0.1,
+      0.5
+    ],
+    "cloudy_day_buffer": [
+      0.0,
+      1.0
+    ]
+  },
+  "hand_set": {
+    "hot_threshold_c": 30.0,
+    "soc_cap_hot": 0.7,
+    "sunny_ratio": 1.0,
+    "reserve_margin": 0.15,
+    "c_rate_hot": 0.25,
+    "cloudy_day_buffer": 0.5
+  },
+  "tuned": {
+    "hot_threshold_c": 27.442,
+    "soc_cap_hot": 0.73,
+    "sunny_ratio": 0.8,
+    "reserve_margin": 0.08,
+    "c_rate_hot": 0.143,
+    "cloudy_day_buffer": 0.567
+  },
+  "train_years": [
+    2014,
+    2015,
+    2016,
+    2017,
+    2018,
+    2014,
+    2015,
+    2016,
+    2017,
+    2018
+  ],
+  "test_years": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023
+  ],
+  "train": {
+    "sabil_hand_set": {
+      "capacity_after_10y": 0.7663,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 1.2,
+      "energy_served_kwh_per_year": 848.99
+    },
+    "sabil_tuned": {
+      "capacity_after_10y": 0.7739,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 1.48,
+      "energy_served_kwh_per_year": 848.7
+    }
+  },
+  "test_unseen_weather": {
+    "standard": {
+      "capacity_after_10y": 0.7464,
+      "critical_hours_lost": 120,
+      "critical_hours_lost_worst_year": 44,
+      "energy_unmet_kwh_per_year": 0.7,
+      "energy_served_kwh_per_year": 849.49
+    },
+    "sabil_hand_set": {
+      "capacity_after_10y": 0.7662,
+      "critical_hours_lost": 26,
+      "critical_hours_lost_worst_year": 18,
+      "energy_unmet_kwh_per_year": 1.52,
+      "energy_served_kwh_per_year": 848.66
+    },
+    "sabil_tuned": {
+      "capacity_after_10y": 0.7733,
+      "critical_hours_lost": 36,
+      "critical_hours_lost_worst_year": 22,
+      "energy_unmet_kwh_per_year": 1.8,
+      "energy_served_kwh_per_year": 848.39
+    }
+  },
+  "full_2014_2023": {
+    "standard": {
+      "capacity_after_10y": 0.7462,
+      "battery_life_years": 6.24,
+      "battery_life_note": "reached in simulation",
+      "critical_hours_lost": 110,
+      "critical_hours_lost_worst_year": 32,
+      "energy_unmet_kwh_per_year": 0.32,
+      "energy_served_kwh_per_year": 424.77
+    },
+    "sabil_hand_set": {
+      "capacity_after_10y": 0.7663,
+      "battery_life_years": 7.51,
+      "battery_life_note": "reached in simulation",
+      "critical_hours_lost": 13,
+      "critical_hours_lost_worst_year": 9,
+      "energy_unmet_kwh_per_year": 0.67,
+      "energy_served_kwh_per_year": 424.42
+    },
+    "sabil_tuned": {
+      "capacity_after_10y": 0.7737,
+      "battery_life_years": 8.03,
+      "battery_life_note": "reached in simulation",
+      "critical_hours_lost": 19,
+      "critical_hours_lost_worst_year": 11,
+      "energy_unmet_kwh_per_year": 0.82,
+      "energy_served_kwh_per_year": 424.27
+    }
+  },
+  "fade_reduction_pct_vs_standard": {
+    "test_unseen_weather": {
+      "sabil_hand_set": 7.8,
+      "sabil_tuned": 10.6
+    },
+    "full_2014_2023": {
+      "sabil_hand_set": 7.9,
+      "sabil_tuned": 10.8
+    }
+  },
+  "tuned_wins_on_unseen_weather": false,
+  "history": [
+    {
+      "trial": 0,
+      "value": 0.7663,
+      "capacity_after_10y": 0.7663,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 1.2,
+      "energy_served_kwh_per_year": 848.99
+    },
+    {
+      "trial": 1,
+      "value": 0.7415,
+      "capacity_after_10y": 0.7475,
+      "critical_hours_lost": 7,
+      "critical_hours_lost_worst_year": 7,
+      "energy_unmet_kwh_per_year": 0.24,
+      "energy_served_kwh_per_year": 849.95
+    },
+    {
+      "trial": 2,
+      "value": 0.7535,
+      "capacity_after_10y": 0.7535,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 1.54,
+      "energy_served_kwh_per_year": 848.65
+    },
+    {
+      "trial": 3,
+      "value": 0.7594,
+      "capacity_after_10y": 0.7654,
+      "critical_hours_lost": 7,
+      "critical_hours_lost_worst_year": 7,
+      "energy_unmet_kwh_per_year": 1.26,
+      "energy_served_kwh_per_year": 848.92
+    },
+    {
+      "trial": 4,
+      "value": 0.7515,
+      "capacity_after_10y": 0.7535,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 0.25,
+      "energy_served_kwh_per_year": 849.94
+    },
+    {
+      "trial": 5,
+      "value": 0.747,
+      "capacity_after_10y": 0.753,
+      "critical_hours_lost": 7,
+      "critical_hours_lost_worst_year": 7,
+      "energy_unmet_kwh_per_year": 0.21,
+      "energy_served_kwh_per_year": 849.97
+    },
+    {
+      "trial": 6,
+      "value": 0.7513,
+      "capacity_after_10y": 0.7513,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.75,
+      "energy_served_kwh_per_year": 849.43
+    },
+    {
+      "trial": 7,
+      "value": 0.7587,
+      "capacity_after_10y": 0.7742,
+      "critical_hours_lost": 10,
+      "critical_hours_lost_worst_year": 8,
+      "energy_unmet_kwh_per_year": 1.77,
+      "energy_served_kwh_per_year": 848.41
+    },
+    {
+      "trial": 8,
+      "value": 0.7516,
+      "capacity_after_10y": 0.7536,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 0.29,
+      "energy_served_kwh_per_year": 849.9
+    },
+    {
+      "trial": 9,
+      "value": 0.7483,
+      "capacity_after_10y": 0.7483,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 1.63,
+      "energy_served_kwh_per_year": 848.56
+    },
+    {
+      "trial": 10,
+      "value": 0.7489,
+      "capacity_after_10y": 0.7489,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.76,
+      "energy_served_kwh_per_year": 849.42
+    },
+    {
+      "trial": 11,
+      "value": 0.7569,
+      "capacity_after_10y": 0.7609,
+      "critical_hours_lost": 6,
+      "critical_hours_lost_worst_year": 6,
+      "energy_unmet_kwh_per_year": 0.24,
+      "energy_served_kwh_per_year": 849.94
+    },
+    {
+      "trial": 12,
+      "value": 0.7573,
+      "capacity_after_10y": 0.7633,
+      "critical_hours_lost": 7,
+      "critical_hours_lost_worst_year": 7,
+      "energy_unmet_kwh_per_year": 1.0,
+      "energy_served_kwh_per_year": 849.19
+    },
+    {
+      "trial": 13,
+      "value": 0.6597,
+      "capacity_after_10y": 0.7812,
+      "critical_hours_lost": 38,
+      "critical_hours_lost_worst_year": 16,
+      "energy_unmet_kwh_per_year": 2.77,
+      "energy_served_kwh_per_year": 847.42
+    },
+    {
+      "trial": 14,
+      "value": 0.7448,
+      "capacity_after_10y": 0.7468,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 1.42,
+      "energy_served_kwh_per_year": 848.76
+    },
+    {
+      "trial": 15,
+      "value": 0.5775,
+      "capacity_after_10y": 0.7895,
+      "critical_hours_lost": 68,
+      "critical_hours_lost_worst_year": 24,
+      "energy_unmet_kwh_per_year": 3.38,
+      "energy_served_kwh_per_year": 846.81
+    },
+    {
+      "trial": 16,
+      "value": 0.7537,
+      "capacity_after_10y": 0.7537,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.58,
+      "energy_served_kwh_per_year": 849.6
+    },
+    {
+      "trial": 17,
+      "value": 0.7548,
+      "capacity_after_10y": 0.7568,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 0.43,
+      "energy_served_kwh_per_year": 849.75
+    },
+    {
+      "trial": 18,
+      "value": 0.7505,
+      "capacity_after_10y": 0.7505,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 1.02,
+      "energy_served_kwh_per_year": 849.17
+    },
+    {
+      "trial": 19,
+      "value": 0.76,
+      "capacity_after_10y": 0.77,
+      "critical_hours_lost": 9,
+      "critical_hours_lost_worst_year": 9,
+      "energy_unmet_kwh_per_year": 1.41,
+      "energy_served_kwh_per_year": 848.78
+    },
+    {
+      "trial": 20,
+      "value": 0.7636,
+      "capacity_after_10y": 0.7636,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 1.27,
+      "energy_served_kwh_per_year": 848.92
+    },
+    {
+      "trial": 21,
+      "value": 0.7535,
+      "capacity_after_10y": 0.7535,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.83,
+      "energy_served_kwh_per_year": 849.36
+    },
+    {
+      "trial": 22,
+      "value": 0.7653,
+      "capacity_after_10y": 0.7713,
+      "critical_hours_lost": 7,
+      "critical_hours_lost_worst_year": 7,
+      "energy_unmet_kwh_per_year": 1.62,
+      "energy_served_kwh_per_year": 848.56
+    },
+    {
+      "trial": 23,
+      "value": 0.7428,
+      "capacity_after_10y": 0.7793,
+      "critical_hours_lost": 14,
+      "critical_hours_lost_worst_year": 12,
+      "energy_unmet_kwh_per_year": 2.03,
+      "energy_served_kwh_per_year": 848.16
+    },
+    {
+      "trial": 24,
+      "value": 0.7584,
+      "capacity_after_10y": 0.7584,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 1.19,
+      "energy_served_kwh_per_year": 848.99
+    },
+    {
+      "trial": 25,
+      "value": 0.7547,
+      "capacity_after_10y": 0.7547,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.93,
+      "energy_served_kwh_per_year": 849.25
+    },
+    {
+      "trial": 26,
+      "value": 0.6507000000000001,
+      "capacity_after_10y": 0.7822,
+      "critical_hours_lost": 48,
+      "critical_hours_lost_worst_year": 27,
+      "energy_unmet_kwh_per_year": 2.57,
+      "energy_served_kwh_per_year": 847.62
+    },
+    {
+      "trial": 27,
+      "value": 0.761,
+      "capacity_after_10y": 0.761,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.86,
+      "energy_served_kwh_per_year": 849.32
+    },
+    {
+      "trial": 28,
+      "value": 0.7544000000000001,
+      "capacity_after_10y": 0.7729,
+      "critical_hours_lost": 8,
+      "critical_hours_lost_worst_year": 8,
+      "energy_unmet_kwh_per_year": 1.91,
+      "energy_served_kwh_per_year": 848.27
+    },
+    {
+      "trial": 29,
+      "value": 0.6059,
+      "capacity_after_10y": 0.7874,
+      "critical_hours_lost": 67,
+      "critical_hours_lost_worst_year": 30,
+      "energy_unmet_kwh_per_year": 2.81,
+      "energy_served_kwh_per_year": 847.37
+    },
+    {
+      "trial": 30,
+      "value": 0.7673,
+      "capacity_after_10y": 0.7733,
+      "critical_hours_lost": 7,
+      "critical_hours_lost_worst_year": 7,
+      "energy_unmet_kwh_per_year": 1.49,
+      "energy_served_kwh_per_year": 848.7
+    },
+    {
+      "trial": 31,
+      "value": 0.7524,
+      "capacity_after_10y": 0.7524,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.41,
+      "energy_served_kwh_per_year": 849.78
+    },
+    {
+      "trial": 32,
+      "value": 0.7629,
+      "capacity_after_10y": 0.7689,
+      "critical_hours_lost": 7,
+      "critical_hours_lost_worst_year": 7,
+      "energy_unmet_kwh_per_year": 1.18,
+      "energy_served_kwh_per_year": 849.01
+    },
+    {
+      "trial": 33,
+      "value": 0.7609,
+      "capacity_after_10y": 0.7709,
+      "critical_hours_lost": 9,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 1.26,
+      "energy_served_kwh_per_year": 848.92
+    },
+    {
+      "trial": 34,
+      "value": 0.7596999999999999,
+      "capacity_after_10y": 0.7757,
+      "critical_hours_lost": 12,
+      "critical_hours_lost_worst_year": 8,
+      "energy_unmet_kwh_per_year": 1.62,
+      "energy_served_kwh_per_year": 848.56
+    },
+    {
+      "trial": 35,
+      "value": 0.7659,
+      "capacity_after_10y": 0.7699,
+      "critical_hours_lost": 6,
+      "critical_hours_lost_worst_year": 6,
+      "energy_unmet_kwh_per_year": 1.62,
+      "energy_served_kwh_per_year": 848.57
+    },
+    {
+      "trial": 36,
+      "value": 0.7644,
+      "capacity_after_10y": 0.7644,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 1.11,
+      "energy_served_kwh_per_year": 849.08
+    },
+    {
+      "trial": 37,
+      "value": 0.751,
+      "capacity_after_10y": 0.751,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.77,
+      "energy_served_kwh_per_year": 849.41
+    },
+    {
+      "trial": 38,
+      "value": 0.7664,
+      "capacity_after_10y": 0.7684,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 1.12,
+      "energy_served_kwh_per_year": 849.07
+    },
+    {
+      "trial": 39,
+      "value": 0.7523,
+      "capacity_after_10y": 0.7523,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.44,
+      "energy_served_kwh_per_year": 849.74
+    },
+    {
+      "trial": 40,
+      "value": 0.7656,
+      "capacity_after_10y": 0.7656,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 1.3,
+      "energy_served_kwh_per_year": 848.89
+    },
+    {
+      "trial": 41,
+      "value": 0.7691,
+      "capacity_after_10y": 0.7711,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 1.46,
+      "energy_served_kwh_per_year": 848.73
+    },
+    {
+      "trial": 42,
+      "value": 0.7588,
+      "capacity_after_10y": 0.7588,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.55,
+      "energy_served_kwh_per_year": 849.64
+    },
+    {
+      "trial": 43,
+      "value": 0.7673,
+      "capacity_after_10y": 0.7693,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 1.3,
+      "energy_served_kwh_per_year": 848.88
+    },
+    {
+      "trial": 44,
+      "value": 0.7642,
+      "capacity_after_10y": 0.7662,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 0.96,
+      "energy_served_kwh_per_year": 849.23
+    },
+    {
+      "trial": 45,
+      "value": 0.7652,
+      "capacity_after_10y": 0.7712,
+      "critical_hours_lost": 7,
+      "critical_hours_lost_worst_year": 7,
+      "energy_unmet_kwh_per_year": 1.3,
+      "energy_served_kwh_per_year": 848.89
+    },
+    {
+      "trial": 46,
+      "value": 0.7219,
+      "capacity_after_10y": 0.7799,
+      "critical_hours_lost": 27,
+      "critical_hours_lost_worst_year": 14,
+      "energy_unmet_kwh_per_year": 1.94,
+      "energy_served_kwh_per_year": 848.25
+    },
+    {
+      "trial": 47,
+      "value": 0.7575,
+      "capacity_after_10y": 0.7575,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.44,
+      "energy_served_kwh_per_year": 849.75
+    },
+    {
+      "trial": 48,
+      "value": 0.7507,
+      "capacity_after_10y": 0.7747,
+      "critical_hours_lost": 16,
+      "critical_hours_lost_worst_year": 10,
+      "energy_unmet_kwh_per_year": 1.6,
+      "energy_served_kwh_per_year": 848.59
+    },
+    {
+      "trial": 49,
+      "value": 0.7624,
+      "capacity_after_10y": 0.7764,
+      "critical_hours_lost": 11,
+      "critical_hours_lost_worst_year": 7,
+      "energy_unmet_kwh_per_year": 1.63,
+      "energy_served_kwh_per_year": 848.56
+    },
+    {
+      "trial": 50,
+      "value": 0.764,
+      "capacity_after_10y": 0.766,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 0.51,
+      "energy_served_kwh_per_year": 849.67
+    },
+    {
+      "trial": 51,
+      "value": 0.7471,
+      "capacity_after_10y": 0.7766,
+      "critical_hours_lost": 18,
+      "critical_hours_lost_worst_year": 10,
+      "energy_unmet_kwh_per_year": 1.73,
+      "energy_served_kwh_per_year": 848.46
+    },
+    {
+      "trial": 52,
+      "value": 0.7683,
+      "capacity_after_10y": 0.7683,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 1.42,
+      "energy_served_kwh_per_year": 848.76
+    },
+    {
+      "trial": 53,
+      "value": 0.7559,
+      "capacity_after_10y": 0.7559,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.5,
+      "energy_served_kwh_per_year": 849.69
+    },
+    {
+      "trial": 54,
+      "value": 0.7631,
+      "capacity_after_10y": 0.7631,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.6,
+      "energy_served_kwh_per_year": 849.59
+    },
+    {
+      "trial": 55,
+      "value": 0.7676,
+      "capacity_after_10y": 0.7696,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 0.99,
+      "energy_served_kwh_per_year": 849.2
+    },
+    {
+      "trial": 56,
+      "value": 0.7661,
+      "capacity_after_10y": 0.7661,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.92,
+      "energy_served_kwh_per_year": 849.26
+    },
+    {
+      "trial": 57,
+      "value": 0.7578,
+      "capacity_after_10y": 0.7598,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 0.28,
+      "energy_served_kwh_per_year": 849.9
+    },
+    {
+      "trial": 58,
+      "value": 0.6971999999999999,
+      "capacity_after_10y": 0.7777,
+      "critical_hours_lost": 40,
+      "critical_hours_lost_worst_year": 24,
+      "energy_unmet_kwh_per_year": 1.87,
+      "energy_served_kwh_per_year": 848.31
+    },
+    {
+      "trial": 59,
+      "value": 0.7522,
+      "capacity_after_10y": 0.7762,
+      "critical_hours_lost": 16,
+      "critical_hours_lost_worst_year": 10,
+      "energy_unmet_kwh_per_year": 1.61,
+      "energy_served_kwh_per_year": 848.57
+    },
+    {
+      "trial": 60,
+      "value": 0.7601,
+      "capacity_after_10y": 0.7621,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 0.33,
+      "energy_served_kwh_per_year": 849.86
+    },
+    {
+      "trial": 61,
+      "value": 0.7582,
+      "capacity_after_10y": 0.7582,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.37,
+      "energy_served_kwh_per_year": 849.81
+    },
+    {
+      "trial": 62,
+      "value": 0.7691,
+      "capacity_after_10y": 0.7711,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 1.33,
+      "energy_served_kwh_per_year": 848.85
+    },
+    {
+      "trial": 63,
+      "value": 0.7581,
+      "capacity_after_10y": 0.7581,
+      "critical_hours_lost": 4,
+      "critical_hours_lost_worst_year": 4,
+      "energy_unmet_kwh_per_year": 0.36,
+      "energy_served_kwh_per_year": 849.83
+    },
+    {
+      "trial": 64,
+      "value": 0.753,
+      "capacity_after_10y": 0.779,
+      "critical_hours_lost": 17,
+      "critical_hours_lost_worst_year": 11,
+      "energy_unmet_kwh_per_year": 1.67,
+      "energy_served_kwh_per_year": 848.51
+    },
+    {
+      "trial": 65,
+      "value": 0.7704,
+      "capacity_after_10y": 0.7724,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 1.47,
+      "energy_served_kwh_per_year": 848.72
+    },
+    {
+      "trial": 66,
+      "value": 0.7581,
+      "capacity_after_10y": 0.7601,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 0.32,
+      "energy_served_kwh_per_year": 849.86
+    },
+    {
+      "trial": 67,
+      "value": 0.7256999999999999,
+      "capacity_after_10y": 0.7817,
+      "critical_hours_lost": 22,
+      "critical_hours_lost_worst_year": 12,
+      "energy_unmet_kwh_per_year": 2.1,
+      "energy_served_kwh_per_year": 848.08
+    },
+    {
+      "trial": 68,
+      "value": 0.7395999999999999,
+      "capacity_after_10y": 0.7786,
+      "critical_hours_lost": 18,
+      "critical_hours_lost_worst_year": 12,
+      "energy_unmet_kwh_per_year": 1.92,
+      "energy_served_kwh_per_year": 848.26
+    },
+    {
+      "trial": 69,
+      "value": 0.7629,
+      "capacity_after_10y": 0.7649,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 0.28,
+      "energy_served_kwh_per_year": 849.91
+    },
+    {
+      "trial": 70,
+      "value": 0.7674,
+      "capacity_after_10y": 0.7694,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 0.62,
+      "energy_served_kwh_per_year": 849.56
+    },
+    {
+      "trial": 71,
+      "value": 0.7708,
+      "capacity_after_10y": 0.7768,
+      "critical_hours_lost": 7,
+      "critical_hours_lost_worst_year": 7,
+      "energy_unmet_kwh_per_year": 1.59,
+      "energy_served_kwh_per_year": 848.6
+    },
+    {
+      "trial": 72,
+      "value": 0.7696,
+      "capacity_after_10y": 0.7716,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 1.56,
+      "energy_served_kwh_per_year": 848.62
+    },
+    {
+      "trial": 73,
+      "value": 0.7715,
+      "capacity_after_10y": 0.7735,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 1.59,
+      "energy_served_kwh_per_year": 848.6
+    },
+    {
+      "trial": 74,
+      "value": 0.7691,
+      "capacity_after_10y": 0.7711,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 1.46,
+      "energy_served_kwh_per_year": 848.72
+    },
+    {
+      "trial": 75,
+      "value": 0.7718,
+      "capacity_after_10y": 0.7738,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 1.48,
+      "energy_served_kwh_per_year": 848.7
+    },
+    {
+      "trial": 76,
+      "value": 0.7666,
+      "capacity_after_10y": 0.7686,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 1.29,
+      "energy_served_kwh_per_year": 848.9
+    },
+    {
+      "trial": 77,
+      "value": 0.7688,
+      "capacity_after_10y": 0.7708,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 0.96,
+      "energy_served_kwh_per_year": 849.22
+    },
+    {
+      "trial": 78,
+      "value": 0.7494999999999999,
+      "capacity_after_10y": 0.7795,
+      "critical_hours_lost": 14,
+      "critical_hours_lost_worst_year": 10,
+      "energy_unmet_kwh_per_year": 1.9,
+      "energy_served_kwh_per_year": 848.29
+    },
+    {
+      "trial": 79,
+      "value": 0.7709,
+      "capacity_after_10y": 0.7769,
+      "critical_hours_lost": 5,
+      "critical_hours_lost_worst_year": 5,
+      "energy_unmet_kwh_per_year": 1.78,
+      "energy_served_kwh_per_year": 848.41
+    }
+  ],
+  "runtime_s": 115.7
+}

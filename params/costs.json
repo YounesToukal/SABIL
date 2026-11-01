@@ -1,0 +1,78 @@
+{
+  "_about": "Cost inputs for src/cost_model.py (owner: Youcef). Prices in USD unless the key says NGN. Each value has a source or is marked as an assumption with the range tested in the sensitivity analysis. The simulation itself reads only generator_l_per_kwh.",
+  "currency": {
+    "ngn_per_usd": 1332,
+    "source": "CBN NFEM official rate, mid-October 2026: N1,331-1,333/USD (techeconomy.ng and withinnigeria.com daily reports, 8-19 Oct 2026). Parallel market ~N1,360-1,380."
+  },
+  "kit": {
+    "pv_usd_per_wp": 0.20,
+    "pv_mounting_usd": 25,
+    "battery_usd_per_kwh": 180,
+    "charge_controller_usd": 40,
+    "meter_comms_usd": 25,
+    "sabil_controller_extra_usd": 12,
+    "wiring_protection_usd": 30,
+    "install_logistics_usd": 45,
+    "customer_acquisition_usd": 35,
+    "sources": {
+      "pv": "PVPRO, Solar equipment prices Lagos, 20 Sep 2026: 590 W mono panels N140,000-145,000 (~N240/W = $0.18/W at N1,332/USD); +10% transport to Maiduguri -> $0.20/W. Mounting: assumption.",
+      "battery": "BloombergNEF battery price survey, Dec 2025: LFP packs $81/kWh on average, stationary storage $70/kWh (large volumes). Small 25.6 V home modules with BMS and casing cost more: Lagos retail EasyWay 2.4 kWh 24 V LiFePO4 N855,500 = $268/kWh (PVPRO, Sep 2026). Base $180/kWh = operator buying in bulk (assumption); range $120-268 tested.",
+      "charge_controller": "Assumption: 24 V, 20 A MPPT charge controller at distributor price.",
+      "meter_comms": "Assumption: pay-per-kWh unit (energy meter, GSM modem, circuit relay). Needed by both kits, so it does not favour SABIL.",
+      "sabil_controller_extra": "Assumption: what the SABIL controller adds to a standard pay-per-kWh unit: two temperature sensors, a second relay to separate essential circuits, a larger microcontroller, assembly. Firmware has no per-unit cost.",
+      "wiring_install_acquisition": "Assumptions for Maiduguri (security and transport premium included); range tested through the capital cost."
+    }
+  },
+  "lifetimes_years": {
+    "pv_and_mounting": 20,
+    "electronics": 10,
+    "wiring_install_acquisition": 20,
+    "battery": "from the simulation: years until the battery holds 80% of its capacity (results/summary_*.json)",
+    "source": "PV module warranties are 20-25 years; 10 years for power electronics is a common planning value (assumption)."
+  },
+  "opex": {
+    "maintenance_usd_per_year": 10,
+    "data_platform_usd_per_year": 4,
+    "insurance_theft_frac_of_capex_per_year": 0.02,
+    "source": "Assumptions: one agent visit a year and remote monitoring over GSM; theft and damage provision of 2% of the kit's value a year."
+  },
+  "revenue_losses": {
+    "collection_fee_frac": 0.02,
+    "bad_debt_frac": 0.10,
+    "source": "Assumptions: mobile-money and agent fees ~2% of payments; 10% of billed energy never paid (range 5-20% tested). Pay-per-kWh limits the loss: when credit runs out only the essential circuits stay on."
+  },
+  "finance": {
+    "real_discount_rate": 0.12,
+    "horizon_years": 20,
+    "source": "Assumption: real cost of capital of an off-grid solar company in Nigeria in USD terms; 8% (concessional finance, e.g. backed by DARES) to 18% tested."
+  },
+  "subsidy": {
+    "dares_grant_usd_per_system": 84,
+    "source": "World Bank DARES Project Appraisal Document (2023): US$230 million of IDA grants for stand-alone solar for basic electrification, for 2.75 million quality-certified solar home systems -> ~$84 per system on average (our division; the real grant depends on the system tier and location). Only households in the National Social Register are eligible for the end-user price reduction."
+  },
+  "fuel": {
+    "petrol_ngn_per_l_borno": 1430,
+    "diesel_ngn_per_l": 1648,
+    "small_generator_l_per_kwh": 2.0,
+    "sources": {
+      "petrol": "NNPC retail prices by state, 9 Oct 2026 (Legit.ng): Borno N1,430/L. NBS PMS Price Watch, March 2026: Borno N1,375/L.",
+      "diesel": "NBS, March 2026: average retail diesel (AGO) price N1,648/L (Businesspost.ng).",
+      "small_generator": "A2EI field measurements (Herzog, Schaale and Chacon, SKGS project update, 2022): small generators in Nigerian homes and shops run at ~22% of their rated load and use ~2 L of fuel per kWh."
+    }
+  },
+  "generator_l_per_kwh": 0.5,
+  "generator_l_per_kwh_source": "Used by the simulation for 'diesel avoided': a generator at a good load factor (~0.5 L/kWh). Deliberately conservative: small household generators use ~2 L/kWh (A2EI), so real fuel avoided is likely up to 4x higher.",
+  "income": {
+    "minimum_wage_ngn_per_month": 70000,
+    "maiduguri_civil_servant_ngn_per_month": 50000,
+    "sources": "National Minimum Wage Act 2024: N70,000/month. HumAngle, 'The light is back on in Nigeria's Maiduguri, but residents can't afford electricity': a civil servant earning ~N50,000/month."
+  },
+  "sensitivity": {
+    "battery_usd_per_kwh": [120, 268],
+    "real_discount_rate": [0.08, 0.18],
+    "bad_debt_frac": [0.05, 0.20],
+    "pv_usd_per_wp": [0.15, 0.30],
+    "capex_other_scale": [0.8, 1.3],
+    "energy_scale": [0.8, 1.2]
+  }
+}

@@ -1,0 +1,205 @@
+{
+  "kit": {
+    "pv_wp": 400.0,
+    "battery_kwh": 1.92
+  },
+  "inputs_used": {
+    "ngn_per_usd": 1332,
+    "battery_life_years": {
+      "baseline": 6.24,
+      "smart": 7.51
+    },
+    "kwh_delivered_per_year": {
+      "baseline": 424.77,
+      "smart": 424.42
+    },
+    "real_discount_rate": 0.12,
+    "horizon_years": 20
+  },
+  "standard": {
+    "capex_usd": 625.6,
+    "capex_items_usd": {
+      "pv_and_mounting": 105.0,
+      "battery": 345.6,
+      "electronics": 65.0,
+      "wiring_install_acquisition": 110
+    },
+    "yearly_cost_usd": 148.6047,
+    "yearly_items_usd": {
+      "pv_and_mounting": 14.0573,
+      "battery": 81.8048,
+      "electronics": 11.504,
+      "wiring_install_acquisition": 14.7267,
+      "running": 26.512
+    },
+    "cost_usd_per_kwh": 0.3498,
+    "tariff_usd_per_kwh": 0.3976
+  },
+  "sabil": {
+    "capex_usd": 637.6,
+    "capex_items_usd": {
+      "pv_and_mounting": 105.0,
+      "battery": 345.6,
+      "electronics": 77,
+      "wiring_install_acquisition": 110
+    },
+    "yearly_cost_usd": 141.5338,
+    "yearly_items_usd": {
+      "pv_and_mounting": 14.0573,
+      "battery": 72.3701,
+      "electronics": 13.6278,
+      "wiring_install_acquisition": 14.7267,
+      "running": 26.752
+    },
+    "cost_usd_per_kwh": 0.3335,
+    "tariff_usd_per_kwh": 0.3789
+  },
+  "sabil_with_dares_grant": {
+    "capex_usd": 637.6,
+    "capex_items_usd": {
+      "pv_and_mounting": 105.0,
+      "battery": 345.6,
+      "electronics": 77,
+      "wiring_install_acquisition": 110
+    },
+    "yearly_cost_usd": 130.288,
+    "yearly_items_usd": {
+      "pv_and_mounting": 14.0573,
+      "battery": 72.3701,
+      "electronics": 13.6278,
+      "wiring_install_acquisition": 14.7267,
+      "running": 26.752,
+      "grant": -11.2458
+    },
+    "cost_usd_per_kwh": 0.307,
+    "tariff_usd_per_kwh": 0.3488
+  },
+  "tariff_ngn_per_kwh": {
+    "standard": 529.5418,
+    "sabil": 504.7612,
+    "sabil_with_dares_grant": 464.6545
+  },
+  "family": {
+    "kwh_per_month": 35.3683,
+    "bill_ngn_per_month": 17852.5619,
+    "bill_ngn_per_month_with_dares_grant": 16434.0554,
+    "essentials_only_kwh_per_month": 28.9567,
+    "essentials_only_bill_ngn_per_month": 14616.2015,
+    "lights_phones_fans_kwh_per_month": 10.7067,
+    "lights_phones_fans_bill_ngn_per_month": 5404.3098,
+    "share_of_minimum_wage": 0.255,
+    "essentials_share_of_minimum_wage": 0.2088,
+    "note": "Tariff set so that a home using the designed load (~1.16 kWh/day) pays for its kit. Essentials only = lights, security light, phone charging, night fan and fridge."
+  },
+  "petrol_generator": {
+    "best_case": {
+      "l_per_kwh": 0.5,
+      "fuel_ngn_per_kwh": 715.0,
+      "fuel_ngn_per_month_same_energy": 25288.3583,
+      "litres_avoided_per_year": 212.21,
+      "sabil_cheaper_by_frac": 0.294
+    },
+    "typical_small_set": {
+      "l_per_kwh": 2.0,
+      "fuel_ngn_per_kwh": 2860.0,
+      "fuel_ngn_per_month_same_energy": 101153.4333,
+      "litres_avoided_per_year": 848.84,
+      "sabil_cheaper_by_frac": 0.8235
+    }
+  },
+  "controller_value": {
+    "extra_hardware_usd": 12,
+    "yearly_saving_usd_per_home": 7.0709,
+    "battery_yearly_saving_usd_per_home": 9.4347,
+    "payback_of_extra_hardware_years": 1.2719,
+    "npv_usd_per_home": 52.8155,
+    "npv_usd_per_1000_homes": 52815.5055,
+    "battery_modules_per_home_over_horizon": {
+      "standard": 3.2051,
+      "sabil": 2.6631
+    },
+    "battery_modules_avoided_per_1000_homes": 542.0124,
+    "battery_waste_avoided_t_per_1000_homes": 9.7562,
+    "cost_per_kwh_reduction_frac": 0.0468
+  },
+  "sensitivity_sabil_tariff": [
+    {
+      "input": "Battery price ($/kWh)",
+      "values": [
+        120,
+        268
+      ],
+      "tariff_ngn_per_kwh": [
+        410.5116,
+        642.994
+      ]
+    },
+    {
+      "input": "Cost of capital (real)",
+      "values": [
+        0.08,
+        0.18
+      ],
+      "tariff_ngn_per_kwh": [
+        439.0536,
+        611.5807
+      ]
+    },
+    {
+      "input": "Unpaid bills",
+      "values": [
+        0.05,
+        0.2
+      ],
+      "tariff_ngn_per_kwh": [
+        477.6235,
+        569.4742
+      ]
+    },
+    {
+      "input": "Other kit and install costs (x)",
+      "values": [
+        0.8,
+        1.3
+      ],
+      "tariff_ngn_per_kwh": [
+        480.8112,
+        540.6862
+      ]
+    },
+    {
+      "input": "PV price ($/Wp)",
+      "values": [
+        0.15,
+        0.3
+      ],
+      "tariff_ngn_per_kwh": [
+        493.7854,
+        526.7127
+      ]
+    },
+    {
+      "input": "Energy used (x design load)",
+      "values": [
+        0.8,
+        1.2
+      ],
+      "tariff_ngn_per_kwh": [
+        630.9515,
+        420.6343
+      ]
+    },
+    {
+      "input": "Battery ageing model",
+      "values": [
+        "TU Munich (base)",
+        "NREL prismatic"
+      ],
+      "tariff_ngn_per_kwh": [
+        504.7612,
+        408.4126
+      ]
+    }
+  ],
+  "sources": "params/costs.json"
+}
