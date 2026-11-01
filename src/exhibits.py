@@ -338,7 +338,7 @@ def tuning(titled=True):
     a2.set_ylim(74, 78.2)
     a2.set_xlabel("Hours without essential power over 10 years")
     a2.set_title("Test: 2019-2023 weather, never seen by the search", fontsize=11, loc="left", color=INK)
-    frame(fig, "Tuned rules gain battery capacity only by losing essential hours on unseen weather, so we keep the hand-set rules",
+    frame(fig, "Tuned rules buy battery life with lost essential hours on unseen weather, so we keep ours",
           "Bayesian optimization (Optuna TPE, seed 2026) of the six controller settings; up and left is better",
           "Source: src/tune_controller.py, results/controller_tuning.json. Training and test weather are each played twice "
           "to make 10 years of battery ageing.", titled)
