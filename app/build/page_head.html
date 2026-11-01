@@ -9,25 +9,25 @@
   --indigo: #1F2B5B; --amber: #F0A13A; --cream: #FBF6EE; --soft-indigo: #5E6787;
   --bg: #FBF6EE; --surface: #FFFFFF; --sunk: #F4EEE3; --ink: #1F2B5B; --ink-2: #5E6787; --line: #E5DCCB;
   --bar: #1F2B5B; --bar-ink: #FFFFFF; --bar-ink-2: #C3C8DD; --bar-line: #34407A;
-  --sun: #F0A13A; --sun-fill: rgba(240, 161, 58, .30); --sun-band: rgba(240, 161, 58, .16);
+  --sun: #F0A13A; --sun-line: #B86B0B; --sun-fill: rgba(240, 161, 58, .30); --sun-band: rgba(240, 161, 58, .16);
   --store: #1F2B5B; --use: #5E6787; --night: rgba(31, 43, 91, .06);
   --ok: #2B7350; --ok-bg: #E3F1E8; --alert: #B3261E; --alert-bg: #FBE6E3; --watch-bg: #ECEEF6;
   --font-display: "Sora", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
-  --s-1: .8125rem; --s0: .9375rem; --s1: 1.0625rem; --s2: 1.375rem; --s3: 1.875rem; --s4: 2.75rem;
+  --s-1: .875rem; --s0: 1rem; --s1: 1.0625rem; --s2: 1.375rem; --s3: 1.875rem; --s4: 2.75rem;
   --r-sm: 6px; --r-md: 12px;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #111733; --surface: #19214A; --sunk: #141B3E; --ink: #F3EEE4; --ink-2: #AEB4CF; --line: #2B3567;
   --bar: #0B1029; --bar-ink: #FFFFFF; --bar-ink-2: #AEB4CF; --bar-line: #232C5C;
-  --sun-fill: rgba(240, 161, 58, .34); --sun-band: rgba(240, 161, 58, .18);
+  --sun-line: #F0A13A; --sun-fill: rgba(240, 161, 58, .34); --sun-band: rgba(240, 161, 58, .18);
   --store: #D6DBF2; --use: #9AA2C6; --night: rgba(0, 0, 0, .22);
   --ok: #6FCB98; --ok-bg: #173A33; --alert: #FF8A80; --alert-bg: #4A1E2A; --watch-bg: #232C5C;
   color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #111733; --surface: #19214A; --sunk: #141B3E; --ink: #F3EEE4; --ink-2: #AEB4CF; --line: #2B3567;
   --bar: #0B1029; --bar-ink: #FFFFFF; --bar-ink-2: #AEB4CF; --bar-line: #232C5C;
-  --sun-fill: rgba(240, 161, 58, .34); --sun-band: rgba(240, 161, 58, .18);
+  --sun-line: #F0A13A; --sun-fill: rgba(240, 161, 58, .34); --sun-band: rgba(240, 161, 58, .18);
   --store: #D6DBF2; --use: #9AA2C6; --night: rgba(0, 0, 0, .22);
   --ok: #6FCB98; --ok-bg: #173A33; --alert: #FF8A80; --alert-bg: #4A1E2A; --watch-bg: #232C5C;
   color-scheme: dark; }
@@ -54,7 +54,7 @@ button, select, input, textarea { font: inherit; color: inherit; }
 .tabs a { color: var(--bar-ink-2); text-decoration: none; padding: 6px 16px; border-radius: 999px; font-family: var(--font-display); font-size: var(--s0); }
 .tabs a[aria-current="page"] { background: var(--bar-ink); color: #1F2B5B; }
 .bar .home-pick { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--bar-ink-2); font-size: var(--s-1); }
-.bar select { background: transparent; border: 1px solid var(--bar-line); color: var(--bar-ink); border-radius: var(--r-sm); padding: 5px 8px; }
+.bar select { min-height: 40px; background: transparent; border: 1px solid var(--bar-line); color: var(--bar-ink); border-radius: var(--r-sm); padding: 5px 8px; }
 .bar select option { color: #1F2B5B; background: #FFFFFF; }
 
 /* player */
@@ -63,12 +63,12 @@ button, select, input, textarea { font: inherit; color: inherit; }
 .clock { display: grid; line-height: 1.25; margin-right: auto; }
 .clock .when { font-family: var(--font-display); font-weight: 600; font-size: var(--s1); font-variant-numeric: tabular-nums; }
 .clock .src-note { font-size: var(--s-1); color: var(--ink-2); }
-.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--ink); background: var(--ink); color: var(--bg); border-radius: 999px; padding: 7px 16px; cursor: pointer; font-family: var(--font-display); font-size: var(--s-1); font-weight: 600; white-space: nowrap; }
+.btn { min-height: 40px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--ink); background: var(--ink); color: var(--bg); border-radius: 999px; padding: 7px 16px; cursor: pointer; font-family: var(--font-display); font-size: var(--s-1); font-weight: 600; white-space: nowrap; }
 .btn.ghost { background: transparent; color: var(--ink); }
 .btn svg { width: 14px; height: 14px; flex: none; }
 .btn[aria-expanded="true"] svg.chev { transform: rotate(180deg); }
 .ctl { display: inline-flex; align-items: center; gap: 8px; font-size: var(--s-1); color: var(--ink-2); }
-.ctl select { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 5px 8px; color: var(--ink); }
+.ctl select { min-height: 40px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 5px 8px; color: var(--ink); }
 .srcpanel { width: 100%; display: grid; gap: 14px; padding: 6px 0 8px; }
 .choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 @media (max-width: 760px) { .choices { grid-template-columns: 1fr; } }
@@ -116,7 +116,7 @@ main { padding-block: 22px 48px; display: grid; gap: 20px; }
 .strip-cap { display: flex; gap: 8px 18px; flex-wrap: wrap; font-size: var(--s-1); color: var(--ink-2); }
 .key { display: inline-flex; align-items: center; gap: 6px; }
 .key i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; }
-.key i.sun { background: var(--sun-fill); border: 1.5px solid var(--sun); }
+.key i.sun { background: var(--sun-fill); border: 1.5px solid var(--sun-line); }
 .key i.bat { height: 3px; background: var(--store); }
 .key i.res { height: 0; border-top: 2px dashed var(--ink-2); }
 .key i.use { height: 2px; background: var(--use); }
@@ -125,7 +125,7 @@ main { padding-block: 22px 48px; display: grid; gap: 20px; }
 @media (max-width: 900px) { .trio { grid-template-columns: 1fr; } }
 .stat .v { font-family: var(--font-display); font-weight: 600; font-size: var(--s3); font-variant-numeric: tabular-nums; line-height: 1.15; margin-top: 6px; }
 .stat .v small { font-size: var(--s1); font-weight: 400; color: var(--ink-2); }
-.stat p { color: var(--ink-2); font-size: var(--s-1); margin-top: 4px; }
+.stat p { color: var(--ink); font-size: var(--s-1); margin-top: 6px; }
 .stat .act { margin-top: 12px; }
 .circuits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 @media (max-width: 640px) { .circuits { grid-template-columns: 1fr; } }
@@ -163,13 +163,16 @@ main { padding-block: 22px 48px; display: grid; gap: 20px; }
 .rule h3 { font-size: var(--s0); }
 .rule .why { color: var(--ink); font-size: var(--s-1); }
 .rule details { font-size: var(--s-1); color: var(--ink-2); }
-.rule summary { cursor: pointer; color: var(--ink-2); width: max-content; }
+.rule summary { cursor: pointer; color: var(--ink-2); width: max-content; padding-block: 6px; min-height: 32px; }
 .rule details p { margin-top: 4px; max-width: 75ch; }
 .alerts { display: grid; gap: 10px; }
 .alert-row { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 12px; border-radius: var(--r-sm); background: var(--sunk); }
 .alert-row.bad { background: var(--alert-bg); }
 .alert-row b { font-family: var(--font-display); font-weight: 600; }
-.alert-row p { font-size: var(--s-1); color: var(--ink-2); }
+.alert-row p { font-size: var(--s-1); color: var(--ink); }
+.ico { display: inline-flex; width: 20px; height: 20px; margin-top: 1px; color: var(--ink); }
+.ico svg { width: 20px; height: 20px; }
+.ico.ok { color: var(--ok); } .ico.alert { color: var(--alert); }
 .alert-row .act { margin-top: 8px; }
 .try { display: flex; flex-wrap: wrap; gap: 8px; }
 .toggle[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
@@ -202,12 +205,12 @@ details.sect[open] > summary .more .closed, details.sect:not([open]) > summary .
 @media (max-width: 420px) { .facts { grid-template-columns: 1fr; } }
 .facts div { font-size: var(--s-1); color: var(--ink-2); }
 .facts b { display: block; font-family: var(--font-display); font-weight: 600; font-size: var(--s1); color: var(--ink); font-variant-numeric: tabular-nums; }
-details.model summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: var(--s-1); }
+details.model summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: var(--s-1); padding-block: 8px; }
 details.model ul { margin: 8px 0 0; padding-left: 18px; color: var(--ink-2); font-size: var(--s-1); display: grid; gap: 6px; max-width: 80ch; }
 
 /* fleet */
 .kpis { display: grid; gap: 12px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
-@media (max-width: 1000px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 1000px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kpi:last-child:nth-child(odd) { grid-column: 1 / -1; } }
 .kpi { padding: 16px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); min-width: 0; }
 .kpi .k { font-size: var(--s-1); color: var(--ink-2); }
 .kpi .v { font-family: var(--font-display); font-weight: 600; font-size: var(--s3); font-variant-numeric: tabular-nums; line-height: 1.2; margin-top: 4px; }
@@ -217,7 +220,10 @@ table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: var
 th { text-align: left; font-weight: 700; color: var(--ink-2); padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 td { padding: 10px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; vertical-align: middle; }
 td.n, th.n { text-align: right; white-space: nowrap; }
-td .id { font-family: var(--font-display); font-weight: 600; white-space: nowrap; }
+td .id, .rowbtn { font-family: var(--font-display); font-weight: 600; white-space: nowrap; }
+.rowbtn { all: unset; cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: var(--s0); display: inline-block; padding-block: 5px; min-height: 22px; white-space: nowrap; }
+.rowbtn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 4px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 td .area { color: var(--ink-2); }
 tbody tr { cursor: pointer; }
 tbody tr:hover td, tbody tr.sel td { background: var(--sunk); }
@@ -232,7 +238,7 @@ footer b { font-family: var(--font-display); color: var(--ink); font-weight: 600
 footer dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 10px 0 0; max-width: 90ch; }
 footer dt { font-weight: 700; color: var(--ink); }
 footer dd { margin: 0; }
-footer summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; color: var(--ink); }
+footer summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; color: var(--ink); padding-block: 8px; }
 @media (max-width: 640px) {
   .bar { position: static; }
   .bar .wrap { gap: 12px; }
@@ -386,6 +392,36 @@ footer summary { cursor: pointer; font-family: var(--font-display); font-weight:
             <button class="btn ghost toggle" type="button" id="tryDust" aria-pressed="false">Dusty panels</button>
           </div>
         </div>
+        <details class="box sect" id="healthSect">
+          <summary><div><h2>Battery health</h2><p class="sum-line" id="hSum"></p></div><span class="more"><span class="closed">Show details</span><span class="opened">Hide details</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></summary>
+          <div class="sect-body">
+            <div class="health">
+              <div><div class="big" id="hBig">–</div><div class="muted" style="font-size:var(--s-1)">of its capacity when new</div></div>
+              <div class="bars" id="hBars"></div>
+            </div>
+            <div class="facts" id="hFacts"></div>
+            <details class="model"><summary>How the health model works</summary><ul>
+              <li>Two kinds of wear add up. Time wear grows with heat and with a high charge level. Use wear grows with each charge and discharge, and more with deep ones.</li>
+              <li>Equations and coefficients: Naumann et al., J. Energy Storage 17 (2018) and J. Power Sources 451 (2020), for a lithium iron phosphate cell, checked identical to the authors' open-source code (SimSES, TU Munich).</li>
+              <li>The same equations run for a standard kit in the same home, with the same weather and use. The gap between the two is what SABIL adds.</li>
+              <li>The projection uses this home's data only and assumes the coming years look like the time since installation (wear grows with the square root of time). The official figures are from the 10-year study on 2014–2023 weather: 7.5 years to 80% capacity with SABIL, 6.2 with a standard kit.</li>
+              <li>A second model, NREL's BLAST-Lite for large prismatic LFP cells, gives the same conclusion. This page runs the TU Munich model, which fades faster, so it is the cautious choice. Both were fitted on lab cells, not yet on this module; the pilot logs every battery hourly to check.</li>
+            </ul></details>
+          </div>
+        </details>
+        <details class="box sect" id="fcSect">
+          <summary><div><h2>Sun forecast</h2><p class="sum-line" id="fSum"></p></div><span class="more"><span class="closed">Show details</span><span class="opened">Hide details</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></summary>
+          <div class="sect-body">
+            <div class="facts" id="fFacts"></div>
+            <details class="model"><summary>How good is the forecast?</summary><ul>
+              <li>A machine-learning model (gradient-boosted trees with ridge regression) trained on NASA POWER and ERA5 weather for Maiduguri: cloud, humidity, pressure and wind. It is issued at midnight and corrected during the day with the panels' own readings.</li>
+              <li>Tested year by year on years it never saw (2014 to 2023). Next-day error: 0.61 kWh/m² a day, against 0.80 for "same as yesterday" and 0.64 for the seasonal average. The difference is statistically significant.</li>
+              <li>In the rainy season (June to September) it is no better than the seasonal average (0.97 against 0.97).</li>
+              <li>The low estimate held on 76% of days; the target was 80%.</li>
+              <li>For battery life the forecast matters little: 7.59 years with the model, 7.51 with "same as yesterday" (10-year study, 2014–2023). The rules do most of the work.</li>
+            </ul></details>
+          </div>
+        </details>
       </div>
       <div class="box span-12 chart">
         <div class="box-head"><div><h2>Last 24 hours and next 24 hours</h2><p class="sub">Solid lines are readings. Dashed lines are the forecast and the plan.</p></div>
@@ -395,36 +431,6 @@ footer summary { cursor: pointer; font-family: var(--font-display); font-weight:
           </div></div>
         <div id="timeline"></div>
       </div>
-      <details class="box span-6 sect" id="healthSect">
-        <summary><div><h2>Battery health</h2><p class="sum-line" id="hSum"></p></div><span class="more"><span class="closed">Show details</span><span class="opened">Hide details</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></summary>
-        <div class="sect-body">
-          <div class="health">
-            <div><div class="big" id="hBig">–</div><div class="muted" style="font-size:var(--s-1)">of its capacity when new</div></div>
-            <div class="bars" id="hBars"></div>
-          </div>
-          <div class="facts" id="hFacts"></div>
-          <details class="model"><summary>How the health model works</summary><ul>
-            <li>Two kinds of wear add up. Time wear grows with heat and with a high charge level. Use wear grows with each charge and discharge, and more with deep ones.</li>
-            <li>Equations and coefficients: Naumann et al., J. Energy Storage 17 (2018) and J. Power Sources 451 (2020), for a lithium iron phosphate cell, checked identical to the authors' open-source code (SimSES, TU Munich).</li>
-            <li>The same equations run for a standard kit in the same home, with the same weather and use. The gap between the two is what SABIL adds.</li>
-            <li>The projection uses this home's data only and assumes the coming years look like the time since installation (wear grows with the square root of time). The official figures are from the 10-year study on 2014–2023 weather: 7.5 years to 80% capacity with SABIL, 6.2 with a standard kit.</li>
-            <li>A second model, NREL's BLAST-Lite for large prismatic LFP cells, gives the same conclusion. This page runs the TU Munich model, which fades faster, so it is the cautious choice. Both were fitted on lab cells, not yet on this module; the pilot logs every battery hourly to check.</li>
-          </ul></details>
-        </div>
-      </details>
-      <details class="box span-6 sect" id="fcSect">
-        <summary><div><h2>Sun forecast</h2><p class="sum-line" id="fSum"></p></div><span class="more"><span class="closed">Show details</span><span class="opened">Hide details</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></summary>
-        <div class="sect-body">
-          <div class="facts" id="fFacts"></div>
-          <details class="model"><summary>How good is the forecast?</summary><ul>
-            <li>A machine-learning model (gradient-boosted trees with ridge regression) trained on NASA POWER and ERA5 weather for Maiduguri: cloud, humidity, pressure and wind. It is issued at midnight and corrected during the day with the panels' own readings.</li>
-            <li>Tested year by year on years it never saw (2014 to 2023). Next-day error: 0.61 kWh/m² a day, against 0.80 for "same as yesterday" and 0.64 for the seasonal average. The difference is statistically significant.</li>
-            <li>In the rainy season (June to September) it is no better than the seasonal average (0.97 against 0.97).</li>
-            <li>The low estimate held on 76% of days; the target was 80%.</li>
-            <li>For battery life the forecast matters little: 7.59 years with the model, 7.51 with "same as yesterday" (10-year study, 2014–2023). The rules do most of the work.</li>
-          </ul></details>
-        </div>
-      </details>
     </div>
   </section>
 
@@ -435,7 +441,7 @@ footer summary { cursor: pointer; font-family: var(--font-display); font-weight:
     <div class="box">
       <div class="box-head"><div><h2>Homes</h2><p class="sub">Homes that need attention come first. Select a row to open that home's controller.</p></div></div>
       <div class="table-wrap"><table>
-        <thead><tr><th>Home</th><th>Battery placed</th><th class="n">Health</th><th class="n">Projected life, SABIL vs standard</th><th class="n">Essentials served</th><th class="n">Credit</th><th>Status</th></tr></thead>
+        <thead><tr><th scope="col">Home</th><th scope="col">Battery placed</th><th scope="col" class="n">Health</th><th scope="col" class="n">Projected life, SABIL vs standard</th><th scope="col" class="n">Essentials served</th><th scope="col" class="n">Credit</th><th scope="col">Status</th></tr></thead>
         <tbody id="fleetRows"></tbody>
       </table></div>
       <p class="note" style="margin-top:14px">Example fleet: twelve simulated homes, each with the selected kit (400 W of panels, 1.92 kWh battery), on the real 2023 Maiduguri weather, with different use and battery placement. Not customer data. Projected life uses each home's data so far; the official figures are from the 10-year study (7.5 vs 6.2 years). When credit runs out, the TV, radio and day fan pause and essentials keep running; that energy is taken from the next top-up (proposed rule, to confirm).</p>

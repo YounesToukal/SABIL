@@ -20,25 +20,25 @@
   --indigo: #1F2B5B; --amber: #F0A13A; --cream: #FBF6EE; --soft-indigo: #5E6787;
   --bg: #FBF6EE; --surface: #FFFFFF; --sunk: #F4EEE3; --ink: #1F2B5B; --ink-2: #5E6787; --line: #E5DCCB;
   --bar: #1F2B5B; --bar-ink: #FFFFFF; --bar-ink-2: #C3C8DD; --bar-line: #34407A;
-  --sun: #F0A13A; --sun-fill: rgba(240, 161, 58, .30); --sun-band: rgba(240, 161, 58, .16);
+  --sun: #F0A13A; --sun-line: #B86B0B; --sun-fill: rgba(240, 161, 58, .30); --sun-band: rgba(240, 161, 58, .16);
   --store: #1F2B5B; --use: #5E6787; --night: rgba(31, 43, 91, .06);
   --ok: #2B7350; --ok-bg: #E3F1E8; --alert: #B3261E; --alert-bg: #FBE6E3; --watch-bg: #ECEEF6;
   --font-display: "Sora", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
-  --s-1: .8125rem; --s0: .9375rem; --s1: 1.0625rem; --s2: 1.375rem; --s3: 1.875rem; --s4: 2.75rem;
+  --s-1: .875rem; --s0: 1rem; --s1: 1.0625rem; --s2: 1.375rem; --s3: 1.875rem; --s4: 2.75rem;
   --r-sm: 6px; --r-md: 12px;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #111733; --surface: #19214A; --sunk: #141B3E; --ink: #F3EEE4; --ink-2: #AEB4CF; --line: #2B3567;
   --bar: #0B1029; --bar-ink: #FFFFFF; --bar-ink-2: #AEB4CF; --bar-line: #232C5C;
-  --sun-fill: rgba(240, 161, 58, .34); --sun-band: rgba(240, 161, 58, .18);
+  --sun-line: #F0A13A; --sun-fill: rgba(240, 161, 58, .34); --sun-band: rgba(240, 161, 58, .18);
   --store: #D6DBF2; --use: #9AA2C6; --night: rgba(0, 0, 0, .22);
   --ok: #6FCB98; --ok-bg: #173A33; --alert: #FF8A80; --alert-bg: #4A1E2A; --watch-bg: #232C5C;
   color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #111733; --surface: #19214A; --sunk: #141B3E; --ink: #F3EEE4; --ink-2: #AEB4CF; --line: #2B3567;
   --bar: #0B1029; --bar-ink: #FFFFFF; --bar-ink-2: #AEB4CF; --bar-line: #232C5C;
-  --sun-fill: rgba(240, 161, 58, .34); --sun-band: rgba(240, 161, 58, .18);
+  --sun-line: #F0A13A; --sun-fill: rgba(240, 161, 58, .34); --sun-band: rgba(240, 161, 58, .18);
   --store: #D6DBF2; --use: #9AA2C6; --night: rgba(0, 0, 0, .22);
   --ok: #6FCB98; --ok-bg: #173A33; --alert: #FF8A80; --alert-bg: #4A1E2A; --watch-bg: #232C5C;
   color-scheme: dark; }
@@ -65,7 +65,7 @@ button, select, input, textarea { font: inherit; color: inherit; }
 .tabs a { color: var(--bar-ink-2); text-decoration: none; padding: 6px 16px; border-radius: 999px; font-family: var(--font-display); font-size: var(--s0); }
 .tabs a[aria-current="page"] { background: var(--bar-ink); color: #1F2B5B; }
 .bar .home-pick { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--bar-ink-2); font-size: var(--s-1); }
-.bar select { background: transparent; border: 1px solid var(--bar-line); color: var(--bar-ink); border-radius: var(--r-sm); padding: 5px 8px; }
+.bar select { min-height: 40px; background: transparent; border: 1px solid var(--bar-line); color: var(--bar-ink); border-radius: var(--r-sm); padding: 5px 8px; }
 .bar select option { color: #1F2B5B; background: #FFFFFF; }
 
 /* player */
@@ -74,12 +74,12 @@ button, select, input, textarea { font: inherit; color: inherit; }
 .clock { display: grid; line-height: 1.25; margin-right: auto; }
 .clock .when { font-family: var(--font-display); font-weight: 600; font-size: var(--s1); font-variant-numeric: tabular-nums; }
 .clock .src-note { font-size: var(--s-1); color: var(--ink-2); }
-.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--ink); background: var(--ink); color: var(--bg); border-radius: 999px; padding: 7px 16px; cursor: pointer; font-family: var(--font-display); font-size: var(--s-1); font-weight: 600; white-space: nowrap; }
+.btn { min-height: 40px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--ink); background: var(--ink); color: var(--bg); border-radius: 999px; padding: 7px 16px; cursor: pointer; font-family: var(--font-display); font-size: var(--s-1); font-weight: 600; white-space: nowrap; }
 .btn.ghost { background: transparent; color: var(--ink); }
 .btn svg { width: 14px; height: 14px; flex: none; }
 .btn[aria-expanded="true"] svg.chev { transform: rotate(180deg); }
 .ctl { display: inline-flex; align-items: center; gap: 8px; font-size: var(--s-1); color: var(--ink-2); }
-.ctl select { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 5px 8px; color: var(--ink); }
+.ctl select { min-height: 40px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 5px 8px; color: var(--ink); }
 .srcpanel { width: 100%; display: grid; gap: 14px; padding: 6px 0 8px; }
 .choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 @media (max-width: 760px) { .choices { grid-template-columns: 1fr; } }
@@ -127,7 +127,7 @@ main { padding-block: 22px 48px; display: grid; gap: 20px; }
 .strip-cap { display: flex; gap: 8px 18px; flex-wrap: wrap; font-size: var(--s-1); color: var(--ink-2); }
 .key { display: inline-flex; align-items: center; gap: 6px; }
 .key i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; }
-.key i.sun { background: var(--sun-fill); border: 1.5px solid var(--sun); }
+.key i.sun { background: var(--sun-fill); border: 1.5px solid var(--sun-line); }
 .key i.bat { height: 3px; background: var(--store); }
 .key i.res { height: 0; border-top: 2px dashed var(--ink-2); }
 .key i.use { height: 2px; background: var(--use); }
@@ -136,7 +136,7 @@ main { padding-block: 22px 48px; display: grid; gap: 20px; }
 @media (max-width: 900px) { .trio { grid-template-columns: 1fr; } }
 .stat .v { font-family: var(--font-display); font-weight: 600; font-size: var(--s3); font-variant-numeric: tabular-nums; line-height: 1.15; margin-top: 6px; }
 .stat .v small { font-size: var(--s1); font-weight: 400; color: var(--ink-2); }
-.stat p { color: var(--ink-2); font-size: var(--s-1); margin-top: 4px; }
+.stat p { color: var(--ink); font-size: var(--s-1); margin-top: 6px; }
 .stat .act { margin-top: 12px; }
 .circuits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 @media (max-width: 640px) { .circuits { grid-template-columns: 1fr; } }
@@ -174,13 +174,16 @@ main { padding-block: 22px 48px; display: grid; gap: 20px; }
 .rule h3 { font-size: var(--s0); }
 .rule .why { color: var(--ink); font-size: var(--s-1); }
 .rule details { font-size: var(--s-1); color: var(--ink-2); }
-.rule summary { cursor: pointer; color: var(--ink-2); width: max-content; }
+.rule summary { cursor: pointer; color: var(--ink-2); width: max-content; padding-block: 6px; min-height: 32px; }
 .rule details p { margin-top: 4px; max-width: 75ch; }
 .alerts { display: grid; gap: 10px; }
 .alert-row { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 12px; border-radius: var(--r-sm); background: var(--sunk); }
 .alert-row.bad { background: var(--alert-bg); }
 .alert-row b { font-family: var(--font-display); font-weight: 600; }
-.alert-row p { font-size: var(--s-1); color: var(--ink-2); }
+.alert-row p { font-size: var(--s-1); color: var(--ink); }
+.ico { display: inline-flex; width: 20px; height: 20px; margin-top: 1px; color: var(--ink); }
+.ico svg { width: 20px; height: 20px; }
+.ico.ok { color: var(--ok); } .ico.alert { color: var(--alert); }
 .alert-row .act { margin-top: 8px; }
 .try { display: flex; flex-wrap: wrap; gap: 8px; }
 .toggle[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
@@ -213,12 +216,12 @@ details.sect[open] > summary .more .closed, details.sect:not([open]) > summary .
 @media (max-width: 420px) { .facts { grid-template-columns: 1fr; } }
 .facts div { font-size: var(--s-1); color: var(--ink-2); }
 .facts b { display: block; font-family: var(--font-display); font-weight: 600; font-size: var(--s1); color: var(--ink); font-variant-numeric: tabular-nums; }
-details.model summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: var(--s-1); }
+details.model summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: var(--s-1); padding-block: 8px; }
 details.model ul { margin: 8px 0 0; padding-left: 18px; color: var(--ink-2); font-size: var(--s-1); display: grid; gap: 6px; max-width: 80ch; }
 
 /* fleet */
 .kpis { display: grid; gap: 12px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
-@media (max-width: 1000px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 1000px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kpi:last-child:nth-child(odd) { grid-column: 1 / -1; } }
 .kpi { padding: 16px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); min-width: 0; }
 .kpi .k { font-size: var(--s-1); color: var(--ink-2); }
 .kpi .v { font-family: var(--font-display); font-weight: 600; font-size: var(--s3); font-variant-numeric: tabular-nums; line-height: 1.2; margin-top: 4px; }
@@ -228,7 +231,10 @@ table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: var
 th { text-align: left; font-weight: 700; color: var(--ink-2); padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 td { padding: 10px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; vertical-align: middle; }
 td.n, th.n { text-align: right; white-space: nowrap; }
-td .id { font-family: var(--font-display); font-weight: 600; white-space: nowrap; }
+td .id, .rowbtn { font-family: var(--font-display); font-weight: 600; white-space: nowrap; }
+.rowbtn { all: unset; cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: var(--s0); display: inline-block; padding-block: 5px; min-height: 22px; white-space: nowrap; }
+.rowbtn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 4px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 td .area { color: var(--ink-2); }
 tbody tr { cursor: pointer; }
 tbody tr:hover td, tbody tr.sel td { background: var(--sunk); }
@@ -243,7 +249,7 @@ footer b { font-family: var(--font-display); color: var(--ink); font-weight: 600
 footer dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 10px 0 0; max-width: 90ch; }
 footer dt { font-weight: 700; color: var(--ink); }
 footer dd { margin: 0; }
-footer summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; color: var(--ink); }
+footer summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; color: var(--ink); padding-block: 8px; }
 @media (max-width: 640px) {
   .bar { position: static; }
   .bar .wrap { gap: 12px; }
@@ -400,6 +406,36 @@ footer summary { cursor: pointer; font-family: var(--font-display); font-weight:
             <button class="btn ghost toggle" type="button" id="tryDust" aria-pressed="false">Dusty panels</button>
           </div>
         </div>
+        <details class="box sect" id="healthSect">
+          <summary><div><h2>Battery health</h2><p class="sum-line" id="hSum"></p></div><span class="more"><span class="closed">Show details</span><span class="opened">Hide details</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></summary>
+          <div class="sect-body">
+            <div class="health">
+              <div><div class="big" id="hBig">–</div><div class="muted" style="font-size:var(--s-1)">of its capacity when new</div></div>
+              <div class="bars" id="hBars"></div>
+            </div>
+            <div class="facts" id="hFacts"></div>
+            <details class="model"><summary>How the health model works</summary><ul>
+              <li>Two kinds of wear add up. Time wear grows with heat and with a high charge level. Use wear grows with each charge and discharge, and more with deep ones.</li>
+              <li>Equations and coefficients: Naumann et al., J. Energy Storage 17 (2018) and J. Power Sources 451 (2020), for a lithium iron phosphate cell, checked identical to the authors' open-source code (SimSES, TU Munich).</li>
+              <li>The same equations run for a standard kit in the same home, with the same weather and use. The gap between the two is what SABIL adds.</li>
+              <li>The projection uses this home's data only and assumes the coming years look like the time since installation (wear grows with the square root of time). The official figures are from the 10-year study on 2014–2023 weather: 7.5 years to 80% capacity with SABIL, 6.2 with a standard kit.</li>
+              <li>A second model, NREL's BLAST-Lite for large prismatic LFP cells, gives the same conclusion. This page runs the TU Munich model, which fades faster, so it is the cautious choice. Both were fitted on lab cells, not yet on this module; the pilot logs every battery hourly to check.</li>
+            </ul></details>
+          </div>
+        </details>
+        <details class="box sect" id="fcSect">
+          <summary><div><h2>Sun forecast</h2><p class="sum-line" id="fSum"></p></div><span class="more"><span class="closed">Show details</span><span class="opened">Hide details</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></summary>
+          <div class="sect-body">
+            <div class="facts" id="fFacts"></div>
+            <details class="model"><summary>How good is the forecast?</summary><ul>
+              <li>A machine-learning model (gradient-boosted trees with ridge regression) trained on NASA POWER and ERA5 weather for Maiduguri: cloud, humidity, pressure and wind. It is issued at midnight and corrected during the day with the panels' own readings.</li>
+              <li>Tested year by year on years it never saw (2014 to 2023). Next-day error: 0.61 kWh/m² a day, against 0.80 for "same as yesterday" and 0.64 for the seasonal average. The difference is statistically significant.</li>
+              <li>In the rainy season (June to September) it is no better than the seasonal average (0.97 against 0.97).</li>
+              <li>The low estimate held on 76% of days; the target was 80%.</li>
+              <li>For battery life the forecast matters little: 7.59 years with the model, 7.51 with "same as yesterday" (10-year study, 2014–2023). The rules do most of the work.</li>
+            </ul></details>
+          </div>
+        </details>
       </div>
       <div class="box span-12 chart">
         <div class="box-head"><div><h2>Last 24 hours and next 24 hours</h2><p class="sub">Solid lines are readings. Dashed lines are the forecast and the plan.</p></div>
@@ -409,36 +445,6 @@ footer summary { cursor: pointer; font-family: var(--font-display); font-weight:
           </div></div>
         <div id="timeline"></div>
       </div>
-      <details class="box span-6 sect" id="healthSect">
-        <summary><div><h2>Battery health</h2><p class="sum-line" id="hSum"></p></div><span class="more"><span class="closed">Show details</span><span class="opened">Hide details</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></summary>
-        <div class="sect-body">
-          <div class="health">
-            <div><div class="big" id="hBig">–</div><div class="muted" style="font-size:var(--s-1)">of its capacity when new</div></div>
-            <div class="bars" id="hBars"></div>
-          </div>
-          <div class="facts" id="hFacts"></div>
-          <details class="model"><summary>How the health model works</summary><ul>
-            <li>Two kinds of wear add up. Time wear grows with heat and with a high charge level. Use wear grows with each charge and discharge, and more with deep ones.</li>
-            <li>Equations and coefficients: Naumann et al., J. Energy Storage 17 (2018) and J. Power Sources 451 (2020), for a lithium iron phosphate cell, checked identical to the authors' open-source code (SimSES, TU Munich).</li>
-            <li>The same equations run for a standard kit in the same home, with the same weather and use. The gap between the two is what SABIL adds.</li>
-            <li>The projection uses this home's data only and assumes the coming years look like the time since installation (wear grows with the square root of time). The official figures are from the 10-year study on 2014–2023 weather: 7.5 years to 80% capacity with SABIL, 6.2 with a standard kit.</li>
-            <li>A second model, NREL's BLAST-Lite for large prismatic LFP cells, gives the same conclusion. This page runs the TU Munich model, which fades faster, so it is the cautious choice. Both were fitted on lab cells, not yet on this module; the pilot logs every battery hourly to check.</li>
-          </ul></details>
-        </div>
-      </details>
-      <details class="box span-6 sect" id="fcSect">
-        <summary><div><h2>Sun forecast</h2><p class="sum-line" id="fSum"></p></div><span class="more"><span class="closed">Show details</span><span class="opened">Hide details</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></summary>
-        <div class="sect-body">
-          <div class="facts" id="fFacts"></div>
-          <details class="model"><summary>How good is the forecast?</summary><ul>
-            <li>A machine-learning model (gradient-boosted trees with ridge regression) trained on NASA POWER and ERA5 weather for Maiduguri: cloud, humidity, pressure and wind. It is issued at midnight and corrected during the day with the panels' own readings.</li>
-            <li>Tested year by year on years it never saw (2014 to 2023). Next-day error: 0.61 kWh/m² a day, against 0.80 for "same as yesterday" and 0.64 for the seasonal average. The difference is statistically significant.</li>
-            <li>In the rainy season (June to September) it is no better than the seasonal average (0.97 against 0.97).</li>
-            <li>The low estimate held on 76% of days; the target was 80%.</li>
-            <li>For battery life the forecast matters little: 7.59 years with the model, 7.51 with "same as yesterday" (10-year study, 2014–2023). The rules do most of the work.</li>
-          </ul></details>
-        </div>
-      </details>
     </div>
   </section>
 
@@ -449,7 +455,7 @@ footer summary { cursor: pointer; font-family: var(--font-display); font-weight:
     <div class="box">
       <div class="box-head"><div><h2>Homes</h2><p class="sub">Homes that need attention come first. Select a row to open that home's controller.</p></div></div>
       <div class="table-wrap"><table>
-        <thead><tr><th>Home</th><th>Battery placed</th><th class="n">Health</th><th class="n">Projected life, SABIL vs standard</th><th class="n">Essentials served</th><th class="n">Credit</th><th>Status</th></tr></thead>
+        <thead><tr><th scope="col">Home</th><th scope="col">Battery placed</th><th scope="col" class="n">Health</th><th scope="col" class="n">Projected life, SABIL vs standard</th><th scope="col" class="n">Essentials served</th><th scope="col" class="n">Credit</th><th scope="col">Status</th></tr></thead>
         <tbody id="fleetRows"></tbody>
       </table></div>
       <p class="note" style="margin-top:14px">Example fleet: twelve simulated homes, each with the selected kit (400 W of panels, 1.92 kWh battery), on the real 2023 Maiduguri weather, with different use and battery placement. Not customer data. Projected life uses each home's data so far; the official figures are from the 10-year study (7.5 vs 6.2 years). When credit runs out, the TV, radio and day fan pause and essentials keep running; that energy is taken from the next top-up (proposed rule, to confirm).</p>
@@ -873,7 +879,7 @@ function startHour() {
   return Math.min(W.n - 49 - 24, Math.max(45 * 24 + now.getUTCHours(), t));
 }
 let T = startHour();
-const dateOf = (t) => new Date(W.start.getTime() + t * 3600e3);
+const dateOf = (t) => new Date(W.start.getTime() + mod(t) * 3600e3); // the replay's weather date (2023)
 const dayName = (t) => dateOf(t).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
 
 // ---------- example fleet ----------
@@ -937,7 +943,7 @@ function stepHome(h, i, t, quiet) {
 function advance(quiet) {
   homes.forEach((h, i) => stepHome(h, i, T, quiet));
   T++;
-  if (T >= W.n - 49) T = W.n - 49, playing = false;
+  if (T >= 2 * W.n - 49) T = 2 * W.n - 49, playing = false;
 }
 
 // warm start: every kit runs from its installation day to the chosen day on the real weather
@@ -1004,7 +1010,7 @@ function alertsFor(h) {
   if (h.credit <= 0) out.push({ lvl: "alert", tag: "Credit used up", title: "Credit has run out", body: "The TV, radio and day fan are paused. Lights, phones, the night fan and the fridge keep running; that energy is taken from the next top-up." });
   else if (h.credit < dailyUse(h)) out.push({ lvl: "watch", tag: "Low credit", title: "Credit for less than a day", body: `${fmt(h.credit, 1)} kWh left. A usual day here uses about ${fmt(dailyUse(h), 1)} kWh.` });
   if (kit.piN > 6 && kit.pi < 0.92) out.push({ lvl: "alert", tag: "Clean panels", title: "The panels give less than the sun allows", body: `They make ${fmt((1 - kit.pi) * 100)}% less power than clean panels would under the same sun. Harmattan dust is the usual cause. Wipe them with water early in the morning.`, action: "clean" });
-  if (last.temp >= 40) out.push({ lvl: "alert", tag: "Battery hot", title: `Battery at ${fmt(last.temp)} °C`, body: "Charging is slowed to protect it. Check the box is shaded and air can move around it." });
+  if (last.temp >= 45) out.push({ lvl: "alert", tag: "Battery hot", title: `Battery at ${fmt(last.temp)} °C`, body: `Above 45 °C, the usual charging limit for LFP batteries, so charging is slowed. ${h.cfg.placement === "outdoor_shaded_box" ? "Check the box is shaded and air can move around it." : "Move the battery away from sunny walls and the roof, to a spot where air can move."}` });
   const fc = forecastFor(h), proj = kit.project(24, fc.pv, fc.amb), ni = nightInfo(h, proj);
   if (!ni.critOk) out.push({ lvl: "alert", tag: "Essentials at risk", title: "Essentials may run short tonight", body: "The forecast does not cover lights, phones, the night fan and the fridge until sunrise. The TV, radio and day fan will be cut first." });
   return out;
@@ -1021,14 +1027,15 @@ function drawStrip(el, h, proj, fc) {
   const N = proj.length, x = (k) => l + (Wd - l - r) * k / N, ySoc = (s) => t + (H - t - b) * (1 - s), kwp = h.cfg.pvKwp;
   const yPv = (p) => H - b - (H - t - b) * 0.5 * Math.min(1, p / (kwp * 0.85));
   const kit = h.sabil, ni = nightInfo(h, proj);
-  let s = `<svg viewBox="0 0 ${Wd} ${H}" height="${H}" role="img" aria-label="Expected sun and battery level over the next 24 hours">`;
+  const lab = `Next 24 hours. Battery now ${fmt(kit.soc * 100)}%.${ni.handover > 0 && ni.handover < N ? ` The battery takes over from the sun at ${hh(kit.t + ni.handover)}.` : ""}${ni.sunBack != null && ni.sunBack < N ? ` Sun back at ${hh(kit.t + ni.sunBack)}, battery about ${fmt(proj[Math.max(0, ni.sunBack - 1)].soc * 100)}%.` : ""}`;
+  let s = `<svg viewBox="0 0 ${Wd} ${H}" height="${H}" role="img" aria-label="${esc(lab)}">`;
   for (let k = 0; k < N; k++) if (fc.pv[k] < 0.01) s += `<rect x="${x(k)}" y="${t}" width="${x(k + 1) - x(k) + .5}" height="${H - t - b}" fill="var(--night)"/>`;
   const sunTop = [];
   s += `<line class="grid-l" x1="${l}" x2="${Wd - r}" y1="${ySoc(1)}" y2="${ySoc(1)}"/><line class="grid-l" x1="${l}" x2="${Wd - r}" y1="${ySoc(0)}" y2="${ySoc(0)}"/>`;
   s += `<text x="${Wd - r}" y="${ySoc(1) - 6}" text-anchor="end">Full</text>`;
   for (let k = 0; k < N; k++) { sunTop.push([x(k + .5), yPv(fc.pv[k])]); }
   s += `<path d="${linePath([[x(0), H - b], ...sunTop, [x(N), H - b]])}Z" fill="var(--sun-fill)"/>`;
-  s += `<path d="${linePath(sunTop)}" fill="none" stroke="var(--sun)" stroke-width="2"/>`;
+  s += `<path d="${linePath(sunTop)}" fill="none" stroke="var(--sun-line)" stroke-width="2"/>`;
   const floor = [[x(0), ySoc(proj[0].floor)], ...proj.map((p, k) => [x(k + 1), ySoc(p.floor)])];
   s += `<path d="${linePath(stepPts(floor.map((p) => p[0]), floor.map((p) => p[1])))}" fill="none" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
   const bat = [[x(0), ySoc(kit.soc)], ...proj.map((p, k) => [x(k + 1), ySoc(p.soc)])];
@@ -1069,18 +1076,18 @@ function drawTimeline(el, h, proj, fc) {
   const stepKw = maxKw <= 0.6 ? 0.1 : maxKw <= 1.2 ? 0.2 : 0.5;
   maxKw = Math.ceil(maxKw / stepKw - 1e-9) * stepKw;
   const y1 = (v) => top1 + h1 * (1 - v / maxKw), y2 = (s) => top2 + h2 * (1 - s);
-  let s = `<svg viewBox="0 0 ${Wd} ${Ht}" height="${Ht}" role="img" aria-label="Sun power, home use and battery level, last 24 hours and next 24 hours">`;
+  let s = `<svg viewBox="0 0 ${Wd} ${Ht}" height="${Ht}" role="img" aria-label="Sun power, home use and battery level over the last 24 hours and the next 24 hours. Battery now ${fmt(kit.soc * 100)}%, panels now ${fmt((past.length ? past[past.length - 1].pv : 0) * 1000)} W.">`;
   for (let v = 0; v <= maxKw + 1e-9; v += stepKw) s += `<line class="grid-l" x1="${l}" x2="${Wd - r}" y1="${y1(v)}" y2="${y1(v)}"/><text x="${l - 8}" y="${y1(v) + 4}" text-anchor="end">${fmt(v * 1000)} W</text>`;
   for (const v of [0, .5, 1]) s += `<line class="grid-l" x1="${l}" x2="${Wd - r}" y1="${y2(v)}" y2="${y2(v)}"/><text x="${l - 8}" y="${y2(v) + 4}" text-anchor="end">${v * 100}%</text>`;
   const k0 = -NP;
   // past sun (measured) and future band (P10 to P50)
   if (NP) {
     const sp = past.map((p, i) => [x(k0 + i + .5), y1(p.pv)]);
-    s += `<path d="${linePath([[sp[0][0], y1(0)], ...sp, [sp[sp.length - 1][0], y1(0)]])}Z" fill="var(--sun-fill)"/><path d="${linePath(sp)}" fill="none" stroke="var(--sun)" stroke-width="2"/>`;
+    s += `<path d="${linePath([[sp[0][0], y1(0)], ...sp, [sp[sp.length - 1][0], y1(0)]])}Z" fill="var(--sun-fill)"/><path d="${linePath(sp)}" fill="none" stroke="var(--sun-line)" stroke-width="2"/>`;
   }
   const fm = Array.from(fc.pv, (v, i) => [x(i + .5), y1(v)]), f10 = Array.from(fc.p10, (v, i) => [x(i + .5), y1(v)]);
   s += `<path d="${linePath([...fm, ...f10.slice().reverse()])}Z" fill="var(--sun-band)"/>`;
-  s += `<path d="${linePath(fm)}" fill="none" stroke="var(--sun)" stroke-width="2" stroke-dasharray="6 4"/>`;
+  s += `<path d="${linePath(fm)}" fill="none" stroke="var(--sun-line)" stroke-width="2" stroke-dasharray="6 4"/>`;
   // home use: steps
   if (NP) { const xs = [], ys = []; past.forEach((p, i) => { xs.push(x(k0 + i)); ys.push(y1(p.crit + p.nonc)); }); xs.push(x(0)); s += `<path d="${linePath(stepPts(xs, ys))}" fill="none" stroke="var(--use)" stroke-width="1.75"/>`; }
   { const xs = [], ys = []; proj.forEach((p, i) => { xs.push(x(i)); ys.push(y1(p.crit + p.nonc)); }); xs.push(x(NF)); s += `<path d="${linePath(stepPts(xs, ys))}" fill="none" stroke="var(--use)" stroke-width="1.5" stroke-dasharray="4 3"/>`; }
@@ -1174,7 +1181,7 @@ function renderController() {
   let st, line;
   const spare = last.curt * P.sys.inv * 1000, held = kit.soc >= lim.soc_max - 0.01;
   const above = kit.soc > lim.soc_max + 0.01;
-  const spareTxt = spare > 20 ? ` ${fmt(spare)} W are not needed${above ? `: the battery is above today's ${fmt(lim.soc_max * 100)}% limit, so it takes no more charge` : held ? `: the battery is held at ${fmt(lim.soc_max * 100)}% today` : lim.hotNow ? ": charging is slowed in the heat" : ""}.` : "";
+  const spareTxt = spare > 20 ? ` ${fmt(spare)} W are not needed${above ? `: the battery is above today's ${fmt(lim.soc_max * 100)}% limit, so it takes no more charge` : held ? (lim.soc_max >= 0.99 ? ": the battery is full" : `: the battery is held at ${fmt(lim.soc_max * 100)}% today`) : lim.hotNow ? ": charging is slowed in the heat" : ""}.` : "";
   if (h.credit <= 0) { st = "Essentials only"; line = `Credit has run out, so the TV, radio and day fan are paused. Essentials use ${fmt(last.servedC * 1000)} W.`; }
   else if (batW > 20) { st = "Charging from the sun"; line = `The panels give ${fmt(pvW)} W: ${fmt(use)} W to the home and ${fmt(batW)} W into the battery.${spareTxt}`; }
   else if (last.pv > 0.02 && batW >= -20) { st = "Running on the sun"; line = `The panels give ${fmt(pvW)} W and cover the home (${fmt(use)} W).${spareTxt}`; }
@@ -1184,7 +1191,7 @@ function renderController() {
   // readouts
   const pv = S.packVolts(kit.soc, last.batKw);
   const ro = [
-    { k: "Sun on the panels", v: `${fmt(last.ghi)} <small>W/m²</small>`, d: `Panels give ${fmt(last.pv * 1000)} W`, sp: sparkline(log.map((r) => r.pv), "var(--sun)", h.cfg.pvKwp) },
+    { k: "Sun on the panels", v: `${fmt(last.ghi)} <small>W/m²</small>`, d: `Panels give ${fmt(last.pv * 1000)} W`, sp: sparkline(log.map((r) => r.pv), "var(--sun-line)", h.cfg.pvKwp) },
     { k: "Air temperature", v: `${fmt(last.amb, 1)} <small>°C</small>`, d: `Last 24 h: ${fmt(Math.min(...log.map((r) => r.amb)))} to ${fmt(Math.max(...log.map((r) => r.amb)))} °C`, sp: sparkline(log.map((r) => r.amb), "var(--use)") },
     { k: "Battery temperature", v: `${fmt(last.temp, 1)} <small>°C</small>`, d: P.placements[h.cfg.placement].short, sp: sparkline(log.map((r) => r.temp), "var(--store)") },
     { k: "Charge", v: `${fmt(kit.soc * 100)} <small>%</small>`, d: `${fmt(kit.soc * cap, 2)} of ${fmt(cap, 2)} kWh (${fmt(P.bat.cap, 2)} when new)`, sp: sparkline(log.map((r) => r.soc), "var(--store)", 1) },
@@ -1210,17 +1217,18 @@ function renderController() {
     more: `Charge limit ${fmt((lim.hotNow ? s.cHot : P.bat.maxC) * cap * 1000)} W (${lim.hotNow ? s.cHot : P.bat.maxC} C). The 400 W panels rarely give more than about 370 W, so on this kit the limit seldom binds; it matters on kits with more panels per kWh of battery.` });
   for (const m of (d && d.moved) || []) {
     const hrs = m.to.slice().sort((a, b) => a - b), phone = /phone/i.test(m.name), wh = m.from.length * (h.sabil.hh.flex.find((f) => f.name === m.name) || { kw: 0 }).kw * 1000;
-    rules.push({ key: "flex-" + m.name, t: phone ? `Phone charging at ${spanTxt(hrs)}` : `Fridge pre-cools at ${spanTxt(hrs)}`, chip: ["ok", "Planned"],
+    const hNow = kit.t - d.t0, state = hNow > hrs[hrs.length - 1] ? ["watch", "Done today"] : hNow >= hrs[0] ? ["ok", "Now"] : ["ok", "Planned"];
+    rules.push({ key: "flex-" + m.name, t: phone ? `Phone charging at ${spanTxt(hrs)}` : `Fridge pre-cools at ${spanTxt(hrs)}`, chip: state,
       why: phone ? "The hours with the most spare sun in today's forecast." : "It cools ahead in the sunny hours, so it needs less from the battery at night.",
       more: `${phone ? "Phones are usually charged" : "This part of the fridge's cooling usually runs"} at ${spanTxt(m.from)}, after dark. Moved to sunny hours, its ${fmt(wh)} Wh come from the panels instead of the battery.${phone ? " The family screen shows this as the best time." : ""}` });
   }
   rules.push({ key: "ess", t: "Essentials first", chip: ["ok", "Always on"], why: "Lights, phones, the night fan and the fridge are the last to be cut.",
     more: `When power is short, the TV, radio and day fan stop first. A standard kit cuts everything at once. A standard kit in this home would now be at ${fmt(h.std.soc * 100)}% charge, charging to 100% whatever the weather.` });
-  $("rules").innerHTML = rules.map((r) => `<div class="rule"><div class="rule-top"><h3>${esc(r.t)}</h3><span class="chip ${r.chip[0]}">${ICON[r.chip[0]]}${esc(r.chip[1])}</span></div><p class="why">${esc(r.why)}</p><details data-key="${r.key}"${openWhy.has(r.key) ? " open" : ""}><summary>Why</summary><p>${esc(r.more)}</p></details></div>`).join("");
+  $("rules").innerHTML = rules.map((r) => `<div class="rule"><div class="rule-top"><h3>${esc(r.t)}</h3><span class="chip ${r.chip[0]}">${ICON[r.chip[0]]}${esc(r.chip[1])}</span></div><p class="why">${esc(r.why)}</p><details data-key="${r.key}"${openWhy.has(r.key) ? " open" : ""}><summary>Why<span class="sr">: ${esc(r.t)}</span></summary><p>${esc(r.more)}</p></details></div>`).join("");
   // alerts
   $("alertSub").textContent = al.length ? `${al.length} for this home` : "";
-  $("alerts").innerHTML = al.length ? al.map((a) => `<div class="alert-row ${a.lvl === "alert" ? "bad" : ""}"><span class="chip ${a.lvl}" style="padding:2px 6px">${ICON[a.lvl]}</span><div><b>${esc(a.title)}</b><p>${esc(a.body)}</p>${a.action === "clean" ? '<div class="act"><button class="btn ghost" type="button" data-act="clean">Mark panels cleaned</button></div>' : ""}</div></div>`).join("")
-    : `<div class="alert-row"><span class="chip ok" style="padding:2px 6px">${ICON.ok}</span><div><b>All good</b><p>Panels, battery and credit look normal. Dust check: the panels give ${fmt(kit.pi * 100)}% of what clean panels would.</p></div></div>`;
+  $("alerts").innerHTML = al.length ? al.map((a) => `<div class="alert-row ${a.lvl === "alert" ? "bad" : ""}"><span class="ico ${a.lvl}">${ICON[a.lvl]}</span><div><b>${esc(a.title)}</b><p>${esc(a.body)}</p>${a.action === "clean" ? '<div class="act"><button class="btn ghost" type="button" data-act="clean">Mark panels cleaned</button></div>' : ""}</div></div>`).join("")
+    : `<div class="alert-row"><span class="ico ok">${ICON.ok}</span><div><b>All good</b><p>Panels, battery and credit look normal. Dust check: the panels give ${fmt(kit.pi * 100)}% of what clean panels would.</p></div></div>`;
   $("tryCloud").setAttribute("aria-pressed", scen.cloud != null); $("tryHeat").setAttribute("aria-pressed", scen.heat != null); $("tryDust").setAttribute("aria-pressed", h.soil < 1);
   drawTimeline($("timeline"), h, proj, fc);
   // battery health
@@ -1279,7 +1287,7 @@ function renderFleet() {
   rows.sort((a, b) => b.sev - a.sev || a.i - b.i);
   $("fleetRows").innerHTML = rows.map((r) => {
     const h = r.h, kit = h.sabil, st = r.al.length ? r.al.map((a) => `<span class="chip ${a.lvl}">${ICON[a.lvl]}${esc(a.tag)}</span>`).join(" ") : `<span class="chip ok">${ICON.ok}All good</span>`;
-    return `<tr data-i="${r.i}" tabindex="0" class="${r.i === sel ? "sel" : ""}"><td><span class="id">${h.cfg.id}</span><br><span class="area">${esc(h.cfg.area)}</span></td><td>${esc(P.placements[h.cfg.placement].short)}</td>` +
+    return `<tr data-i="${r.i}" class="${r.i === sel ? "sel" : ""}"><td><button type="button" class="rowbtn" aria-label="Open ${h.cfg.id}, ${esc(h.cfg.area)}">${h.cfg.id}</button><br><span class="area">${esc(h.cfg.area)}</span></td><td>${esc(P.placements[h.cfg.placement].short)}</td>` +
       `<td class="n"><span class="minibar"><i style="width:${Math.max(0, (kit.capFrac - 0.8) / 0.2) * 100}%"></i></span>${fmt(kit.capFrac * 100, 1)}%</td><td class="n">${fmt(r.life, 1)} <span class="muted">vs ${fmt(r.lifeS, 1)}</span> years</td>` +
       `<td class="n">${fmt(r.crit * 100, 2)}%</td><td class="n">${h.credit > 0 ? fmt(h.credit, 1) + " kWh" : "Lifeline"}</td><td>${st}</td></tr>`;
   }).join("");
@@ -1337,7 +1345,8 @@ for (const [id, key] of [["mGhi", "ghi"], ["mAmb", "amb"], ["mExtra", "extra"]])
 $("topUp").addEventListener("click", () => { homes[sel].credit += 10; render(); });
 $("daySel").addEventListener("change", (e) => {
   const v = e.target.value, now = new Date(Date.now() + 3600e3);
-  const t = v === "today" ? startHour() : (Date.UTC(2023, +v.split("-")[0] - 1, +v.split("-")[1]) - Date.UTC(2023, 0, 1)) / 3600e3 + 10;
+  // seasons: the kits have run a full year first (2023 weather replayed), so battery wear and projections have history
+  const t = v === "today" ? startHour() : W.n + (Date.UTC(2023, +v.split("-")[0] - 1, +v.split("-")[1]) - Date.UTC(2023, 0, 1)) / 3600e3 + 10;
   boot(t); homeSelOptions(); render();
 });
 $("tryCloud").addEventListener("click", () => { scen.cloud = scen.cloud == null ? T - hod(T) + 24 : null; applyScenarios(); render(); });
@@ -1347,7 +1356,6 @@ $("alerts").addEventListener("click", (e) => { if (e.target.closest("[data-act=c
 $("rules").addEventListener("toggle", (e) => { const k = e.target.dataset && e.target.dataset.key; if (k) { if (e.target.open) openWhy.add(k); else openWhy.delete(k); } }, true);
 function openRow(tr) { sel = +tr.dataset.i; $("homeSel").value = sel; location.hash = "controller"; }
 $("fleetRows").addEventListener("click", (e) => { const tr = e.target.closest("tr[data-i]"); if (tr) openRow(tr); });
-$("fleetRows").addEventListener("keydown", (e) => { if (e.key === "Enter") { const tr = e.target.closest("tr[data-i]"); if (tr) openRow(tr); } });
 window.addEventListener("resize", () => { clearTimeout(window.__rz); window.__rz = setTimeout(render, 120); });
 try { if (localStorage.getItem("sabil-tip") !== "seen") $("tip").hidden = false; } catch (e) { $("tip").hidden = false; }
 $("tipClose").addEventListener("click", () => { $("tip").hidden = true; try { localStorage.setItem("sabil-tip", "seen"); } catch (e) {} });

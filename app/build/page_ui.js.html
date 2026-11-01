@@ -72,7 +72,7 @@ function renderController() {
   let st, line;
   const spare = last.curt * P.sys.inv * 1000, held = kit.soc >= lim.soc_max - 0.01;
   const above = kit.soc > lim.soc_max + 0.01;
-  const spareTxt = spare > 20 ? ` ${fmt(spare)} W are not needed${above ? `: the battery is above today's ${fmt(lim.soc_max * 100)}% limit, so it takes no more charge` : held ? `: the battery is held at ${fmt(lim.soc_max * 100)}% today` : lim.hotNow ? ": charging is slowed in the heat" : ""}.` : "";
+  const spareTxt = spare > 20 ? ` ${fmt(spare)} W are not needed${above ? `: the battery is above today's ${fmt(lim.soc_max * 100)}% limit, so it takes no more charge` : held ? (lim.soc_max >= 0.99 ? ": the battery is full" : `: the battery is held at ${fmt(lim.soc_max * 100)}% today`) : lim.hotNow ? ": charging is slowed in the heat" : ""}.` : "";
   if (h.credit <= 0) { st = "Essentials only"; line = `Credit has run out, so the TV, radio and day fan are paused. Essentials use ${fmt(last.servedC * 1000)} W.`; }
   else if (batW > 20) { st = "Charging from the sun"; line = `The panels give ${fmt(pvW)} W: ${fmt(use)} W to the home and ${fmt(batW)} W into the battery.${spareTxt}`; }
   else if (last.pv > 0.02 && batW >= -20) { st = "Running on the sun"; line = `The panels give ${fmt(pvW)} W and cover the home (${fmt(use)} W).${spareTxt}`; }
@@ -82,7 +82,7 @@ function renderController() {
   // readouts
   const pv = S.packVolts(kit.soc, last.batKw);
   const ro = [
-    { k: "Sun on the panels", v: `${fmt(last.ghi)} <small>W/m²</small>`, d: `Panels give ${fmt(last.pv * 1000)} W`, sp: sparkline(log.map((r) => r.pv), "var(--sun)", h.cfg.pvKwp) },
+    { k: "Sun on the panels", v: `${fmt(last.ghi)} <small>W/m²</small>`, d: `Panels give ${fmt(last.pv * 1000)} W`, sp: sparkline(log.map((r) => r.pv), "var(--sun-line)", h.cfg.pvKwp) },
     { k: "Air temperature", v: `${fmt(last.amb, 1)} <small>°C</small>`, d: `Last 24 h: ${fmt(Math.min(...log.map((r) => r.amb)))} to ${fmt(Math.max(...log.map((r) => r.amb)))} °C`, sp: sparkline(log.map((r) => r.amb), "var(--use)") },
     { k: "Battery temperature", v: `${fmt(last.temp, 1)} <small>°C</small>`, d: P.placements[h.cfg.placement].short, sp: sparkline(log.map((r) => r.temp), "var(--store)") },
     { k: "Charge", v: `${fmt(kit.soc * 100)} <small>%</small>`, d: `${fmt(kit.soc * cap, 2)} of ${fmt(cap, 2)} kWh (${fmt(P.bat.cap, 2)} when new)`, sp: sparkline(log.map((r) => r.soc), "var(--store)", 1) },
@@ -108,17 +108,18 @@ function renderController() {
     more: `Charge limit ${fmt((lim.hotNow ? s.cHot : P.bat.maxC) * cap * 1000)} W (${lim.hotNow ? s.cHot : P.bat.maxC} C). The 400 W panels rarely give more than about 370 W, so on this kit the limit seldom binds; it matters on kits with more panels per kWh of battery.` });
   for (const m of (d && d.moved) || []) {
     const hrs = m.to.slice().sort((a, b) => a - b), phone = /phone/i.test(m.name), wh = m.from.length * (h.sabil.hh.flex.find((f) => f.name === m.name) || { kw: 0 }).kw * 1000;
-    rules.push({ key: "flex-" + m.name, t: phone ? `Phone charging at ${spanTxt(hrs)}` : `Fridge pre-cools at ${spanTxt(hrs)}`, chip: ["ok", "Planned"],
+    const hNow = kit.t - d.t0, state = hNow > hrs[hrs.length - 1] ? ["watch", "Done today"] : hNow >= hrs[0] ? ["ok", "Now"] : ["ok", "Planned"];
+    rules.push({ key: "flex-" + m.name, t: phone ? `Phone charging at ${spanTxt(hrs)}` : `Fridge pre-cools at ${spanTxt(hrs)}`, chip: state,
       why: phone ? "The hours with the most spare sun in today's forecast." : "It cools ahead in the sunny hours, so it needs less from the battery at night.",
       more: `${phone ? "Phones are usually charged" : "This part of the fridge's cooling usually runs"} at ${spanTxt(m.from)}, after dark. Moved to sunny hours, its ${fmt(wh)} Wh come from the panels instead of the battery.${phone ? " The family screen shows this as the best time." : ""}` });
   }
   rules.push({ key: "ess", t: "Essentials first", chip: ["ok", "Always on"], why: "Lights, phones, the night fan and the fridge are the last to be cut.",
     more: `When power is short, the TV, radio and day fan stop first. A standard kit cuts everything at once. A standard kit in this home would now be at ${fmt(h.std.soc * 100)}% charge, charging to 100% whatever the weather.` });
-  $("rules").innerHTML = rules.map((r) => `<div class="rule"><div class="rule-top"><h3>${esc(r.t)}</h3><span class="chip ${r.chip[0]}">${ICON[r.chip[0]]}${esc(r.chip[1])}</span></div><p class="why">${esc(r.why)}</p><details data-key="${r.key}"${openWhy.has(r.key) ? " open" : ""}><summary>Why</summary><p>${esc(r.more)}</p></details></div>`).join("");
+  $("rules").innerHTML = rules.map((r) => `<div class="rule"><div class="rule-top"><h3>${esc(r.t)}</h3><span class="chip ${r.chip[0]}">${ICON[r.chip[0]]}${esc(r.chip[1])}</span></div><p class="why">${esc(r.why)}</p><details data-key="${r.key}"${openWhy.has(r.key) ? " open" : ""}><summary>Why<span class="sr">: ${esc(r.t)}</span></summary><p>${esc(r.more)}</p></details></div>`).join("");
   // alerts
   $("alertSub").textContent = al.length ? `${al.length} for this home` : "";
-  $("alerts").innerHTML = al.length ? al.map((a) => `<div class="alert-row ${a.lvl === "alert" ? "bad" : ""}"><span class="chip ${a.lvl}" style="padding:2px 6px">${ICON[a.lvl]}</span><div><b>${esc(a.title)}</b><p>${esc(a.body)}</p>${a.action === "clean" ? '<div class="act"><button class="btn ghost" type="button" data-act="clean">Mark panels cleaned</button></div>' : ""}</div></div>`).join("")
-    : `<div class="alert-row"><span class="chip ok" style="padding:2px 6px">${ICON.ok}</span><div><b>All good</b><p>Panels, battery and credit look normal. Dust check: the panels give ${fmt(kit.pi * 100)}% of what clean panels would.</p></div></div>`;
+  $("alerts").innerHTML = al.length ? al.map((a) => `<div class="alert-row ${a.lvl === "alert" ? "bad" : ""}"><span class="ico ${a.lvl}">${ICON[a.lvl]}</span><div><b>${esc(a.title)}</b><p>${esc(a.body)}</p>${a.action === "clean" ? '<div class="act"><button class="btn ghost" type="button" data-act="clean">Mark panels cleaned</button></div>' : ""}</div></div>`).join("")
+    : `<div class="alert-row"><span class="ico ok">${ICON.ok}</span><div><b>All good</b><p>Panels, battery and credit look normal. Dust check: the panels give ${fmt(kit.pi * 100)}% of what clean panels would.</p></div></div>`;
   $("tryCloud").setAttribute("aria-pressed", scen.cloud != null); $("tryHeat").setAttribute("aria-pressed", scen.heat != null); $("tryDust").setAttribute("aria-pressed", h.soil < 1);
   drawTimeline($("timeline"), h, proj, fc);
   // battery health
@@ -177,7 +178,7 @@ function renderFleet() {
   rows.sort((a, b) => b.sev - a.sev || a.i - b.i);
   $("fleetRows").innerHTML = rows.map((r) => {
     const h = r.h, kit = h.sabil, st = r.al.length ? r.al.map((a) => `<span class="chip ${a.lvl}">${ICON[a.lvl]}${esc(a.tag)}</span>`).join(" ") : `<span class="chip ok">${ICON.ok}All good</span>`;
-    return `<tr data-i="${r.i}" tabindex="0" class="${r.i === sel ? "sel" : ""}"><td><span class="id">${h.cfg.id}</span><br><span class="area">${esc(h.cfg.area)}</span></td><td>${esc(P.placements[h.cfg.placement].short)}</td>` +
+    return `<tr data-i="${r.i}" class="${r.i === sel ? "sel" : ""}"><td><button type="button" class="rowbtn" aria-label="Open ${h.cfg.id}, ${esc(h.cfg.area)}">${h.cfg.id}</button><br><span class="area">${esc(h.cfg.area)}</span></td><td>${esc(P.placements[h.cfg.placement].short)}</td>` +
       `<td class="n"><span class="minibar"><i style="width:${Math.max(0, (kit.capFrac - 0.8) / 0.2) * 100}%"></i></span>${fmt(kit.capFrac * 100, 1)}%</td><td class="n">${fmt(r.life, 1)} <span class="muted">vs ${fmt(r.lifeS, 1)}</span> years</td>` +
       `<td class="n">${fmt(r.crit * 100, 2)}%</td><td class="n">${h.credit > 0 ? fmt(h.credit, 1) + " kWh" : "Lifeline"}</td><td>${st}</td></tr>`;
   }).join("");
@@ -235,7 +236,8 @@ for (const [id, key] of [["mGhi", "ghi"], ["mAmb", "amb"], ["mExtra", "extra"]])
 $("topUp").addEventListener("click", () => { homes[sel].credit += 10; render(); });
 $("daySel").addEventListener("change", (e) => {
   const v = e.target.value, now = new Date(Date.now() + 3600e3);
-  const t = v === "today" ? startHour() : (Date.UTC(2023, +v.split("-")[0] - 1, +v.split("-")[1]) - Date.UTC(2023, 0, 1)) / 3600e3 + 10;
+  // seasons: the kits have run a full year first (2023 weather replayed), so battery wear and projections have history
+  const t = v === "today" ? startHour() : W.n + (Date.UTC(2023, +v.split("-")[0] - 1, +v.split("-")[1]) - Date.UTC(2023, 0, 1)) / 3600e3 + 10;
   boot(t); homeSelOptions(); render();
 });
 $("tryCloud").addEventListener("click", () => { scen.cloud = scen.cloud == null ? T - hod(T) + 24 : null; applyScenarios(); render(); });
@@ -245,7 +247,6 @@ $("alerts").addEventListener("click", (e) => { if (e.target.closest("[data-act=c
 $("rules").addEventListener("toggle", (e) => { const k = e.target.dataset && e.target.dataset.key; if (k) { if (e.target.open) openWhy.add(k); else openWhy.delete(k); } }, true);
 function openRow(tr) { sel = +tr.dataset.i; $("homeSel").value = sel; location.hash = "controller"; }
 $("fleetRows").addEventListener("click", (e) => { const tr = e.target.closest("tr[data-i]"); if (tr) openRow(tr); });
-$("fleetRows").addEventListener("keydown", (e) => { if (e.key === "Enter") { const tr = e.target.closest("tr[data-i]"); if (tr) openRow(tr); } });
 window.addEventListener("resize", () => { clearTimeout(window.__rz); window.__rz = setTimeout(render, 120); });
 try { if (localStorage.getItem("sabil-tip") !== "seen") $("tip").hidden = false; } catch (e) { $("tip").hidden = false; }
 $("tipClose").addEventListener("click", () => { $("tip").hidden = true; try { localStorage.setItem("sabil-tip", "seen"); } catch (e) {} });

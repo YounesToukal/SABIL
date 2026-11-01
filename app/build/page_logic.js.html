@@ -27,7 +27,7 @@ function startHour() {
   return Math.min(W.n - 49 - 24, Math.max(45 * 24 + now.getUTCHours(), t));
 }
 let T = startHour();
-const dateOf = (t) => new Date(W.start.getTime() + t * 3600e3);
+const dateOf = (t) => new Date(W.start.getTime() + mod(t) * 3600e3); // the replay's weather date (2023)
 const dayName = (t) => dateOf(t).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
 
 // ---------- example fleet ----------
@@ -91,7 +91,7 @@ function stepHome(h, i, t, quiet) {
 function advance(quiet) {
   homes.forEach((h, i) => stepHome(h, i, T, quiet));
   T++;
-  if (T >= W.n - 49) T = W.n - 49, playing = false;
+  if (T >= 2 * W.n - 49) T = 2 * W.n - 49, playing = false;
 }
 
 // warm start: every kit runs from its installation day to the chosen day on the real weather
@@ -158,7 +158,7 @@ function alertsFor(h) {
   if (h.credit <= 0) out.push({ lvl: "alert", tag: "Credit used up", title: "Credit has run out", body: "The TV, radio and day fan are paused. Lights, phones, the night fan and the fridge keep running; that energy is taken from the next top-up." });
   else if (h.credit < dailyUse(h)) out.push({ lvl: "watch", tag: "Low credit", title: "Credit for less than a day", body: `${fmt(h.credit, 1)} kWh left. A usual day here uses about ${fmt(dailyUse(h), 1)} kWh.` });
   if (kit.piN > 6 && kit.pi < 0.92) out.push({ lvl: "alert", tag: "Clean panels", title: "The panels give less than the sun allows", body: `They make ${fmt((1 - kit.pi) * 100)}% less power than clean panels would under the same sun. Harmattan dust is the usual cause. Wipe them with water early in the morning.`, action: "clean" });
-  if (last.temp >= 40) out.push({ lvl: "alert", tag: "Battery hot", title: `Battery at ${fmt(last.temp)} °C`, body: "Charging is slowed to protect it. Check the box is shaded and air can move around it." });
+  if (last.temp >= 45) out.push({ lvl: "alert", tag: "Battery hot", title: `Battery at ${fmt(last.temp)} °C`, body: `Above 45 °C, the usual charging limit for LFP batteries, so charging is slowed. ${h.cfg.placement === "outdoor_shaded_box" ? "Check the box is shaded and air can move around it." : "Move the battery away from sunny walls and the roof, to a spot where air can move."}` });
   const fc = forecastFor(h), proj = kit.project(24, fc.pv, fc.amb), ni = nightInfo(h, proj);
   if (!ni.critOk) out.push({ lvl: "alert", tag: "Essentials at risk", title: "Essentials may run short tonight", body: "The forecast does not cover lights, phones, the night fan and the fridge until sunrise. The TV, radio and day fan will be cut first." });
   return out;
@@ -175,14 +175,15 @@ function drawStrip(el, h, proj, fc) {
   const N = proj.length, x = (k) => l + (Wd - l - r) * k / N, ySoc = (s) => t + (H - t - b) * (1 - s), kwp = h.cfg.pvKwp;
   const yPv = (p) => H - b - (H - t - b) * 0.5 * Math.min(1, p / (kwp * 0.85));
   const kit = h.sabil, ni = nightInfo(h, proj);
-  let s = `<svg viewBox="0 0 ${Wd} ${H}" height="${H}" role="img" aria-label="Expected sun and battery level over the next 24 hours">`;
+  const lab = `Next 24 hours. Battery now ${fmt(kit.soc * 100)}%.${ni.handover > 0 && ni.handover < N ? ` The battery takes over from the sun at ${hh(kit.t + ni.handover)}.` : ""}${ni.sunBack != null && ni.sunBack < N ? ` Sun back at ${hh(kit.t + ni.sunBack)}, battery about ${fmt(proj[Math.max(0, ni.sunBack - 1)].soc * 100)}%.` : ""}`;
+  let s = `<svg viewBox="0 0 ${Wd} ${H}" height="${H}" role="img" aria-label="${esc(lab)}">`;
   for (let k = 0; k < N; k++) if (fc.pv[k] < 0.01) s += `<rect x="${x(k)}" y="${t}" width="${x(k + 1) - x(k) + .5}" height="${H - t - b}" fill="var(--night)"/>`;
   const sunTop = [];
   s += `<line class="grid-l" x1="${l}" x2="${Wd - r}" y1="${ySoc(1)}" y2="${ySoc(1)}"/><line class="grid-l" x1="${l}" x2="${Wd - r}" y1="${ySoc(0)}" y2="${ySoc(0)}"/>`;
   s += `<text x="${Wd - r}" y="${ySoc(1) - 6}" text-anchor="end">Full</text>`;
   for (let k = 0; k < N; k++) { sunTop.push([x(k + .5), yPv(fc.pv[k])]); }
   s += `<path d="${linePath([[x(0), H - b], ...sunTop, [x(N), H - b]])}Z" fill="var(--sun-fill)"/>`;
-  s += `<path d="${linePath(sunTop)}" fill="none" stroke="var(--sun)" stroke-width="2"/>`;
+  s += `<path d="${linePath(sunTop)}" fill="none" stroke="var(--sun-line)" stroke-width="2"/>`;
   const floor = [[x(0), ySoc(proj[0].floor)], ...proj.map((p, k) => [x(k + 1), ySoc(p.floor)])];
   s += `<path d="${linePath(stepPts(floor.map((p) => p[0]), floor.map((p) => p[1])))}" fill="none" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
   const bat = [[x(0), ySoc(kit.soc)], ...proj.map((p, k) => [x(k + 1), ySoc(p.soc)])];
@@ -223,18 +224,18 @@ function drawTimeline(el, h, proj, fc) {
   const stepKw = maxKw <= 0.6 ? 0.1 : maxKw <= 1.2 ? 0.2 : 0.5;
   maxKw = Math.ceil(maxKw / stepKw - 1e-9) * stepKw;
   const y1 = (v) => top1 + h1 * (1 - v / maxKw), y2 = (s) => top2 + h2 * (1 - s);
-  let s = `<svg viewBox="0 0 ${Wd} ${Ht}" height="${Ht}" role="img" aria-label="Sun power, home use and battery level, last 24 hours and next 24 hours">`;
+  let s = `<svg viewBox="0 0 ${Wd} ${Ht}" height="${Ht}" role="img" aria-label="Sun power, home use and battery level over the last 24 hours and the next 24 hours. Battery now ${fmt(kit.soc * 100)}%, panels now ${fmt((past.length ? past[past.length - 1].pv : 0) * 1000)} W.">`;
   for (let v = 0; v <= maxKw + 1e-9; v += stepKw) s += `<line class="grid-l" x1="${l}" x2="${Wd - r}" y1="${y1(v)}" y2="${y1(v)}"/><text x="${l - 8}" y="${y1(v) + 4}" text-anchor="end">${fmt(v * 1000)} W</text>`;
   for (const v of [0, .5, 1]) s += `<line class="grid-l" x1="${l}" x2="${Wd - r}" y1="${y2(v)}" y2="${y2(v)}"/><text x="${l - 8}" y="${y2(v) + 4}" text-anchor="end">${v * 100}%</text>`;
   const k0 = -NP;
   // past sun (measured) and future band (P10 to P50)
   if (NP) {
     const sp = past.map((p, i) => [x(k0 + i + .5), y1(p.pv)]);
-    s += `<path d="${linePath([[sp[0][0], y1(0)], ...sp, [sp[sp.length - 1][0], y1(0)]])}Z" fill="var(--sun-fill)"/><path d="${linePath(sp)}" fill="none" stroke="var(--sun)" stroke-width="2"/>`;
+    s += `<path d="${linePath([[sp[0][0], y1(0)], ...sp, [sp[sp.length - 1][0], y1(0)]])}Z" fill="var(--sun-fill)"/><path d="${linePath(sp)}" fill="none" stroke="var(--sun-line)" stroke-width="2"/>`;
   }
   const fm = Array.from(fc.pv, (v, i) => [x(i + .5), y1(v)]), f10 = Array.from(fc.p10, (v, i) => [x(i + .5), y1(v)]);
   s += `<path d="${linePath([...fm, ...f10.slice().reverse()])}Z" fill="var(--sun-band)"/>`;
-  s += `<path d="${linePath(fm)}" fill="none" stroke="var(--sun)" stroke-width="2" stroke-dasharray="6 4"/>`;
+  s += `<path d="${linePath(fm)}" fill="none" stroke="var(--sun-line)" stroke-width="2" stroke-dasharray="6 4"/>`;
   // home use: steps
   if (NP) { const xs = [], ys = []; past.forEach((p, i) => { xs.push(x(k0 + i)); ys.push(y1(p.crit + p.nonc)); }); xs.push(x(0)); s += `<path d="${linePath(stepPts(xs, ys))}" fill="none" stroke="var(--use)" stroke-width="1.75"/>`; }
   { const xs = [], ys = []; proj.forEach((p, i) => { xs.push(x(i)); ys.push(y1(p.crit + p.nonc)); }); xs.push(x(NF)); s += `<path d="${linePath(stepPts(xs, ys))}" fill="none" stroke="var(--use)" stroke-width="1.5" stroke-dasharray="4 3"/>`; }
