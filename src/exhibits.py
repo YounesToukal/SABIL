@@ -204,53 +204,61 @@ def robustness(titled=True):
 
 # ------------------------------------------------------------------ 4. cost build-up
 def cost_buildup(titled=True):
+    """Same build-up as before, drawn in US dollars per kWh (naira shown once, for the tariff)."""
     cs = load("costs_summary.json")
     fx = cs["inputs_used"]["ngn_per_usd"]
     kwh = cs["inputs_used"]["kwh_delivered_per_year"]["smart"]
     it = cs["sabil"]["yearly_items_usd"]
-    per = lambda usd: usd / kwh * fx  # noqa: E731
+    usd = lambda v: f"\\${v:.2f}"  # noqa: E731   escaped: matplotlib reads two $ as maths
+    per = lambda y: y / kwh  # noqa: E731   yearly USD -> USD per kWh delivered
     parts = [("Battery\nwear", per(it["battery"])), ("Panels,\nmounting", per(it["pv_and_mounting"])),
              ("Controller,\nmeter", per(it["electronics"])), ("Wiring,\ninstall,\nsales", per(it["wiring_install_acquisition"])),
              ("Running\ncosts", per(it["running"]))]
-    tariff = cs["tariff_ngn_per_kwh"]["sabil"]
+    tariff_ngn = cs["tariff_ngn_per_kwh"]["sabil"]
+    tariff = tariff_ngn / fx
     parts.append(("Fees,\nunpaid\nbills", tariff - sum(v for _, v in parts)))
     sens = cs["sensitivity_sabil_tariff"]
-    lo = min(min(s["tariff_ngn_per_kwh"]) for s in sens)
-    hi = max(max(s["tariff_ngn_per_kwh"]) for s in sens)
+    lo = min(min(s["tariff_ngn_per_kwh"]) for s in sens) / fx
+    hi = max(max(s["tariff_ngn_per_kwh"]) for s in sens) / fx
     gen = cs["petrol_generator"]
+    g_best = gen["best_case"]["fuel_ngn_per_kwh"] / fx
+    g_small = gen["typical_small_set"]["fuel_ngn_per_kwh"] / fx
     fig = plt.figure(figsize=(13.33, 7.5) if titled else DECK_SIZES["cost_buildup"])
     top = 0.76 if titled else 0.93
     ax = fig.add_axes([0.07, 0.17, 0.9, top - 0.17] if titled else [0.08, 0.13, 0.9, 0.82])
+    off = 0.0105
     x, run = 0, 0.0
     for lab, v in parts:
         ax.bar(x, v, bottom=run, width=0.62, color=SABIL if lab.startswith("Battery") else "#6A73A0")  # battery wear: the cost SABIL acts on
-        ax.text(x, run + v + 14, ngn(v), ha="center", fontsize=10.5)
+        ax.text(x, run + v + off, usd(v), ha="center", fontsize=10.5)
         if x:
             ax.plot([x - 1 + 0.31, x - 0.31], [run, run], color=INK2, lw=0.8)
         run += v
         x += 1
     ax.bar(x, tariff, width=0.62, color=SABIL)
     ax.errorbar(x, tariff, yerr=[[tariff - lo], [hi - tariff]], color=INK, capsize=6, lw=1.4)
-    ax.text(x + 0.38, tariff, f"{ngn(tariff)}\nrange tested\n{ngn(lo)} to {ngn(hi)}", fontsize=10.5, va="center", fontweight="bold", color=SABIL)
+    ax.text(x + 0.38, tariff, f"{usd(tariff)} ({ngn(tariff_ngn)})\nrange tested\n{usd(lo)} to {usd(hi)}", fontsize=10.5, va="center",
+            fontweight="bold", color=SABIL)
     x += 2.0
-    ax.bar(x, gen["best_case"]["fuel_ngn_per_kwh"], width=0.62, color=GEN)
-    ax.text(x, gen["best_case"]["fuel_ngn_per_kwh"] + 14, ngn(gen["best_case"]["fuel_ngn_per_kwh"]), ha="center", fontsize=10.5)
+    ax.bar(x, g_best, width=0.62, color=GEN)
+    ax.text(x, g_best + off, usd(g_best), ha="center", fontsize=10.5)
     x += 1.3
-    cap = 1000
+    cap = 0.75
     ax.bar(x, cap, width=0.62, color=GEN)
-    ax.plot([x - 0.36, x + 0.36], [cap - 45, cap - 25], color="white", lw=5)
-    ax.text(x, cap + 14, f"{ngn(gen['typical_small_set']['fuel_ngn_per_kwh'])}\n(bar cut)", ha="center", fontsize=10.5)
+    ax.plot([x - 0.36, x + 0.36], [cap - 0.034, cap - 0.019], color="white", lw=5)
+    ax.text(x, cap + off, f"{usd(g_small)}\n(bar cut)", ha="center", fontsize=10.5)
     labels = [p[0] for p in parts] + ["SABIL\ntariff", "Generator fuel\nbest case\n0.5 L/kWh", "Generator fuel\nsmall set\n2 L/kWh"]
     pos = list(range(len(parts) + 1)) + [len(parts) + 2.0, len(parts) + 3.3]
     ax.set_xticks(pos, labels, fontsize=9.5 if titled else 8.8)
     ax.axvline(len(parts) + 1.25, color=GRID, lw=1)
-    ax.set_ylim(0, 1100)
-    ax.set_ylabel("Naira per kWh delivered")
+    ax.set_ylim(0, 0.83)
+    ax.yaxis.set_major_formatter(lambda v, _: f"${v:.1f}")
+    ax.set_ylabel("US dollars per kWh delivered")
     ax.tick_params(axis="x", length=0)
-    frame(fig, f"A SABIL kWh costs {ngn(tariff)}, below even the best-case fuel cost of a petrol generator ({ngn(gen['best_case']['fuel_ngn_per_kwh'])})",
+    frame(fig, f"A SABIL kWh costs {usd(tariff)}, below even the best-case fuel cost of a petrol generator ({usd(g_best)})",
           "Break-even tariff built up from its parts (kit financed over 20 years at 12% real, 2026 prices) against "
           "generator fuel alone at the Borno pump price",
-          "Source: src/cost_model.py, params/costs.json (NNPC Oct 2026: petrol ₦1,430/L in Borno; CBN ₦1,332/USD; PVPRO Sep 2026; "
+          "Source: src/cost_model.py, params/costs.json (NNPC Oct 2026: petrol ₦1,430/L in Borno; CBN ₦1,332 per US dollar; PVPRO Sep 2026; "
           "BNEF Dec 2025; A2EI 2022).\nRange tested: battery price, cost of capital, unpaid bills, panel price, use, ageing model.", titled)
     save(fig, "fig15_cost_per_kwh.png" if titled else "cost_buildup.png", titled)
 
