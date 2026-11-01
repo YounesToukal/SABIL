@@ -46,6 +46,8 @@ python src/exhibits.py           # report and slide exhibits (fig15-fig20, resul
 python src/report.py             # results/RESEARCH_REPORT.md
 ```
 
+Interface: open `app/index.html` in a browser, works offline (source and checks in `app/`).
+
 ## Layout (integration contract)
 
 | Path | Owner | What |

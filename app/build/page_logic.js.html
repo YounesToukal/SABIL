@@ -1,0 +1,256 @@
+<script>
+/*__ENGINE__*/
+</script>
+<script>
+"use strict";
+const DATA = __DATA__;
+const S = SABIL, P = S.P;
+const W = S.setWeather(DATA);
+const ORIG = { ghi: W.ghi.slice(), amb: W.amb.slice(), fc0: W.fc0.slice(), fc1: W.fc1.slice(), fc0p10: W.fc0p10.slice(), fc1p10: W.fc1p10.slice() };
+const $ = (id) => document.getElementById(id);
+const mod = S.mod, hod = S.hod;
+const fmt = (v, d = 0) => (v == null || !isFinite(v)) ? "–" : v.toLocaleString("en-GB", { minimumFractionDigits: d, maximumFractionDigits: d });
+const hh = (t) => String(hod(t)).padStart(2, "0") + ":00";
+const ICON = {
+  ok: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  alert: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l7 13H1z" fill="currentColor"/><path d="M8 6v4" stroke="var(--surface)" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="12.2" r="1" fill="var(--surface)"/></svg>',
+  watch: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 4.5V8l2.5 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  play: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg>',
+  pause: '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="2.5" width="3" height="11" fill="currentColor"/><rect x="9.5" y="2.5" width="3" height="11" fill="currentColor"/></svg>',
+};
+
+// ---------- clock: start at today's date and hour (Maiduguri time, UTC+1) inside the 2023 weather year ----------
+function startHour() {
+  const now = new Date(Date.now() + 3600e3);
+  const y0 = Date.UTC(2023, 0, 1), d = Date.UTC(2023, now.getUTCMonth(), now.getUTCDate());
+  const t = Math.round((d - y0) / 3600e3) + now.getUTCHours();
+  return Math.min(W.n - 49 - 24, Math.max(45 * 24 + now.getUTCHours(), t));
+}
+let T = startHour();
+const dateOf = (t) => new Date(W.start.getTime() + t * 3600e3);
+const dayName = (t) => dateOf(t).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+
+// ---------- example fleet ----------
+const FLEET = [ // every home has the selected kit: 400 Wp, 1.92 kWh, 24 V DC
+  { id: "MDG-001", area: "Bulumkutu", pvKwp: 0.4, loadScale: 1.00, placement: "indoor_default", installDay: 0, topup: 0.9 },
+  { id: "MDG-002", area: "Gwange", pvKwp: 0.4, loadScale: 1.10, placement: "indoor_metal_roof", installDay: 0, topup: 0.8 },
+  { id: "MDG-003", area: "Old Maiduguri", pvKwp: 0.4, loadScale: 1.20, placement: "indoor_masonry", installDay: 0, topup: 0.9 },
+  { id: "MDG-004", area: "Pompomari", pvKwp: 0.4, loadScale: 0.85, placement: "cool_interior_floor", installDay: 31, topup: 0.7 },
+  { id: "MDG-005", area: "Wulari", pvKwp: 0.4, loadScale: 0.90, placement: "outdoor_shaded_box", installDay: 59, topup: 0.8, dustDaysAgo: 9 },
+  { id: "MDG-006", area: "Bolori", pvKwp: 0.4, loadScale: 1.05, placement: "indoor_metal_roof", installDay: 90, topup: 0.6 },
+  { id: "MDG-007", area: "Shehuri", pvKwp: 0.4, loadScale: 1.15, placement: "outdoor_shaded_box", installDay: 0, topup: 0.9 },
+  { id: "MDG-008", area: "Moduganari", pvKwp: 0.4, loadScale: 1.20, placement: "indoor_metal_roof", installDay: 120, topup: 0.25 },
+  { id: "MDG-009", area: "Jiddari Polo", pvKwp: 0.4, loadScale: 0.95, placement: "indoor_masonry", installDay: 151, topup: 0.8 },
+  { id: "MDG-010", area: "Dala", pvKwp: 0.4, loadScale: 1.10, placement: "cool_interior_floor", installDay: 0, topup: 0.7 },
+  { id: "MDG-011", area: "Gamboru", pvKwp: 0.4, loadScale: 0.85, placement: "outdoor_shaded_box", installDay: 181, topup: 0.9 },
+  { id: "MDG-012", area: "London Ciki", pvKwp: 0.4, loadScale: 1.25, placement: "indoor_metal_roof", installDay: 59, topup: 0.5 },
+];
+let seed = 2026;
+const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+let homes = [];
+function makeHomes() {
+  seed = 2026;
+  homes = FLEET.map((c) => {
+    const cfg = { ...c, t0: Math.max(0, Math.min(c.installDay * 24, (Math.floor(T / 24) - 30) * 24)) };
+    return { cfg, sabil: new S.Kit(cfg, "sabil"), std: new S.Kit(cfg, "standard"), credit: 8 + 10 * rnd(), soil: 1, debt: 0 };
+  });
+}
+let sel = 0;
+let source = "replay", playing = true, speed = "1000";
+const scen = { cloud: null, heat: null };
+const manual = { ghi: 600, amb: 34, extra: 0 };
+let devQueue = [], devPending = null, devTimer = null;
+
+function inputsFor(h, t, i) {
+  const k = mod(t);
+  let ghi = W.ghi[k], amb = W.amb[k], extraKw = 0, o = {};
+  if (i === sel && source === "manual") { ghi = manual.ghi; amb = manual.amb; extraKw = manual.extra / 1000; }
+  if (i === sel && source === "device" && devPending) {
+    const r = devPending;
+    if (r.ghi_w_m2 != null) ghi = r.ghi_w_m2;
+    if (r.ambient_c != null) amb = r.ambient_c;
+    if (r.pv_w != null) o.pvDc = r.pv_w / 1000;
+    if (r.battery_temp_c != null) o.tBat = r.battery_temp_c;
+    if (r.soc != null) o.soc = r.soc > 1 ? r.soc / 100 : r.soc;
+    if (r.essential_w != null) o.critKw = r.essential_w / 1000;
+    if (r.other_w != null) o.noncKw = r.other_w / 1000;
+  }
+  if (o.pvDc == null && h.soil < 1) o.pvDc = S.pvDc(ghi, amb, h.cfg.pvKwp) * h.soil;
+  return { ghi, amb, extraKw, ...o };
+}
+
+function stepHome(h, i, t, quiet) {
+  if (t < h.cfg.t0) return;
+  const inp = inputsFor(h, t, i);
+  const r = h.sabil.step({ ...inp, otherOff: h.credit <= 0 });
+  h.std.step({ ghi: inp.ghi, amb: inp.amb, pvDc: inp.pvDc, extraKw: inp.extraKw });
+  h.credit -= r.servedC + r.servedN;
+  const auto = quiet || i !== sel;
+  if (auto && h.credit < 2 && hod(t) === 10 && rnd() < h.cfg.topup) h.credit += 10 + 10 * Math.round(rnd());
+}
+function advance(quiet) {
+  homes.forEach((h, i) => stepHome(h, i, T, quiet));
+  T++;
+  if (T >= W.n - 49) T = W.n - 49, playing = false;
+}
+
+// warm start: every kit runs from its installation day to the chosen day on the real weather
+function boot(t1) {
+  T = t1;
+  scen.cloud = scen.heat = null;
+  for (const k of Object.keys(ORIG)) W[k].set(ORIG[k]);
+  makeHomes();
+  T = 0;
+  homes.forEach((h) => { if (h.cfg.dustDaysAgo) h.dustAt = t1 - h.cfg.dustDaysAgo * 24; });
+  while (T < t1) {
+    homes.forEach((h) => { if (h.dustAt != null && T >= h.dustAt) h.soil = 0.8; });
+    advance(true);
+  }
+  homes[0].credit = 12;
+}
+boot(T);
+
+// ---------- situations ("try") ----------
+function applyScenarios() {
+  for (const k of Object.keys(ORIG)) W[k].set(ORIG[k]);
+  if (scen.cloud != null) for (let t = scen.cloud; t < scen.cloud + 24; t++) { const k = mod(t); for (const a of ["ghi", "fc0", "fc1", "fc0p10", "fc1p10"]) W[a][k] = ORIG[a][k] * 0.35; }
+  // heat wave: +6 °C from yesterday to three days ahead, so the forecast (yesterday's temperatures) sees it too
+  if (scen.heat != null) for (let t = scen.heat - hod(scen.heat) - 24; t < scen.heat + 72; t++) W.amb[mod(t)] = ORIG.amb[mod(t)] + 6;
+  homes.forEach((h) => { if (T > h.cfg.t0) { h.sabil.replan(); } });
+}
+
+// ---------- derived: forecast, projection, status ----------
+function forecastFor(h, H = 24) {
+  const kit = h.sabil, t = kit.t, dayStart = t - hod(t), kwp = h.cfg.pvKwp, pi = kit.pi;
+  let m = 0, f = 0, n = 0;
+  for (const r of kit.log) if (r.t >= dayStart && r.t < t) {
+    const fcv = S.pvDc(W.fc0[mod(r.t)], W.amb[mod(r.t - 24)], kwp) * pi;
+    if (fcv > 0.05 * kwp) { m += r.pv; f += fcv; n++; }
+  }
+  const ratio = f > 0 ? Math.min(1.5, Math.max(0.3, m / f)) : 1, w = Math.min(1, n / 4), corr = 1 + w * (ratio - 1);
+  const pv = new Float64Array(H), p10 = new Float64Array(H), amb = new Float64Array(H);
+  for (let k = 0; k < H; k++) {
+    const tt = t + k, i = mod(tt), today = tt < dayStart + 24, aP = W.amb[mod(tt - 24)];
+    const g = today ? W.fc0[i] : W.fc1[i], g10 = today ? W.fc0p10[i] : W.fc1p10[i], c = today ? corr : 1;
+    pv[k] = S.pvDc(g, aP, kwp) * pi * c; p10[k] = Math.min(pv[k], S.pvDc(g10, aP, kwp) * pi * c); amb[k] = aP;
+  }
+  return { pv, p10, amb, ratio, nNow: n, corr };
+}
+function nightInfo(h, proj) {
+  // first hour from now the sun no longer covers essentials, and the hour it is back
+  let k0 = 0;
+  const sunOk = (p) => p.pv * P.sys.inv >= p.crit && p.pv > 0.02;
+  while (k0 < proj.length && sunOk(proj[k0])) k0++;
+  let k1 = k0;
+  while (k1 < proj.length && !sunOk(proj[k1])) k1++;
+  let critOk = true, otherOk = true, minSoc = 1;
+  for (let k = k0; k < Math.min(k1 + 1, proj.length); k++) {
+    const p = proj[k];
+    if (p.servedC < p.crit - 0.002) critOk = false;
+    if (p.servedN < p.nonc - 0.002) otherOk = false;
+    minSoc = Math.min(minSoc, p.soc);
+  }
+  return { handover: k0, sunBack: k1 < proj.length ? k1 : null, critOk, otherOk, socAtSunrise: proj[Math.max(0, Math.min(k1, proj.length) - 1)].soc, minSoc };
+}
+function alertsFor(h) {
+  const kit = h.sabil, out = [], last = kit.last;
+  if (!last) return out;
+  if (h.credit <= 0) out.push({ lvl: "alert", tag: "Credit used up", title: "Credit has run out", body: "The TV, radio and day fan are paused. Lights, phones, the night fan and the fridge keep running; that energy is taken from the next top-up." });
+  else if (h.credit < dailyUse(h)) out.push({ lvl: "watch", tag: "Low credit", title: "Credit for less than a day", body: `${fmt(h.credit, 1)} kWh left. A usual day here uses about ${fmt(dailyUse(h), 1)} kWh.` });
+  if (kit.piN > 6 && kit.pi < 0.92) out.push({ lvl: "alert", tag: "Clean panels", title: "The panels give less than the sun allows", body: `They make ${fmt((1 - kit.pi) * 100)}% less power than clean panels would under the same sun. Harmattan dust is the usual cause. Wipe them with water early in the morning.`, action: "clean" });
+  if (last.temp >= 40) out.push({ lvl: "alert", tag: "Battery hot", title: `Battery at ${fmt(last.temp)} °C`, body: "Charging is slowed to protect it. Check the box is shaded and air can move around it." });
+  const fc = forecastFor(h), proj = kit.project(24, fc.pv, fc.amb), ni = nightInfo(h, proj);
+  if (!ni.critOk) out.push({ lvl: "alert", tag: "Essentials at risk", title: "Essentials may run short tonight", body: "The forecast does not cover lights, phones, the night fan and the fridge until sunrise. The TV, radio and day fan will be cut first." });
+  return out;
+}
+function dailyUse(h) { let s = 0; for (let i = 0; i < 24; i++) s += h.sabil.hh.crit[i] + h.sabil.hh.nonc[i]; for (const f of h.sabil.hh.flex) s += f.kw * f.n; return s; }
+
+// ---------- charts (hand-drawn SVG, one scale per panel) ----------
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function linePath(pts) { return pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + "," + p[1].toFixed(1)).join(""); }
+function stepPts(xs, ys) { const o = []; for (let i = 0; i < xs.length - 1; i++) { o.push([xs[i], ys[i]], [xs[i + 1], ys[i]]); } return o; }
+
+function drawStrip(el, h, proj, fc) {
+  const Wd = Math.max(300, el.clientWidth || 640), H = 170, l = 6, r = 6, t = 26, b = 26;
+  const N = proj.length, x = (k) => l + (Wd - l - r) * k / N, ySoc = (s) => t + (H - t - b) * (1 - s), kwp = h.cfg.pvKwp;
+  const yPv = (p) => H - b - (H - t - b) * 0.5 * Math.min(1, p / (kwp * 0.85));
+  const kit = h.sabil, ni = nightInfo(h, proj);
+  let s = `<svg viewBox="0 0 ${Wd} ${H}" height="${H}" role="img" aria-label="Expected sun and battery level over the next 24 hours">`;
+  for (let k = 0; k < N; k++) if (fc.pv[k] < 0.01) s += `<rect x="${x(k)}" y="${t}" width="${x(k + 1) - x(k) + .5}" height="${H - t - b}" fill="var(--night)"/>`;
+  const sunTop = [];
+  s += `<line class="grid-l" x1="${l}" x2="${Wd - r}" y1="${ySoc(1)}" y2="${ySoc(1)}"/><line class="grid-l" x1="${l}" x2="${Wd - r}" y1="${ySoc(0)}" y2="${ySoc(0)}"/>`;
+  s += `<text x="${Wd - r}" y="${ySoc(1) - 6}" text-anchor="end">Full</text>`;
+  for (let k = 0; k < N; k++) { sunTop.push([x(k + .5), yPv(fc.pv[k])]); }
+  s += `<path d="${linePath([[x(0), H - b], ...sunTop, [x(N), H - b]])}Z" fill="var(--sun-fill)"/>`;
+  s += `<path d="${linePath(sunTop)}" fill="none" stroke="var(--sun)" stroke-width="2"/>`;
+  const floor = [[x(0), ySoc(proj[0].floor)], ...proj.map((p, k) => [x(k + 1), ySoc(p.floor)])];
+  s += `<path d="${linePath(stepPts(floor.map((p) => p[0]), floor.map((p) => p[1])))}" fill="none" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  const bat = [[x(0), ySoc(kit.soc)], ...proj.map((p, k) => [x(k + 1), ySoc(p.soc)])];
+  s += `<path d="${linePath(bat)}" fill="none" stroke="var(--store)" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+  s += `<circle cx="${x(0)}" cy="${ySoc(kit.soc)}" r="5" fill="var(--store)"/>`;
+  if (ni.handover > 0 && ni.handover < N) {
+    const k = ni.handover, cx = x(k), cy = ySoc(k ? proj[k - 1].soc : kit.soc);
+    s += `<circle cx="${cx}" cy="${cy}" r="7" fill="var(--sun)" stroke="var(--surface)" stroke-width="2"/>`;
+    s += `<text x="${Math.min(Wd - 150, cx + 10)}" y="${Math.max(t + 12, cy - 12)}" style="fill:var(--ink)">Battery takes over, ${hh(kit.t + k)}</text>`;
+  }
+  if (ni.sunBack != null && ni.sunBack < N) {
+    const k = ni.sunBack, cx = x(k), cy = ySoc(proj[Math.max(0, k - 1)].soc);
+    s += `<circle cx="${cx}" cy="${cy}" r="5" fill="var(--surface)" stroke="var(--store)" stroke-width="2.5"/>`;
+    s += `<text x="${Math.min(Wd - 160, Math.max(l, cx - 60))}" y="${Math.min(H - b - 8, cy + 22)}" style="fill:var(--ink)">Sun back ${hh(kit.t + k)}, ${fmt(proj[Math.max(0, k - 1)].soc * 100)}%</text>`;
+  }
+  s += `<text x="${x(0) + 10}" y="${Math.max(t + 12, ySoc(kit.soc) - 10)}" style="fill:var(--ink);font-weight:700">Now ${fmt(kit.soc * 100)}%</text>`;
+  const stepH = Wd < 560 ? 6 : 3;
+  for (let k = stepH; k < N; k += stepH) s += `<text x="${x(k)}" y="${H - 6}" text-anchor="middle">${hh(kit.t + k)}</text>`;
+  el.innerHTML = s + "</svg>";
+}
+
+function sparkline(vals, color, maxV, minV) {
+  const w = 160, h = 34, n = vals.length;
+  if (n < 2) return "";
+  const mx = maxV != null ? maxV : Math.max(1e-6, ...vals), mn = minV != null ? minV : 0;
+  const pts = vals.map((v, i) => [2 + (w - 6) * i / (n - 1), h - 3 - (h - 6) * (v - mn) / (mx - mn || 1)]);
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path d="${linePath([[pts[0][0], h - 2], ...pts, [pts[n - 1][0], h - 2]])}Z" fill="${color}" opacity=".14"/>` +
+    `<path d="${linePath(pts)}" fill="none" stroke="${color}" stroke-width="1.6" vector-effect="non-scaling-stroke"/><circle cx="${pts[n - 1][0]}" cy="${pts[n - 1][1]}" r="2.6" fill="${color}"/></svg>`;
+}
+
+function drawTimeline(el, h, proj, fc) {
+  const kit = h.sabil, past = kit.log.slice(-24), Wd = Math.max(320, el.clientWidth || 900);
+  const l = 58, r = 16, Ht = 320, top1 = 12, h1 = 150, top2 = 196, h2 = 92, bx = Ht - 8;
+  const NP = past.length, NF = proj.length, x = (k) => l + (Wd - l - r) * (k + 24) / 48;
+  let maxKw = h.cfg.pvKwp * 0.9;
+  for (const p of past) maxKw = Math.max(maxKw, p.pv, p.crit + p.nonc);
+  for (const p of proj) maxKw = Math.max(maxKw, p.pv, p.crit + p.nonc);
+  const stepKw = maxKw <= 0.6 ? 0.1 : maxKw <= 1.2 ? 0.2 : 0.5;
+  maxKw = Math.ceil(maxKw / stepKw - 1e-9) * stepKw;
+  const y1 = (v) => top1 + h1 * (1 - v / maxKw), y2 = (s) => top2 + h2 * (1 - s);
+  let s = `<svg viewBox="0 0 ${Wd} ${Ht}" height="${Ht}" role="img" aria-label="Sun power, home use and battery level, last 24 hours and next 24 hours">`;
+  for (let v = 0; v <= maxKw + 1e-9; v += stepKw) s += `<line class="grid-l" x1="${l}" x2="${Wd - r}" y1="${y1(v)}" y2="${y1(v)}"/><text x="${l - 8}" y="${y1(v) + 4}" text-anchor="end">${fmt(v * 1000)} W</text>`;
+  for (const v of [0, .5, 1]) s += `<line class="grid-l" x1="${l}" x2="${Wd - r}" y1="${y2(v)}" y2="${y2(v)}"/><text x="${l - 8}" y="${y2(v) + 4}" text-anchor="end">${v * 100}%</text>`;
+  const k0 = -NP;
+  // past sun (measured) and future band (P10 to P50)
+  if (NP) {
+    const sp = past.map((p, i) => [x(k0 + i + .5), y1(p.pv)]);
+    s += `<path d="${linePath([[sp[0][0], y1(0)], ...sp, [sp[sp.length - 1][0], y1(0)]])}Z" fill="var(--sun-fill)"/><path d="${linePath(sp)}" fill="none" stroke="var(--sun)" stroke-width="2"/>`;
+  }
+  const fm = Array.from(fc.pv, (v, i) => [x(i + .5), y1(v)]), f10 = Array.from(fc.p10, (v, i) => [x(i + .5), y1(v)]);
+  s += `<path d="${linePath([...fm, ...f10.slice().reverse()])}Z" fill="var(--sun-band)"/>`;
+  s += `<path d="${linePath(fm)}" fill="none" stroke="var(--sun)" stroke-width="2" stroke-dasharray="6 4"/>`;
+  // home use: steps
+  if (NP) { const xs = [], ys = []; past.forEach((p, i) => { xs.push(x(k0 + i)); ys.push(y1(p.crit + p.nonc)); }); xs.push(x(0)); s += `<path d="${linePath(stepPts(xs, ys))}" fill="none" stroke="var(--use)" stroke-width="1.75"/>`; }
+  { const xs = [], ys = []; proj.forEach((p, i) => { xs.push(x(i)); ys.push(y1(p.crit + p.nonc)); }); xs.push(x(NF)); s += `<path d="${linePath(stepPts(xs, ys))}" fill="none" stroke="var(--use)" stroke-width="1.5" stroke-dasharray="4 3"/>`; }
+  // battery panel
+  if (NP) {
+    const fl = [], fy = []; past.forEach((p, i) => { fl.push(x(k0 + i)); fy.push(y2(p.lim.soc_floor_nonc)); }); fl.push(x(0));
+    s += `<path d="${linePath(stepPts(fl, fy))}" fill="none" stroke="var(--ink-2)" stroke-width="1.25" stroke-dasharray="5 4"/>`;
+    const bp = past.map((p, i) => [x(k0 + i + 1), y2(p.soc)]);
+    s += `<path d="${linePath(bp)}" fill="none" stroke="var(--store)" stroke-width="2.5" stroke-linejoin="round"/>`;
+  }
+  { const fl = [], fy = []; proj.forEach((p, i) => { fl.push(x(i)); fy.push(y2(p.floor)); }); fl.push(x(NF)); s += `<path d="${linePath(stepPts(fl, fy))}" fill="none" stroke="var(--ink-2)" stroke-width="1.25" stroke-dasharray="5 4"/>`; }
+  s += `<path d="${linePath([[x(0), y2(kit.soc)], ...proj.map((p, i) => [x(i + 1), y2(p.soc)])])}" fill="none" stroke="var(--store)" stroke-width="2.5" stroke-dasharray="6 4"/>`;
+  s += `<line class="now-l" x1="${x(0)}" x2="${x(0)}" y1="${top1 - 4}" y2="${top2 + h2}"/><text x="${x(0) + 6}" y="${top1 + 10}" style="fill:var(--ink);font-weight:700">Now</text>`;
+  s += `<text x="${l}" y="${top2 - 10}" style="fill:var(--ink);font-weight:700">Battery</text>`;
+  const stepT = Wd < 560 ? 12 : 6;
+  for (let k = -24; k <= 24; k += stepT) { if (k === 0) continue; const tt = kit.t + k, a = k === -24 ? "start" : k === 24 ? "end" : "middle"; s += `<text x="${x(k)}" y="${bx}" text-anchor="${a}">${hh(tt)}</text>`; }
+  el.innerHTML = s + "</svg>";
+}
+

@@ -1,0 +1,466 @@
+<title>SABIL Controller</title>
+<style>
+/*__FONTS__*/
+/* Layout: an indigo bar (the night ink of the logo) over a cream day page. Three tabs: Family, Controller, Fleet.
+   Each view opens with one plain sentence, then the detail. Left aligned, 12-column grid, one column on phones.
+   Light theme = day, dark theme = night. Amber is kept for the sun: solar power, forecast and the hand-over
+   point, never for text on cream. */
+:root {
+  --indigo: #1F2B5B; --amber: #F0A13A; --cream: #FBF6EE; --soft-indigo: #5E6787;
+  --bg: #FBF6EE; --surface: #FFFFFF; --sunk: #F4EEE3; --ink: #1F2B5B; --ink-2: #5E6787; --line: #E5DCCB;
+  --bar: #1F2B5B; --bar-ink: #FFFFFF; --bar-ink-2: #C3C8DD; --bar-line: #34407A;
+  --sun: #F0A13A; --sun-fill: rgba(240, 161, 58, .30); --sun-band: rgba(240, 161, 58, .16);
+  --store: #1F2B5B; --use: #5E6787; --night: rgba(31, 43, 91, .06);
+  --ok: #2B7350; --ok-bg: #E3F1E8; --alert: #B3261E; --alert-bg: #FBE6E3; --watch-bg: #ECEEF6;
+  --font-display: "Sora", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --s-1: .8125rem; --s0: .9375rem; --s1: 1.0625rem; --s2: 1.375rem; --s3: 1.875rem; --s4: 2.75rem;
+  --r-sm: 6px; --r-md: 12px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111733; --surface: #19214A; --sunk: #141B3E; --ink: #F3EEE4; --ink-2: #AEB4CF; --line: #2B3567;
+  --bar: #0B1029; --bar-ink: #FFFFFF; --bar-ink-2: #AEB4CF; --bar-line: #232C5C;
+  --sun-fill: rgba(240, 161, 58, .34); --sun-band: rgba(240, 161, 58, .18);
+  --store: #D6DBF2; --use: #9AA2C6; --night: rgba(0, 0, 0, .22);
+  --ok: #6FCB98; --ok-bg: #173A33; --alert: #FF8A80; --alert-bg: #4A1E2A; --watch-bg: #232C5C;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #111733; --surface: #19214A; --sunk: #141B3E; --ink: #F3EEE4; --ink-2: #AEB4CF; --line: #2B3567;
+  --bar: #0B1029; --bar-ink: #FFFFFF; --bar-ink-2: #AEB4CF; --bar-line: #232C5C;
+  --sun-fill: rgba(240, 161, 58, .34); --sun-band: rgba(240, 161, 58, .18);
+  --store: #D6DBF2; --use: #9AA2C6; --night: rgba(0, 0, 0, .22);
+  --ok: #6FCB98; --ok-bg: #173A33; --alert: #FF8A80; --alert-bg: #4A1E2A; --watch-bg: #232C5C;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+html, body { background: var(--bg); }
+body { color: var(--ink); font-family: var(--font-body); font-size: var(--s0); line-height: 1.5; -webkit-font-smoothing: antialiased; margin: 0; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bar); }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; margin: 0; text-wrap: balance; line-height: 1.2; }
+p { margin: 0; }
+button, select, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 4px; }
+.bar :focus-visible { outline-color: #FFFFFF; }
+[hidden] { display: none !important; }
+.num { font-family: var(--font-display); font-variant-numeric: tabular-nums; }
+.muted { color: var(--ink-2); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* bar */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bar); color: var(--bar-ink); }
+.bar .wrap { display: flex; align-items: center; gap: 20px; padding-block: 12px; flex-wrap: wrap; }
+.logo { display: block; height: 40px; width: auto; }
+.tabs { display: flex; gap: 4px; background: rgba(255,255,255,.07); padding: 4px; border-radius: 999px; }
+.tabs a { color: var(--bar-ink-2); text-decoration: none; padding: 6px 16px; border-radius: 999px; font-family: var(--font-display); font-size: var(--s0); }
+.tabs a[aria-current="page"] { background: var(--bar-ink); color: #1F2B5B; }
+.bar .home-pick { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--bar-ink-2); font-size: var(--s-1); }
+.bar select { background: transparent; border: 1px solid var(--bar-line); color: var(--bar-ink); border-radius: var(--r-sm); padding: 5px 8px; }
+.bar select option { color: #1F2B5B; background: #FFFFFF; }
+
+/* player */
+.player { background: var(--sunk); border-bottom: 1px solid var(--line); }
+.player .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding-block: 10px; }
+.clock { display: grid; line-height: 1.25; margin-right: auto; }
+.clock .when { font-family: var(--font-display); font-weight: 600; font-size: var(--s1); font-variant-numeric: tabular-nums; }
+.clock .src-note { font-size: var(--s-1); color: var(--ink-2); }
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--ink); background: var(--ink); color: var(--bg); border-radius: 999px; padding: 7px 16px; cursor: pointer; font-family: var(--font-display); font-size: var(--s-1); font-weight: 600; white-space: nowrap; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn svg { width: 14px; height: 14px; flex: none; }
+.btn[aria-expanded="true"] svg.chev { transform: rotate(180deg); }
+.ctl { display: inline-flex; align-items: center; gap: 8px; font-size: var(--s-1); color: var(--ink-2); }
+.ctl select { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 5px 8px; color: var(--ink); }
+.srcpanel { width: 100%; display: grid; gap: 14px; padding: 6px 0 8px; }
+.choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 760px) { .choices { grid-template-columns: 1fr; } }
+.choice { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-md); padding: 10px 12px; cursor: pointer; display: grid; gap: 2px; }
+.choice b { font-family: var(--font-display); font-weight: 600; font-size: var(--s0); }
+.choice span { font-size: var(--s-1); color: var(--ink-2); }
+.choice[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.panel-extra { display: grid; gap: 12px 24px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.panel-extra label { display: grid; gap: 4px; font-size: var(--s-1); color: var(--ink-2); }
+.panel-extra output { font-family: var(--font-display); color: var(--ink); font-variant-numeric: tabular-nums; }
+input[type="range"] { accent-color: var(--ink); width: 100%; }
+textarea, input[type="url"] { width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-sm); padding: 8px; font-size: var(--s-1); }
+textarea { min-height: 110px; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+.msg { font-size: var(--s-1); color: var(--ink-2); }
+.msg.err { color: var(--alert); }
+.msg.good { color: var(--ok); }
+
+main { padding-block: 22px 48px; display: grid; gap: 20px; }
+.view { display: grid; gap: 20px; }
+.tip { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 12px 16px; border-radius: var(--r-md); background: var(--watch-bg); font-size: var(--s0); }
+.tip p { max-width: 90ch; }
+.view-head { display: grid; gap: 4px; }
+.view-head h1 { font-size: var(--s2); }
+.view-head p { color: var(--ink-2); max-width: 75ch; }
+.grid { display: grid; gap: 20px; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.span-12 { grid-column: span 12; } .span-7 { grid-column: span 7; } .span-6 { grid-column: span 6; } .span-5 { grid-column: span 5; }
+@media (max-width: 900px) { .span-7, .span-6, .span-5 { grid-column: span 12; } }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 20px; min-width: 0; }
+.box h2 { font-size: var(--s1); }
+.box .sub { color: var(--ink-2); font-size: var(--s-1); margin-top: 2px; }
+.box-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.stack { display: grid; gap: 20px; align-content: start; min-width: 0; }
+
+/* family */
+.hero { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 24px; display: grid; gap: 18px; }
+.hero-top { display: flex; gap: 24px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+.hero h1 { font-size: var(--s4); letter-spacing: -.01em; }
+.hero .say { font-size: var(--s1); max-width: 60ch; margin-top: 8px; }
+.gauge { display: grid; grid-template-columns: auto auto; align-items: center; gap: 14px; }
+.cell { width: 54px; height: 96px; border: 3px solid var(--ink); border-radius: 10px; position: relative; }
+.cell::before { content: ""; position: absolute; top: -9px; left: 50%; width: 20px; height: 6px; margin-left: -10px; background: var(--ink); border-radius: 3px 3px 0 0; }
+.cell .lvl { position: absolute; left: 4px; right: 4px; bottom: 4px; max-height: calc(100% - 8px); background: var(--store); border-radius: 4px; transition: height .4s ease; }
+.gauge .big { font-family: var(--font-display); font-weight: 600; font-size: var(--s4); line-height: 1; font-variant-numeric: tabular-nums; }
+.gauge .lab { color: var(--ink-2); font-size: var(--s-1); }
+.strip-cap { display: flex; gap: 8px 18px; flex-wrap: wrap; font-size: var(--s-1); color: var(--ink-2); }
+.key { display: inline-flex; align-items: center; gap: 6px; }
+.key i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; }
+.key i.sun { background: var(--sun-fill); border: 1.5px solid var(--sun); }
+.key i.bat { height: 3px; background: var(--store); }
+.key i.res { height: 0; border-top: 2px dashed var(--ink-2); }
+.key i.use { height: 2px; background: var(--use); }
+.key i.band { background: var(--sun-band); }
+.trio { display: grid; gap: 20px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px) { .trio { grid-template-columns: 1fr; } }
+.stat .v { font-family: var(--font-display); font-weight: 600; font-size: var(--s3); font-variant-numeric: tabular-nums; line-height: 1.15; margin-top: 6px; }
+.stat .v small { font-size: var(--s1); font-weight: 400; color: var(--ink-2); }
+.stat p { color: var(--ink-2); font-size: var(--s-1); margin-top: 4px; }
+.stat .act { margin-top: 12px; }
+.circuits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 640px) { .circuits { grid-template-columns: 1fr; } }
+.circuit { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 14px; border-radius: var(--r-sm); background: var(--sunk); }
+.circuit b { font-family: var(--font-display); font-weight: 600; }
+.circuit .what { color: var(--ink-2); font-size: var(--s-1); }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: var(--ok); }
+.dot.off { background: transparent; border: 2px solid var(--alert); }
+
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; font-size: var(--s-1); font-weight: 700; white-space: nowrap; }
+.chip.ok { background: var(--ok-bg); color: var(--ok); }
+.chip.alert { background: var(--alert-bg); color: var(--alert); }
+.chip.watch { background: var(--watch-bg); color: var(--ink); }
+.chip svg { width: 12px; height: 12px; }
+
+/* controller */
+.now { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 24px; align-items: center; }
+@media (max-width: 760px) { .now { grid-template-columns: 1fr; } .now .chips { justify-content: flex-start; } }
+.now h2 { font-size: var(--s2); }
+.now p { color: var(--ink-2); margin-top: 6px; max-width: 75ch; }
+.now .chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.readouts { display: grid; gap: 12px; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+@media (max-width: 1100px) { .readouts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .readouts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ro { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px 14px 10px; min-width: 0; display: grid; gap: 2px; grid-template-rows: auto auto 1fr auto; }
+.ro .k { font-size: var(--s-1); color: var(--ink-2); }
+.ro .v { font-family: var(--font-display); font-weight: 600; font-size: var(--s2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ro .v small { font-size: var(--s-1); font-weight: 400; color: var(--ink-2); }
+.ro .d { font-size: var(--s-1); color: var(--ink-2); font-variant-numeric: tabular-nums; min-height: 2.9em; }
+.ro svg { display: block; width: 100%; height: 34px; margin-top: 6px; }
+.rules { display: grid; }
+.rule { padding: 12px 0; border-top: 1px solid var(--line); display: grid; gap: 4px; }
+.rule:first-child { border-top: 0; padding-top: 0; }
+.rule-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.rule h3 { font-size: var(--s0); }
+.rule .why { color: var(--ink); font-size: var(--s-1); }
+.rule details { font-size: var(--s-1); color: var(--ink-2); }
+.rule summary { cursor: pointer; color: var(--ink-2); width: max-content; }
+.rule details p { margin-top: 4px; max-width: 75ch; }
+.alerts { display: grid; gap: 10px; }
+.alert-row { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 12px; border-radius: var(--r-sm); background: var(--sunk); }
+.alert-row.bad { background: var(--alert-bg); }
+.alert-row b { font-family: var(--font-display); font-weight: 600; }
+.alert-row p { font-size: var(--s-1); color: var(--ink-2); }
+.alert-row .act { margin-top: 8px; }
+.try { display: flex; flex-wrap: wrap; gap: 8px; }
+.toggle[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.chart svg { display: block; width: 100%; }
+.chart text { fill: var(--ink-2); font-family: var(--font-body); font-size: 12px; paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+.chart .grid-l { stroke: var(--line); stroke-width: 1; }
+.chart .now-l { stroke: var(--ink); stroke-width: 1.25; }
+
+details.sect { align-self: start; }
+details.sect > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; align-items: center; }
+details.sect > summary::-webkit-details-marker { display: none; }
+details.sect > summary .more { font-family: var(--font-display); font-weight: 600; font-size: var(--s-1); display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; }
+details.sect > summary .more svg { width: 12px; height: 12px; transition: transform .2s; }
+details.sect[open] > summary .more svg { transform: rotate(180deg); }
+details.sect[open] > summary .more .closed, details.sect:not([open]) > summary .more .opened { display: none; }
+.sum-line { font-size: var(--s1); margin-top: 6px; }
+.sum-line b { font-family: var(--font-display); font-weight: 600; font-variant-numeric: tabular-nums; }
+.sect-body { margin-top: 18px; display: grid; gap: 18px; }
+.health { display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; }
+@media (max-width: 520px) { .health { grid-template-columns: 1fr; } }
+.health .big { font-family: var(--font-display); font-weight: 600; font-size: var(--s4); line-height: 1; font-variant-numeric: tabular-nums; }
+.bars { display: grid; gap: 8px; }
+.bh { font-family: var(--font-display); font-weight: 600; font-size: var(--s-1); margin-top: 4px; }
+.hbar { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) 4rem; gap: 10px; align-items: center; font-size: var(--s-1); }
+.hbar .track { height: 12px; background: var(--sunk); border-radius: 6px; overflow: hidden; display: flex; }
+.hbar .fill { height: 100%; background: var(--store); }
+.hbar .fill.cyc { background: var(--use); }
+.hbar span:last-child { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--font-display); }
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 24px; }
+@media (max-width: 420px) { .facts { grid-template-columns: 1fr; } }
+.facts div { font-size: var(--s-1); color: var(--ink-2); }
+.facts b { display: block; font-family: var(--font-display); font-weight: 600; font-size: var(--s1); color: var(--ink); font-variant-numeric: tabular-nums; }
+details.model summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: var(--s-1); }
+details.model ul { margin: 8px 0 0; padding-left: 18px; color: var(--ink-2); font-size: var(--s-1); display: grid; gap: 6px; max-width: 80ch; }
+
+/* fleet */
+.kpis { display: grid; gap: 12px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (max-width: 1000px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpi { padding: 16px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); min-width: 0; }
+.kpi .k { font-size: var(--s-1); color: var(--ink-2); }
+.kpi .v { font-family: var(--font-display); font-weight: 600; font-size: var(--s3); font-variant-numeric: tabular-nums; line-height: 1.2; margin-top: 4px; }
+.kpi .d { font-size: var(--s-1); color: var(--ink-2); }
+.table-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: var(--s-1); }
+th { text-align: left; font-weight: 700; color: var(--ink-2); padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 10px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; vertical-align: middle; }
+td.n, th.n { text-align: right; white-space: nowrap; }
+td .id { font-family: var(--font-display); font-weight: 600; white-space: nowrap; }
+td .area { color: var(--ink-2); }
+tbody tr { cursor: pointer; }
+tbody tr:hover td, tbody tr.sel td { background: var(--sunk); }
+tbody tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--ink); }
+.minibar { display: inline-block; width: 56px; height: 8px; background: var(--sunk); border-radius: 4px; overflow: hidden; vertical-align: middle; margin-right: 8px; }
+.minibar i { display: block; height: 100%; background: var(--store); }
+.note { font-size: var(--s-1); color: var(--ink-2); max-width: 80ch; }
+
+footer { padding-block: 24px 40px; border-top: 1px solid var(--line); color: var(--ink-2); font-size: var(--s-1); }
+footer .wrap { display: grid; gap: 10px; }
+footer b { font-family: var(--font-display); color: var(--ink); font-weight: 600; }
+footer dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 16px; margin: 10px 0 0; max-width: 90ch; }
+footer dt { font-weight: 700; color: var(--ink); }
+footer dd { margin: 0; }
+footer summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; color: var(--ink); }
+@media (max-width: 640px) {
+  .bar { position: static; }
+  .bar .wrap { gap: 12px; }
+  .bar .home-pick { margin-left: 0; width: 100%; }
+  .clock { width: 100%; }
+  .hero { padding: 18px; }
+  .hero h1 { font-size: var(--s3); }
+  .gauge .big { font-size: var(--s3); }
+  .box { padding: 16px; }
+  footer dl { grid-template-columns: 1fr; }
+  footer dd { margin-bottom: 6px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<header class="bar">
+  <div class="wrap">
+    <img class="logo" src="__LOGO_SHORT_REV__" alt="SABIL" width="105" height="40">
+    <nav class="tabs" aria-label="Views">
+      <a href="#family" data-view="family">Family</a>
+      <a href="#controller" data-view="controller">Controller</a>
+      <a href="#fleet" data-view="fleet">Fleet</a>
+    </nav>
+    <label class="home-pick" for="homeSel">Home <select id="homeSel"></select></label>
+  </div>
+</header>
+
+<section class="player" aria-label="Clock and data source">
+  <div class="wrap">
+    <button class="btn" type="button" id="playBtn"></button>
+    <div class="clock"><span class="when" id="when">…</span><span class="src-note" id="srcNote"></span></div>
+    <label class="ctl" for="speedSel">Speed
+      <select id="speedSel">
+        <option value="3000">Slow (1 hour every 3 s)</option>
+        <option value="1000" selected>Normal (1 hour per second)</option>
+        <option value="166">Fast (6 hours per second)</option>
+        <option value="real">Real time</option>
+      </select>
+    </label>
+    <label class="ctl" for="daySel">Day
+      <select id="daySel">
+        <option value="today" selected>Today's date</option>
+        <option value="1-15">Cool season, 15 Jan</option>
+        <option value="4-15">Hot season, 15 Apr</option>
+        <option value="8-15">Rainy season, 15 Aug</option>
+      </select>
+    </label>
+    <button class="btn ghost" type="button" id="stepBtn">Next hour</button>
+    <button class="btn ghost" type="button" id="srcBtn" aria-expanded="false" aria-controls="srcPanel"><span id="srcBtnLab">Data: replay</span><svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    <div class="srcpanel" id="srcPanel" hidden>
+      <div class="choices" role="group" aria-label="Where the readings come from">
+        <button type="button" class="choice" data-src="replay" aria-pressed="true"><b>Replay</b><span>Real weather recorded in Maiduguri, hour by hour.</span></button>
+        <button type="button" class="choice" data-src="manual" aria-pressed="false"><b>Manual</b><span>You set the sun, the heat and extra use with sliders.</span></button>
+        <button type="button" class="choice" data-src="device" aria-pressed="false"><b>Device</b><span>Readings from a real controller: paste, load a log or connect.</span></button>
+      </div>
+      <div class="panel-extra" id="manualPanel" hidden>
+        <label for="mGhi">Sun on the panels <output id="mGhiO">600 W/m²</output><input id="mGhi" type="range" min="0" max="1100" step="10" value="600"></label>
+        <label for="mAmb">Air temperature <output id="mAmbO">34 °C</output><input id="mAmb" type="range" min="15" max="46" step="0.5" value="34"></label>
+        <label for="mExtra">Extra use in the home <output id="mExtraO">0 W</output><input id="mExtra" type="range" min="0" max="300" step="5" value="0"></label>
+      </div>
+      <div class="panel-extra" id="devicePanel" hidden>
+        <label for="devJson">Paste one hourly reading (JSON)
+          <textarea id="devJson" spellcheck="false"></textarea>
+          <span><button class="btn" type="button" id="devApply">Apply reading</button></span>
+        </label>
+        <label for="devFile">Or load a log file (CSV, one row per hour)
+          <input id="devFile" type="file" accept=".csv,text/csv">
+          <span class="msg" id="devFileMsg">Columns: ghi_w_m2, ambient_c, and if you have them pv_w, battery_temp_c, soc, essential_w, other_w.</span>
+        </label>
+        <label for="devUrl">Or read the controller on the home network
+          <input id="devUrl" type="url" placeholder="http://192.168.4.1/reading.json">
+          <span><button class="btn ghost" type="button" id="devConnect">Connect</button></span>
+          <span class="msg">Reads the address every 10 seconds. The controller must allow the page to read it (CORS).</span>
+        </label>
+        <p class="msg" id="devMsg" aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
+  <div class="tip" id="tip" hidden>
+    <p><b>How to use this:</b> press Play to watch the hours go by on real Maiduguri weather. Switch tabs to see the family screen, the controller's decisions or the whole fleet. On Controller, try "Cloudy tomorrow" and watch the plan change.</p>
+    <button class="btn ghost" type="button" id="tipClose">Got it</button>
+  </div>
+
+  <!-- FAMILY -->
+  <section class="view" id="view-family" aria-labelledby="homeTitle">
+    <div class="hero">
+      <div class="hero-top">
+        <div>
+          <h1 id="homeTitle">…</h1>
+          <p class="say" id="homeSay"></p>
+        </div>
+        <div class="gauge" aria-label="Battery level">
+          <div class="cell"><div class="lvl" id="cellLvl" style="height:50%"></div></div>
+          <div><div class="big" id="cellPct">–</div><div class="lab" id="cellLab">in the battery</div></div>
+        </div>
+      </div>
+      <div class="chart" id="strip"></div>
+      <div class="strip-cap">
+        <span class="key"><i class="sun"></i>Sun expected</span>
+        <span class="key"><i class="bat"></i>Battery level, expected</span>
+        <span class="key"><i class="res"></i>Kept for essentials: lights, phones, night fan, fridge</span>
+      </div>
+    </div>
+    <div class="trio">
+      <div class="box stat">
+        <h2>Credit</h2>
+        <div class="v" id="credV">–</div>
+        <p id="credP"></p>
+        <div class="act"><button class="btn" type="button" id="topUp">Top up 10 kWh (₦5,050)</button></div>
+      </div>
+      <div class="box stat">
+        <h2>Best time to charge phones</h2>
+        <div class="v" id="bestV">–</div>
+        <p>The sun has power to spare then. The fridge also pre-cools in these sunny hours, so less is taken from the battery at night.</p>
+      </div>
+      <div class="box stat">
+        <h2>Battery health</h2>
+        <div class="v" id="hlthV">–</div>
+        <p id="hlthP"></p>
+      </div>
+    </div>
+    <div class="box">
+      <div class="box-head"><h2>Circuits in the home</h2><span class="sub">Essentials are always served first.</span></div>
+      <div class="circuits" id="circuits"></div>
+    </div>
+  </section>
+
+  <!-- CONTROLLER -->
+  <section class="view" id="view-controller" aria-labelledby="ctlTitle" hidden>
+    <div class="view-head"><h1 id="ctlTitle">Controller</h1><p id="ctlIntro">What the controller measures, decides and predicts, every hour.</p></div>
+    <div class="box now" id="nowBox"></div>
+    <div class="readouts" id="readouts"></div>
+    <div class="grid">
+      <div class="box span-7">
+        <div class="box-head"><div><h2>Decisions this hour</h2><p class="sub">Each rule with its reason. Open "Why" for the numbers.</p></div></div>
+        <div class="rules" id="rules"></div>
+      </div>
+      <div class="span-5 stack">
+        <div class="box">
+          <div class="box-head"><h2>Alerts</h2><span class="sub" id="alertSub"></span></div>
+          <div class="alerts" id="alerts"></div>
+        </div>
+        <div class="box">
+          <div class="box-head"><div><h2>Try a situation</h2><p class="sub">See the controller react. Only the replay changes.</p></div></div>
+          <div class="try">
+            <button class="btn ghost toggle" type="button" id="tryCloud" aria-pressed="false">Cloudy tomorrow</button>
+            <button class="btn ghost toggle" type="button" id="tryHeat" aria-pressed="false">Heat wave, +6 °C</button>
+            <button class="btn ghost toggle" type="button" id="tryDust" aria-pressed="false">Dusty panels</button>
+          </div>
+        </div>
+      </div>
+      <div class="box span-12 chart">
+        <div class="box-head"><div><h2>Last 24 hours and next 24 hours</h2><p class="sub">Solid lines are readings. Dashed lines are the forecast and the plan.</p></div>
+          <div class="strip-cap">
+            <span class="key"><i class="sun"></i>Sun power</span><span class="key"><i class="band"></i>Forecast range</span>
+            <span class="key"><i class="use"></i>Home use</span><span class="key"><i class="bat"></i>Battery</span><span class="key"><i class="res"></i>Essentials reserve</span>
+          </div></div>
+        <div id="timeline"></div>
+      </div>
+      <details class="box span-6 sect" id="healthSect">
+        <summary><div><h2>Battery health</h2><p class="sum-line" id="hSum"></p></div><span class="more"><span class="closed">Show details</span><span class="opened">Hide details</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></summary>
+        <div class="sect-body">
+          <div class="health">
+            <div><div class="big" id="hBig">–</div><div class="muted" style="font-size:var(--s-1)">of its capacity when new</div></div>
+            <div class="bars" id="hBars"></div>
+          </div>
+          <div class="facts" id="hFacts"></div>
+          <details class="model"><summary>How the health model works</summary><ul>
+            <li>Two kinds of wear add up. Time wear grows with heat and with a high charge level. Use wear grows with each charge and discharge, and more with deep ones.</li>
+            <li>Equations and coefficients: Naumann et al., J. Energy Storage 17 (2018) and J. Power Sources 451 (2020), for a lithium iron phosphate cell, checked identical to the authors' open-source code (SimSES, TU Munich).</li>
+            <li>The same equations run for a standard kit in the same home, with the same weather and use. The gap between the two is what SABIL adds.</li>
+            <li>The projection uses this home's data only and assumes the coming years look like the time since installation (wear grows with the square root of time). The official figures are from the 10-year study on 2014–2023 weather: 7.5 years to 80% capacity with SABIL, 6.2 with a standard kit.</li>
+            <li>A second model, NREL's BLAST-Lite for large prismatic LFP cells, gives the same conclusion. This page runs the TU Munich model, which fades faster, so it is the cautious choice. Both were fitted on lab cells, not yet on this module; the pilot logs every battery hourly to check.</li>
+          </ul></details>
+        </div>
+      </details>
+      <details class="box span-6 sect" id="fcSect">
+        <summary><div><h2>Sun forecast</h2><p class="sum-line" id="fSum"></p></div><span class="more"><span class="closed">Show details</span><span class="opened">Hide details</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></summary>
+        <div class="sect-body">
+          <div class="facts" id="fFacts"></div>
+          <details class="model"><summary>How good is the forecast?</summary><ul>
+            <li>A machine-learning model (gradient-boosted trees with ridge regression) trained on NASA POWER and ERA5 weather for Maiduguri: cloud, humidity, pressure and wind. It is issued at midnight and corrected during the day with the panels' own readings.</li>
+            <li>Tested year by year on years it never saw (2014 to 2023). Next-day error: 0.61 kWh/m² a day, against 0.80 for "same as yesterday" and 0.64 for the seasonal average. The difference is statistically significant.</li>
+            <li>In the rainy season (June to September) it is no better than the seasonal average (0.97 against 0.97).</li>
+            <li>The low estimate held on 76% of days; the target was 80%.</li>
+            <li>For battery life the forecast matters little: 7.59 years with the model, 7.51 with "same as yesterday" (10-year study, 2014–2023). The rules do most of the work.</li>
+          </ul></details>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- FLEET -->
+  <section class="view" id="view-fleet" aria-labelledby="opTitle" hidden>
+    <div class="view-head"><h1 id="opTitle">Fleet</h1><p id="opSub"></p></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="box">
+      <div class="box-head"><div><h2>Homes</h2><p class="sub">Homes that need attention come first. Select a row to open that home's controller.</p></div></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Home</th><th>Battery placed</th><th class="n">Health</th><th class="n">Projected life, SABIL vs standard</th><th class="n">Essentials served</th><th class="n">Credit</th><th>Status</th></tr></thead>
+        <tbody id="fleetRows"></tbody>
+      </table></div>
+      <p class="note" style="margin-top:14px">Example fleet: twelve simulated homes, each with the selected kit (400 W of panels, 1.92 kWh battery), on the real 2023 Maiduguri weather, with different use and battery placement. Not customer data. Projected life uses each home's data so far; the official figures are from the 10-year study (7.5 vs 6.2 years). When credit runs out, the TV, radio and day fan pause and essentials keep running; that energy is taken from the next top-up (proposed rule, to confirm).</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <details>
+      <summary>What the words mean</summary>
+      <dl>
+        <dt>kWh</dt><dd>An amount of energy. 1 kWh runs a 20 W fan for 50 hours. A home here uses about 1.2 kWh a day.</dd>
+        <dt>W</dt><dd>Power right now. The 400 W of panels give up to about 370 W in full sun.</dd>
+        <dt>Charge</dt><dd>How full the battery is, from 0% to 100%.</dd>
+        <dt>Battery health</dt><dd>How much the battery can still hold compared with new. Batteries are usually replaced at 80%.</dd>
+        <dt>Essentials</dt><dd>Lights, phone charging, the night fan and the fridge. Always served first.</dd>
+        <dt>Essentials reserve</dt><dd>Charge kept back so essentials last until the sun is back. Other circuits stop below it.</dd>
+        <dt>Forecast range</dt><dd>From the low estimate (P10, a poor day) to the expected value (P50).</dd>
+        <dt>Standard kit</dt><dd>The same panels and battery with the usual controller: charge to 100% whenever there is sun, no forecast, no priority.</dd>
+        <dt>₦505 per kWh</dt><dd>SABIL's price per kWh from the cost model: it pays for the kit over 20 years with no ongoing subsidy.</dd>
+      </dl>
+    </details>
+    <span><b>Solar Access Builds Independent Lives.</b> Global Energy Hackathon 2026, Brief 13: power for a city the grid can't protect.</span>
+    <span>Kit: 24 V DC, no inverter. 400 W of panels and an LFP battery, 25.6 V 75 Ah (1.92 kWh). Home: five people, 1.16 kWh a day, 952 Wh of it essentials. Weather: NASA POWER hourly, Maiduguri (11.85° N, 13.16° E), 2023. Same engine and parameters as the team's simulation (params/ on GitHub), ported line by line and checked against it. Everything runs inside this one file, with no internet needed.</span>
+  </div>
+</footer>
+

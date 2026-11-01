@@ -1,0 +1,300 @@
+
+// ---------- rendering ----------
+// "11:00 to 13:00" for a run of whole hours, "10:00, 14:00" otherwise
+function spanTxt(hrs) {
+  const h = hrs.slice().sort((a, b) => a - b), run = h.every((x, i) => i === 0 || x === h[i - 1] + 1);
+  const f = (x) => String(x % 24).padStart(2, "0") + ":00";
+  return run ? `${f(h[0])} to ${f(h[h.length - 1] + 1)}` : h.map(f).join(", ");
+}
+let view = "family";
+const openWhy = new Set();
+function homeSelOptions() { $("homeSel").innerHTML = homes.map((h, i) => `<option value="${i}">${h.cfg.id}, ${esc(h.cfg.area)}</option>`).join(""); $("homeSel").value = sel; }
+const SRC_NOTE = { replay: "Replay of real weather in Maiduguri", manual: "Manual: you set the sun, heat and use for this home", device: "Device: readings from a controller" };
+
+function renderClock() {
+  $("when").textContent = `${dateOf(T).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}, ${hh(T)}`;
+  $("srcNote").textContent = source === "device" && devQueue.length ? `Device log: ${devQueue.length} hours waiting` : SRC_NOTE[source];
+  $("srcBtnLab").textContent = "Data: " + source;
+  $("playBtn").innerHTML = playing ? ICON.pause + "Pause" : ICON.play + "Play";
+  $("playBtn").setAttribute("aria-label", playing ? "Pause the clock" : "Start the clock");
+}
+
+function homeState(h) {
+  const kit = h.sabil, fc = forecastFor(h), proj = kit.project(24, fc.pv, fc.amb);
+  return { kit, fc, proj, ni: nightInfo(h, proj), last: kit.last };
+}
+
+function renderFamily() {
+  const h = homes[sel], { kit, fc, proj, ni, last } = homeState(h);
+  const pct = kit.soc * 100;
+  $("cellLvl").style.height = Math.max(3, Math.min(100, pct)) + "%";
+  $("cellPct").textContent = fmt(pct) + "%";
+  $("cellLab").textContent = last && last.batKw > 0.02 ? `charging, +${fmt(last.batKw * 1000)} W` : last && last.batKw < -0.02 ? `in the battery, ${fmt(-last.batKw * 1000)} W out` : "in the battery";
+  const dayNow = last && last.pvAc >= last.crit && last.pv > 0.02;
+  const sunBack = ni.sunBack != null ? hh(kit.t + ni.sunBack) : "after tomorrow";
+  let title, say;
+  if (h.credit <= 0) { title = "Essentials only: credit has run out"; say = "Lights, phones, the night fan and the fridge keep running. The TV, radio and day fan come back as soon as you top up."; }
+  else if (!ni.critOk) { title = "Power may run short tonight"; say = `The battery may not last until the sun is back at ${sunBack}. The TV, radio and day fan will be cut first to keep the lights, phones, fan and fridge on as long as possible.`; }
+  else if (!ni.otherOk) { title = "Essentials covered tonight"; say = `Lights, phones, the night fan and the fridge have power until the sun is back at ${sunBack}. The TV and radio may pause late in the night to protect them.`; }
+  else { title = dayNow ? "The sun is running your home" : "Tonight is covered"; say = `Everything has power until the sun is back at ${sunBack}. The battery should still have about ${fmt(ni.socAtSunrise * 100)}% at sunrise.`; }
+  $("homeTitle").textContent = title; $("homeSay").textContent = say;
+  drawStrip($("strip"), h, proj, fc);
+  const du = dailyUse(h);
+  $("credV").innerHTML = `${fmt(Math.max(0, h.credit), 1)} <small>kWh</small>`;
+  $("credP").textContent = h.credit > 0 ? `About ${fmt(h.credit / du, h.credit / du < 2 ? 1 : 0)} days at your usual use (${fmt(du, 1)} kWh a day). Worth ₦${fmt(h.credit * P.tariff_ngn_per_kwh)} at ₦${P.tariff_ngn_per_kwh} per kWh.` : `${fmt(-h.credit, 1)} kWh of essentials to repay at the next top-up.`;
+  const plan = kit.ctrl.today;
+  let best = null;
+  const ph = plan && plan.moved ? plan.moved.find((m) => /phone/i.test(m.name)) : null;
+  if (ph) { const hrs = ph.to.slice().sort((a, b) => a - b); if (plan.t0 + hrs[0] >= kit.t) best = { when: "today", hrs }; }
+  if (!best) { // tomorrow's sunniest pair of hours
+    const tm = kit.t - hod(kit.t) + 24; let bh = 12, bv = -1;
+    for (let x = 10; x <= 14; x++) { const v = (fc.pv[tm + x - kit.t] || 0) + (fc.pv[tm + x + 1 - kit.t] || 0); if (v > bv) bv = v, bh = x; }
+    best = { when: "tomorrow", hrs: [bh, bh + 1] };
+  }
+  $("bestV").innerHTML = `${spanTxt(best.hrs)} <small>${best.when}</small>`;
+  $("hlthV").innerHTML = `${fmt(kit.capFrac * 100, 1)}<small>%</small>`;
+  $("hlthP").textContent = "Looked after by SABIL and guaranteed by the operator. 10-year study: 7.5 years to 80% capacity, against 6.2 for a standard kit.";
+  const ess = last ? last.servedC >= last.crit - 0.002 : true, oth = h.credit > 0 && (last ? last.servedN >= last.nonc - 0.002 : true);
+  $("circuits").innerHTML = [
+    { name: "Essentials", what: "Lights, phone charging, night fan, fridge", on: ess, w: last ? last.servedC * 1000 : 0 },
+    { name: "Other", what: "TV, radio, day fan", on: oth, w: last ? last.servedN * 1000 : 0 },
+  ].map((c) => `<div class="circuit"><span class="dot ${c.on ? "" : "off"}" aria-hidden="true"></span><div><b>${c.name}</b> <span class="chip ${c.on ? "ok" : "alert"}">${c.on ? ICON.ok + "On" : ICON.alert + "Paused"}</span><div class="what">${c.what}</div></div><span class="num">${fmt(c.w)} W</span></div>`).join("");
+}
+
+function renderController() {
+  const h = homes[sel], { kit, fc, proj, ni, last } = homeState(h);
+  const log = kit.log.slice(-24), d = kit.ctrl.today, cap = P.bat.cap * kit.capFrac, s = P.smart;
+  const lim = hod(kit.t) === 0 || !d ? last.lim : kit.ctrl.decide(kit.t, { capacity_kwh: cap, soc: kit.soc, last_battery_temp_c: kit.lastTemp });
+  const al = alertsFor(h);
+  $("ctlIntro").textContent = `What the controller in ${h.cfg.id} (${h.cfg.area}) measures, decides and predicts, every hour.`;
+  // right now
+  const use = (last.servedC + last.servedN) * 1000, pvW = last.pvAc * 1000, batW = last.batKw * 1000;
+  let st, line;
+  const spare = last.curt * P.sys.inv * 1000, held = kit.soc >= lim.soc_max - 0.01;
+  const above = kit.soc > lim.soc_max + 0.01;
+  const spareTxt = spare > 20 ? ` ${fmt(spare)} W are not needed${above ? `: the battery is above today's ${fmt(lim.soc_max * 100)}% limit, so it takes no more charge` : held ? `: the battery is held at ${fmt(lim.soc_max * 100)}% today` : lim.hotNow ? ": charging is slowed in the heat" : ""}.` : "";
+  if (h.credit <= 0) { st = "Essentials only"; line = `Credit has run out, so the TV, radio and day fan are paused. Essentials use ${fmt(last.servedC * 1000)} W.`; }
+  else if (batW > 20) { st = "Charging from the sun"; line = `The panels give ${fmt(pvW)} W: ${fmt(use)} W to the home and ${fmt(batW)} W into the battery.${spareTxt}`; }
+  else if (last.pv > 0.02 && batW >= -20) { st = "Running on the sun"; line = `The panels give ${fmt(pvW)} W and cover the home (${fmt(use)} W).${spareTxt}`; }
+  else { st = "Running on the battery"; line = `The home uses ${fmt(use)} W from the battery; ${fmt(kit.soc * 100)}% left. ${ni.critOk ? `Essentials are covered until the sun is back at ${ni.sunBack != null ? hh(kit.t + ni.sunBack) : "sunrise"}.` : "Essentials may run short before sunrise."}`; }
+  const plan = lim.capped ? `Today's plan: stop charging at ${fmt(lim.soc_max * 100)}%, because it is hot and tomorrow is sunny.` : d && d.hot ? "Today's plan: charge to full, because tomorrow may be cloudy." : "Today's plan: charge to full, the heat is mild.";
+  $("nowBox").innerHTML = `<div><h2>${st}</h2><p>${esc(line)} ${esc(plan)}</p></div><div class="chips">${al.length ? al.map((a) => `<span class="chip ${a.lvl}">${ICON[a.lvl]}${esc(a.tag)}</span>`).join("") : `<span class="chip ok">${ICON.ok}All good</span>`}</div>`;
+  // readouts
+  const pv = S.packVolts(kit.soc, last.batKw);
+  const ro = [
+    { k: "Sun on the panels", v: `${fmt(last.ghi)} <small>W/m²</small>`, d: `Panels give ${fmt(last.pv * 1000)} W`, sp: sparkline(log.map((r) => r.pv), "var(--sun)", h.cfg.pvKwp) },
+    { k: "Air temperature", v: `${fmt(last.amb, 1)} <small>°C</small>`, d: `Last 24 h: ${fmt(Math.min(...log.map((r) => r.amb)))} to ${fmt(Math.max(...log.map((r) => r.amb)))} °C`, sp: sparkline(log.map((r) => r.amb), "var(--use)") },
+    { k: "Battery temperature", v: `${fmt(last.temp, 1)} <small>°C</small>`, d: P.placements[h.cfg.placement].short, sp: sparkline(log.map((r) => r.temp), "var(--store)") },
+    { k: "Charge", v: `${fmt(kit.soc * 100)} <small>%</small>`, d: `${fmt(kit.soc * cap, 2)} of ${fmt(cap, 2)} kWh (${fmt(P.bat.cap, 2)} when new)`, sp: sparkline(log.map((r) => r.soc), "var(--store)", 1) },
+    { k: "Battery", v: `${fmt(pv.v, 1)} <small>V</small>`, d: Math.abs(pv.a) < 0.2 ? "0 A, resting" : `${pv.a > 0 ? "+" : ""}${fmt(pv.a, 1)} A, ${pv.a > 0 ? "charging" : "discharging"}`, sp: sparkline(log.map((r) => r.batKw), "var(--store)", P.bat.maxC * P.bat.cap, -P.bat.maxC * P.bat.cap) },
+    { k: "Home use", v: `${fmt(use)} <small>W</small>`, d: `${fmt(last.servedC * 1000)} W essentials, ${fmt(last.servedN * 1000)} W other`, sp: sparkline(log.map((r) => r.servedC + r.servedN), "var(--use)") },
+  ];
+  $("readouts").innerHTML = ro.map((r) => `<div class="ro"><span class="k">${r.k}</span><span class="v">${r.v}</span><span class="d">${r.d}</span>${r.sp}</div>`).join("");
+  // decisions: short reason visible, numbers under "Why"
+  const kAt = (soc) => S.calRate(soc, last.temp), slow = 1 - kAt(Math.max(0.5, lim.soc_max)) / kAt(1);
+  const sunBackTxt = ni.sunBack != null ? hh(kit.t + ni.sunBack) : "sunrise";
+  const rules = [];
+  if (lim.capped) rules.push({ key: "cap", t: `Stop charging at ${fmt(lim.soc_max * 100)}%`, chip: ["ok", "Active"], why: "Hot day and a sunny tomorrow, so the battery does not need to be full.",
+    more: `The battery averages about ${fmt(d.meanTemp)} °C today (limit ${s.hot} °C). Tomorrow the panels should give about ${fmt(d.pvTom, 2)} kWh for ${fmt(d.loadTom, 2)} kWh of use (before moving phones and fridge pre-cooling). The charge covers tonight (${fmt(d.eTonight, 2)} kWh) plus half of tomorrow's essentials (${fmt(s.cloudyBuffer * d.critTom, 2)} kWh) in case the forecast is wrong, with a ${fmt(s.margin * 100)}% margin, never below ${fmt(s.capHot * 100)}%. Holding ${fmt(lim.soc_max * 100)}% instead of 100% in this heat slows time wear by ${fmt(slow * 100)}%.` });
+  else if (d && d.hot) rules.push({ key: "cap", t: "Charge to full", chip: ["watch", "Cloudy day ahead"], why: "Tomorrow may be cloudy, so the battery fills up today.",
+    more: `It is hot, but tomorrow's sun (${fmt(d.pvTom, 2)} kWh from the panels) may not cover the home's use (${fmt(d.loadTom, 2)} kWh). A full battery keeps tomorrow night covered.` });
+  else rules.push({ key: "cap", t: "Charge to full", chip: ["watch", "Mild day"], why: "The heat is mild, so a full charge costs little wear.",
+    more: `The battery averages about ${fmt(d ? d.meanTemp : last.temp)} °C today, under the ${s.hot} °C limit.` });
+  const paused = kit.soc <= lim.soc_floor_nonc + 0.01;
+  rules.push({ key: "res", t: `Keep ${fmt(lim.soc_floor_nonc * 100)}% for essentials`, chip: [paused ? "alert" : "ok", paused ? "Other circuits paused" : "Active"], why: `Enough for lights, phones, the night fan and the fridge until the sun is back at ${sunBackTxt}.`,
+    more: `Essentials need ${fmt(lim.reserveKwh * 1000)} Wh until the sun is back, plus a ${fmt(s.margin * 100)}% margin. The TV, radio and day fan stop below this level.` });
+  rules.push({ key: "heat", t: lim.hotNow ? "Heat protection: gentle charging" : "Normal charging", chip: lim.hotNow ? ["ok", "Heat protection on"] : ["watch", "Battery cool enough"],
+    why: lim.hotNow ? `The battery is at ${fmt(last.temp, 1)} °C, above ${s.hot} °C, so the charge rate is limited.` : `The battery is at ${fmt(last.temp, 1)} °C, under ${s.hot} °C.`,
+    more: `Charge limit ${fmt((lim.hotNow ? s.cHot : P.bat.maxC) * cap * 1000)} W (${lim.hotNow ? s.cHot : P.bat.maxC} C). The 400 W panels rarely give more than about 370 W, so on this kit the limit seldom binds; it matters on kits with more panels per kWh of battery.` });
+  for (const m of (d && d.moved) || []) {
+    const hrs = m.to.slice().sort((a, b) => a - b), phone = /phone/i.test(m.name), wh = m.from.length * (h.sabil.hh.flex.find((f) => f.name === m.name) || { kw: 0 }).kw * 1000;
+    rules.push({ key: "flex-" + m.name, t: phone ? `Phone charging at ${spanTxt(hrs)}` : `Fridge pre-cools at ${spanTxt(hrs)}`, chip: ["ok", "Planned"],
+      why: phone ? "The hours with the most spare sun in today's forecast." : "It cools ahead in the sunny hours, so it needs less from the battery at night.",
+      more: `${phone ? "Phones are usually charged" : "This part of the fridge's cooling usually runs"} at ${spanTxt(m.from)}, after dark. Moved to sunny hours, its ${fmt(wh)} Wh come from the panels instead of the battery.${phone ? " The family screen shows this as the best time." : ""}` });
+  }
+  rules.push({ key: "ess", t: "Essentials first", chip: ["ok", "Always on"], why: "Lights, phones, the night fan and the fridge are the last to be cut.",
+    more: `When power is short, the TV, radio and day fan stop first. A standard kit cuts everything at once. A standard kit in this home would now be at ${fmt(h.std.soc * 100)}% charge, charging to 100% whatever the weather.` });
+  $("rules").innerHTML = rules.map((r) => `<div class="rule"><div class="rule-top"><h3>${esc(r.t)}</h3><span class="chip ${r.chip[0]}">${ICON[r.chip[0]]}${esc(r.chip[1])}</span></div><p class="why">${esc(r.why)}</p><details data-key="${r.key}"${openWhy.has(r.key) ? " open" : ""}><summary>Why</summary><p>${esc(r.more)}</p></details></div>`).join("");
+  // alerts
+  $("alertSub").textContent = al.length ? `${al.length} for this home` : "";
+  $("alerts").innerHTML = al.length ? al.map((a) => `<div class="alert-row ${a.lvl === "alert" ? "bad" : ""}"><span class="chip ${a.lvl}" style="padding:2px 6px">${ICON[a.lvl]}</span><div><b>${esc(a.title)}</b><p>${esc(a.body)}</p>${a.action === "clean" ? '<div class="act"><button class="btn ghost" type="button" data-act="clean">Mark panels cleaned</button></div>' : ""}</div></div>`).join("")
+    : `<div class="alert-row"><span class="chip ok" style="padding:2px 6px">${ICON.ok}</span><div><b>All good</b><p>Panels, battery and credit look normal. Dust check: the panels give ${fmt(kit.pi * 100)}% of what clean panels would.</p></div></div>`;
+  $("tryCloud").setAttribute("aria-pressed", scen.cloud != null); $("tryHeat").setAttribute("aria-pressed", scen.heat != null); $("tryDust").setAttribute("aria-pressed", h.soil < 1);
+  drawTimeline($("timeline"), h, proj, fc);
+  // battery health
+  const q = 1 - kit.capFrac, qs = 1 - h.std.capFrac, life = kit.projectedLifeYears(), lifeS = h.std.projectedLifeYears(), age = kit.ageHours() / 8760;
+  $("hSum").innerHTML = `<b>${fmt(kit.capFrac * 100, 1)}%</b> of new capacity. 10-year study: <b>7.5 years</b> to 80%, against 6.2 for a standard kit.`;
+  $("hBig").textContent = fmt(kit.capFrac * 100, 1) + "%";
+  const maxQ = Math.max(q, qs, 1e-6), maxL = Math.max(life || 0, lifeS || 0, 1e-6);
+  $("hBars").innerHTML = `
+    <div class="bh">Wear so far</div>
+    <div class="hbar"><span>SABIL</span><span class="track"><i class="fill" style="width:${100 * kit.age.qCal / maxQ}%"></i><i class="fill cyc" style="width:${100 * kit.age.qCyc / maxQ}%"></i></span><span>${fmt(q * 100, 2)}%</span></div>
+    <div class="hbar"><span>Standard kit</span><span class="track"><i class="fill" style="width:${100 * h.std.age.qCal / maxQ}%"></i><i class="fill cyc" style="width:${100 * h.std.age.qCyc / maxQ}%"></i></span><span>${fmt(qs * 100, 2)}%</span></div>
+    <div class="strip-cap"><span class="key"><i style="background:var(--store)"></i>Time wear (heat, high charge)</span><span class="key"><i style="background:var(--use)"></i>Use wear (cycles)</span></div>
+    <div class="bh">Projected life from this home so far</div>
+    <div class="hbar"><span>SABIL</span><span class="track"><i class="fill" style="width:${100 * (life || 0) / maxL}%"></i></span><span>${fmt(life, 1)} y</span></div>
+    <div class="hbar"><span>Standard kit</span><span class="track"><i class="fill" style="width:${100 * (lifeS || 0) / maxL}%;opacity:.45"></i></span><span>${fmt(lifeS, 1)} y</span></div>`;
+  $("hFacts").innerHTML = `
+    <div><b>${fmt(age * 12, 1)} months</b>since installation</div>
+    <div><b>${fmt(kit.age.fec)} vs ${fmt(h.std.age.fec)}</b>full cycles, SABIL vs standard kit</div>
+    ${lim.capped ? `<div><b>${fmt(slow * 100)}% slower</b>time wear right now, holding ${fmt(lim.soc_max * 100)}% instead of 100%</div>` : `<div><b>Full charge</b>allowed today, so no charge limit is slowing wear</div>`}
+    <div><b>7.5 vs 6.2 years</b>to 80% capacity in the team's 10-year study on 2014–2023 weather; the projection beside it uses this home's data only</div>`;
+  // sun forecast
+  const tm = kit.t - hod(kit.t) + 24;
+  let gT = 0, gT10 = 0, pvT = 0, remToday = 0;
+  for (let k = 0; k < 24; k++) { const i = mod(tm + k), aP = W.amb[mod(tm + k - 24)]; gT += W.fc1[i]; gT10 += W.fc1p10[i]; pvT += S.pvDc(W.fc1[i], aP, h.cfg.pvKwp) * kit.pi * P.sys.inv; }
+  for (let k = 0; k < fc.pv.length; k++) if (kit.t + k < tm) remToday += fc.pv[k] * P.sys.inv;
+  const du = dailyUse(h);
+  $("fSum").innerHTML = `Tomorrow the panels should give <b>${fmt(pvT, 1)} kWh</b>; the home uses about ${fmt(du, 1)} kWh a day.`;
+  $("fFacts").innerHTML = `
+    <div><b>${fmt(gT / 1000, 1)} kWh/m²</b>of sun expected tomorrow (${esc(dayName(tm))}); low estimate ${fmt(gT10 / 1000, 1)}</div>
+    <div><b>${fmt(remToday, 1)} kWh</b>more from the panels expected today</div>
+    <div><b>${fc.nNow ? fmt(fc.ratio * 100) + "%" : "Not yet"}</b>${fc.nNow ? "of the forecast reached so far today; the rest of today is adjusted to match" : "no sun readings yet today; the correction starts after sunrise"}</div>
+    <div><b>${fmt(kit.pi * 100)}%</b>of clean-panel output (dust check), used to scale the forecast</div>`;
+}
+
+function renderFleet() {
+  const rows = homes.map((h, i) => {
+    const kit = h.sabil, active = kit.t > h.cfg.t0 + 24;
+    const al = active ? alertsFor(h) : [], life = kit.projectedLifeYears(), lifeS = h.std.projectedLifeYears();
+    const crit = kit.stats.critH ? kit.stats.critOkH / kit.stats.critH : 1;
+    let tonight = true;
+    if (active) tonight = homeState(h).ni.critOk;
+    return { h, i, al, life, lifeS, crit, tonight, sev: al.filter((a) => a.lvl === "alert").length * 10 + al.length };
+  });
+  const med = (a) => { a = a.filter((v) => v != null).sort((x, y) => x - y); return a.length ? (a.length % 2 ? a[(a.length - 1) / 2] : (a[a.length / 2 - 1] + a[a.length / 2]) / 2) : null; };
+  const served = homes.reduce((s, h) => s + h.sabil.stats.served, 0), critH = homes.reduce((s, h) => s + h.sabil.stats.critH, 0), critOk = homes.reduce((s, h) => s + h.sabil.stats.critOkH, 0);
+  const health = homes.map((h) => h.sabil.capFrac);
+  const needs = rows.filter((r) => r.al.some((a) => a.lvl === "alert")).length;
+  $("opSub").textContent = `${homes.length} homes in Maiduguri. Figures since each kit was installed.`;
+  $("kpis").innerHTML = [
+    { k: "Essentials covered tonight", v: `${rows.filter((r) => r.tonight).length} of ${rows.length}`, d: "homes, from each kit's forecast" },
+    { k: "Need a visit or a call", v: `${needs}`, d: needs ? "homes with an alert" : "no alerts" },
+    { k: "Battery health, median", v: `${fmt(med(health) * 100, 1)}%`, d: `lowest ${fmt(Math.min(...health) * 100, 1)}%` },
+    { k: "Projected battery life, median", v: `${fmt(med(rows.map((r) => r.life)), 1)} y`, d: `standard kits in the same homes: ${fmt(med(rows.map((r) => r.lifeS)), 1)} y. 10-year study: 7.5 vs 6.2` },
+    { k: "Generator fuel avoided", v: `${fmt(served * P.gen_l_per_kwh)} to ${fmt(served * P.gen_l_per_kwh_small)} L`, d: `${fmt(served)} kWh served at 0.5 to 2 L per kWh; essentials on ${fmt(100 * critOk / Math.max(1, critH), 2)}% of hours` },
+  ].map((c) => `<div class="kpi"><div class="k">${c.k}</div><div class="v">${c.v}</div><div class="d">${c.d}</div></div>`).join("");
+  rows.sort((a, b) => b.sev - a.sev || a.i - b.i);
+  $("fleetRows").innerHTML = rows.map((r) => {
+    const h = r.h, kit = h.sabil, st = r.al.length ? r.al.map((a) => `<span class="chip ${a.lvl}">${ICON[a.lvl]}${esc(a.tag)}</span>`).join(" ") : `<span class="chip ok">${ICON.ok}All good</span>`;
+    return `<tr data-i="${r.i}" tabindex="0" class="${r.i === sel ? "sel" : ""}"><td><span class="id">${h.cfg.id}</span><br><span class="area">${esc(h.cfg.area)}</span></td><td>${esc(P.placements[h.cfg.placement].short)}</td>` +
+      `<td class="n"><span class="minibar"><i style="width:${Math.max(0, (kit.capFrac - 0.8) / 0.2) * 100}%"></i></span>${fmt(kit.capFrac * 100, 1)}%</td><td class="n">${fmt(r.life, 1)} <span class="muted">vs ${fmt(r.lifeS, 1)}</span> years</td>` +
+      `<td class="n">${fmt(r.crit * 100, 2)}%</td><td class="n">${h.credit > 0 ? fmt(h.credit, 1) + " kWh" : "Lifeline"}</td><td>${st}</td></tr>`;
+  }).join("");
+}
+
+function render() {
+  renderClock();
+  if (view === "family") renderFamily(); else if (view === "controller") renderController(); else renderFleet();
+}
+
+// ---------- clock loop ----------
+let timer = null, lastReal = Date.now();
+function schedule() {
+  clearInterval(timer);
+  if (!playing) return;
+  if (speed === "real") { lastReal = Date.now(); timer = setInterval(() => { if (Date.now() - lastReal >= 3600e3) { lastReal += 3600e3; tickOnce(); } }, 5000); return; }
+  const ms = +speed, perTick = ms < 500 ? 6 : 1, every = ms < 500 ? 1000 : ms;
+  timer = setInterval(() => { for (let i = 0; i < perTick; i++) tickOnce(true); render(); }, every);
+}
+function tickOnce(noRender) {
+  if (source === "device") { if (!devQueue.length) { if (!noRender) render(); return; } devPending = devQueue.shift(); }
+  advance(false);
+  if (source === "device") devPending = null;
+  if (!noRender) render();
+}
+
+// ---------- events ----------
+const ALIAS = { home: "family", operator: "fleet" };
+function setView(v) {
+  v = ALIAS[v] || v;
+  view = ["family", "controller", "fleet"].includes(v) ? v : "family";
+  for (const s of ["family", "controller", "fleet"]) $("view-" + s).hidden = s !== view;
+  document.querySelectorAll(".tabs a").forEach((a) => { if (a.dataset.view === view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  render();
+}
+window.addEventListener("hashchange", () => setView(location.hash.slice(1)));
+$("homeSel").addEventListener("change", (e) => { sel = +e.target.value; render(); });
+$("playBtn").addEventListener("click", () => { playing = !playing; schedule(); render(); });
+$("speedSel").addEventListener("change", (e) => { speed = e.target.value; schedule(); });
+$("stepBtn").addEventListener("click", () => tickOnce());
+$("srcBtn").addEventListener("click", () => { const open = $("srcPanel").hidden; $("srcPanel").hidden = !open; $("srcBtn").setAttribute("aria-expanded", open); });
+document.querySelectorAll("[data-src]").forEach((b) => b.addEventListener("click", () => {
+  source = b.dataset.src;
+  document.querySelectorAll("[data-src]").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  $("manualPanel").hidden = source !== "manual"; $("devicePanel").hidden = source !== "device";
+  if (source === "manual") { const k = mod(T); manual.ghi = Math.round(W.ghi[k] / 10) * 10; manual.amb = Math.round(W.amb[k] * 2) / 2; syncManual(); }
+  if (source === "device") { playing = false; schedule(); }
+  render();
+}));
+function syncManual() {
+  $("mGhi").value = manual.ghi; $("mAmb").value = manual.amb; $("mExtra").value = manual.extra;
+  $("mGhiO").textContent = `${fmt(manual.ghi)} W/m²`; $("mAmbO").textContent = `${fmt(manual.amb, 1)} °C`; $("mExtraO").textContent = `${fmt(manual.extra)} W`;
+}
+for (const [id, key] of [["mGhi", "ghi"], ["mAmb", "amb"], ["mExtra", "extra"]]) $(id).addEventListener("input", (e) => { manual[key] = +e.target.value; syncManual(); });
+$("topUp").addEventListener("click", () => { homes[sel].credit += 10; render(); });
+$("daySel").addEventListener("change", (e) => {
+  const v = e.target.value, now = new Date(Date.now() + 3600e3);
+  const t = v === "today" ? startHour() : (Date.UTC(2023, +v.split("-")[0] - 1, +v.split("-")[1]) - Date.UTC(2023, 0, 1)) / 3600e3 + 10;
+  boot(t); homeSelOptions(); render();
+});
+$("tryCloud").addEventListener("click", () => { scen.cloud = scen.cloud == null ? T - hod(T) + 24 : null; applyScenarios(); render(); });
+$("tryHeat").addEventListener("click", () => { scen.heat = scen.heat == null ? T : null; applyScenarios(); render(); });
+$("tryDust").addEventListener("click", () => { const h = homes[sel]; h.soil = h.soil < 1 ? 1 : 0.8; render(); });
+$("alerts").addEventListener("click", (e) => { if (e.target.closest("[data-act=clean]")) { homes[sel].soil = 1; homes[sel].sabil.pi = 1; render(); } });
+$("rules").addEventListener("toggle", (e) => { const k = e.target.dataset && e.target.dataset.key; if (k) { if (e.target.open) openWhy.add(k); else openWhy.delete(k); } }, true);
+function openRow(tr) { sel = +tr.dataset.i; $("homeSel").value = sel; location.hash = "controller"; }
+$("fleetRows").addEventListener("click", (e) => { const tr = e.target.closest("tr[data-i]"); if (tr) openRow(tr); });
+$("fleetRows").addEventListener("keydown", (e) => { if (e.key === "Enter") { const tr = e.target.closest("tr[data-i]"); if (tr) openRow(tr); } });
+window.addEventListener("resize", () => { clearTimeout(window.__rz); window.__rz = setTimeout(render, 120); });
+try { if (localStorage.getItem("sabil-tip") !== "seen") $("tip").hidden = false; } catch (e) { $("tip").hidden = false; }
+$("tipClose").addEventListener("click", () => { $("tip").hidden = true; try { localStorage.setItem("sabil-tip", "seen"); } catch (e) {} });
+
+// device readings
+const EXAMPLE = { timestamp_local: "2026-11-01T13:00", ghi_w_m2: 780, ambient_c: 35.5, pv_w: 255, battery_temp_c: 38.6, soc: 0.64, essential_w: 25, other_w: 20 };
+$("devJson").value = JSON.stringify(EXAMPLE, null, 1);
+function checkReading(r) {
+  const errs = [];
+  const rng = { ghi_w_m2: [0, 1400], ambient_c: [-5, 60], pv_w: [0, 5000], battery_temp_c: [-10, 80], soc: [0, 100], essential_w: [0, 5000], other_w: [0, 5000] };
+  for (const [k, [a, b]] of Object.entries(rng)) if (r[k] != null && !(typeof r[k] === "number" && r[k] >= a && r[k] <= b)) errs.push(`${k} should be a number from ${a} to ${b}`);
+  if (r.ghi_w_m2 == null && r.pv_w == null) errs.push("give ghi_w_m2 or pv_w so the controller knows the sun");
+  if (r.ambient_c == null) errs.push("ambient_c is missing");
+  return errs;
+}
+$("devApply").addEventListener("click", () => {
+  let r;
+  try { r = JSON.parse($("devJson").value); } catch (e) { $("devMsg").className = "msg err"; $("devMsg").textContent = "This is not valid JSON. Check the commas and quotes."; return; }
+  const errs = checkReading(r);
+  if (errs.length) { $("devMsg").className = "msg err"; $("devMsg").textContent = "Reading not applied: " + errs.join("; ") + "."; return; }
+  devQueue.push(r); tickOnce();
+  $("devMsg").className = "msg good"; $("devMsg").textContent = `Reading applied to ${homes[sel].cfg.id} for ${hh(T - 1)}. The Controller tab now uses it.`;
+});
+$("devFile").addEventListener("change", (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    const lines = String(rd.result).trim().split(/\r?\n/), head = lines.shift().split(",").map((s) => s.trim());
+    const rows = []; let bad = 0;
+    for (const ln of lines) { const c = ln.split(","), o = {}; head.forEach((k, j) => { const v = parseFloat(c[j]); if (k !== "timestamp_local" && isFinite(v)) o[k] = v; }); if (checkReading(o).length) bad++; else rows.push(o); }
+    devQueue.push(...rows);
+    $("devFileMsg").className = rows.length ? "msg good" : "msg err";
+    $("devFileMsg").textContent = rows.length ? `${rows.length} hours loaded${bad ? `, ${bad} skipped (missing or out-of-range values)` : ""}. Press Play to run them.` : "No usable rows. The file needs a header with ghi_w_m2 and ambient_c.";
+    render();
+  };
+  rd.readAsText(f);
+});
+$("devConnect").addEventListener("click", () => {
+  const url = $("devUrl").value.trim();
+  clearInterval(devTimer);
+  if (!url) { $("devMsg").className = "msg err"; $("devMsg").textContent = "Type the controller's address first, for example http://192.168.4.1/reading.json."; return; }
+  const poll = () => fetch(url, { cache: "no-store" }).then((r) => r.json()).then((r) => {
+    const errs = checkReading(r); if (errs.length) throw new Error(errs.join("; "));
+    devQueue.push(r); tickOnce(); $("devMsg").className = "msg good"; $("devMsg").textContent = `Connected. Last reading at ${new Date().toLocaleTimeString("en-GB")}.`;
+  }).catch((err) => { clearInterval(devTimer); $("devMsg").className = "msg err"; $("devMsg").textContent = `Could not read ${url}. Check the controller is on and on the same network, and that it allows the page to read it. Meanwhile, paste a reading or load a log file. (${err.message})`; });
+  poll(); devTimer = setInterval(poll, 10000);
+});
+
+homeSelOptions(); syncManual();
+setView(location.hash.slice(1) || "family");
+schedule();
+</script>
