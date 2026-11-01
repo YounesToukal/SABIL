@@ -285,7 +285,7 @@ def save(tag, summary, hourly=None):
     with open(RESULTS / f"summary_{tag}.json", "w") as f:
         json.dump(summary, f, indent=2)
     if hourly is not None:
-        hourly.to_csv(RESULTS / f"hourly_{tag}.csv", index=False, float_format="%.4f",
+        hourly.to_csv(RESULTS / f"hourly_{tag}.csv", index=False, float_format="%.6f",
                       date_format="%Y-%m-%d %H:%M")
 
 

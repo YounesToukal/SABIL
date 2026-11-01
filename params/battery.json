@@ -1,0 +1,50 @@
+{
+  "chemistry": "LFP",
+  "module": "LFP 25.6 V 50 Ah (8 prismatic cells in series)",
+  "capacity_kwh": 1.92,
+  "charge_eff": 0.97,
+  "discharge_eff": 0.97,
+  "max_c_rate": 0.5,
+  "soc_min_baseline": 0.1,
+  "soc_max_baseline": 1.0,
+  "eol_capacity_frac": 0.8,
+  "temp_offset_c": 3.0,
+  "thermal": {
+    "r_th_k_per_w": 0.5
+  },
+  "aging": {
+    "model": "naumann_sony",
+    "_models": "naumann_sony = TU Munich data (Naumann et al. 2018/2020), src/aging_naumann.py, default; nrel_prismatic = NREL BLAST-Lite large prismatic cells, src/aging_nrel.py",
+    "cal_k_ref_per_sqrt_s": 1.2571e-05,
+    "cal_ea_j_mol": 17126,
+    "cal_t_ref_k": 298.15,
+    "cal_soc_a": 2.8575,
+    "cal_soc_b": 0.60225,
+    "cyc_c_a": 0.063,
+    "cyc_c_b": 0.0971,
+    "cyc_dod_c": 4.0253,
+    "cyc_dod_d": 1.0923,
+    "p1": 83700.0,
+    "p2": -5210.0,
+    "p3": -3560.0,
+    "p_cal": 0.526,
+    "p4": 4.38e-08,
+    "p5": 1.55e-08,
+    "p6": 1.68e-07,
+    "p7": 2190.0,
+    "p8": 155000.0,
+    "p_cyc": 0.828,
+    "degradation_scalar": 1.0,
+    "units": "naumann_sony: k_cal per sqrt(s), Ea in J/mol, cycle law in % per sqrt(FEC); nrel_prismatic: k_cal per day^p_cal, T in K, Ua in V, k_cyc per EFC^p_cyc"
+  },
+  "sources": {
+    "aging": "naumann_sony (default): Naumann et al., J. Energy Storage 17 (2018) 153-169, doi:10.1016/j.est.2018.01.019 (calendar) and J. Power Sources 451 (2020) 227666 (cycle); coefficients as in the authors' SimSES code, checked by src/validate_aging.py. nrel_prismatic: NREL BLAST-Lite v1.1.1 lfp_gr_250AhPrismatic_2019, data in J. Energy Storage doi:10.1016/j.est.2023.109042; checked by src/validate_aging_nrel.py. The default is the faster-fading (conservative) model.",
+    "degradation_scalar": "1.0 = the premium cell tested by NREL. Low-cost modules sold off-grid usually age faster; 2.0 is used as a sensitivity case, not a measured value.",
+    "graphite_potential": "Safari & Delacourt, J. Electrochem. Soc. 158(5) A562 (2011), doi:10.1149/1.3567007",
+    "efficiency": "LFP coulombic and voltage efficiency at low C-rate, round trip ~94%. TO CONFIRM with module datasheet.",
+    "max_c_rate": "Conservative continuous rate for a home LFP module; our peak use is 0.07 C.",
+    "soc_window": "Standard controller uses 10-100% SoC (LVD at 10% to protect the cells).",
+    "temp_offset_c": "Battery indoors in a Maiduguri house: assumed 3 C above outdoor air on average (sheet-metal roofs, thermal mass). TO CONFIRM; sensitivity tested in validate_aging.py.",
+    "r_th_k_per_w": "Module-to-room thermal resistance, natural convection: h ~ 5-10 W/m2K over ~0.3 m2 gives 0.3-0.7 K/W. Self-heating is small at 0.1 C (~1-2 C)."
+  }
+}

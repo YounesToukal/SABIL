@@ -51,14 +51,18 @@ def main():
     w("## 2. Method")
     w(f"- **Site and weather:** {sim['site']['name']} ({sim['site']['latitude']} N, {sim['site']['longitude']} E). "
       f"NASA POWER hourly irradiance, air temperature and humidity, {base['weather'] if base else ''}, local time (UTC+{sim['site']['utc_offset_h']}).")
-    w("- **Household:** 5 people; hourly appliance schedule from `params/household.json`; lights, phone charging and fans "
-      "are critical loads. Grid assumed down for the whole horizon (worst case of Brief 13).")
+    apps = P["household"]["appliances"]
+    crit_names = ", ".join(dict.fromkeys(a["name"].split(",")[0] for a in apps if a.get("critical")))
+    flex_names = ", ".join(dict.fromkeys(a["name"].split(",")[0] for a in apps if a.get("flexible"))) or "none"
+    daily_kwh = sum(a["power_w"] * a["quantity"] * len(a["use_hours"]) for a in apps) / 1000
+    w(f"- **Household:** 5 people, {daily_kwh:.2f} kWh/day; hourly appliance schedule from `params/household.json`; "
+      f"critical loads: {crit_names}. Grid assumed down for the whole horizon (worst case of Brief 13).")
     w("- **Paired design:** the same house, weather, PV array and battery are simulated twice; only the controller differs. "
       "Any difference is caused by the controller.")
     w("- **Standard controller:** charges to 100% whenever there is sun, discharges to the low-voltage cut-off, serves "
       "all loads equally, runs appliances at their usual hour.")
     w("- **SABIL controller:** (1) caps the charge level on hot days when tomorrow is sunny; (2) keeps a night reserve "
-      "for critical loads; (3) moves flexible loads (iron) to sunny hours; (4) serves critical loads first; (5) limits "
+      f"for critical loads; (3) moves flexible loads ({flex_names}) to sunny hours; (4) serves critical loads first; (5) limits "
       "power when the battery is hot. Plans with a next-day sun forecast.")
     w("- **Battery ageing:** semi-empirical LFP/graphite model (Naumann et al. 2018 calendar, 2020 cycle): calendar loss "
       "~ sqrt(time), accelerated by temperature (Arrhenius) and state of charge; cycle loss ~ sqrt(full equivalent cycles), "
@@ -179,6 +183,10 @@ def main():
             w("")
             w(f"Battery life varies by only {span:.2f} years across all forecasts: SABIL's benefit does not depend on a "
               "sophisticated forecast, which matters for deployment on cheap hardware without internet.")
+            w("")
+            w("Note: this table was computed with the first, placeholder kit (dev_params: 1.5 kWp, 5.12 kWh). On the "
+              "selected kit the main simulation confirms the same conclusion (battery life with each forecast in the "
+              "headline table above).")
         w("")
         w("![leaderboard](figures/fig10_forecast_leaderboard.png)")
         w("![groups](figures/fig11_feature_groups.png)")

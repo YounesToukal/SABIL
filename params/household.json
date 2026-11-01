@@ -1,0 +1,216 @@
+{
+  "people": 5,
+  "location": "Maiduguri, Borno State, Nigeria",
+  "hour_convention": "hour h = the interval h:00 to h+1:00, local time (WAT, UTC+1)",
+  "appliances": [
+    {
+      "name": "LED lights, indoor",
+      "power_w": 3,
+      "quantity": 4,
+      "use_hours": [
+        5,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "critical": true,
+      "flexible": false,
+      "allowed_hours": []
+    },
+    {
+      "name": "LED security light, outdoor",
+      "power_w": 5,
+      "quantity": 1,
+      "use_hours": [
+        19,
+        20,
+        21,
+        22,
+        23,
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "critical": true,
+      "flexible": false,
+      "allowed_hours": []
+    },
+    {
+      "name": "Phone charging",
+      "power_w": 5,
+      "quantity": 5,
+      "use_hours": [
+        19,
+        20
+      ],
+      "critical": true,
+      "flexible": true,
+      "allowed_hours": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "name": "DC fan, bedroom (night)",
+      "power_w": 20,
+      "quantity": 1,
+      "use_hours": [
+        21,
+        22,
+        23,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "critical": true,
+      "flexible": false,
+      "allowed_hours": []
+    },
+    {
+      "name": "DC fan, living room (day)",
+      "power_w": 20,
+      "quantity": 1,
+      "use_hours": [
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "critical": false,
+      "flexible": false,
+      "allowed_hours": []
+    },
+    {
+      "name": "TV 32 inch, efficient DC",
+      "power_w": 20,
+      "quantity": 1,
+      "use_hours": [
+        18,
+        19,
+        20,
+        21
+      ],
+      "critical": false,
+      "flexible": false,
+      "allowed_hours": []
+    },
+    {
+      "name": "Radio",
+      "power_w": 3,
+      "quantity": 1,
+      "use_hours": [
+        6,
+        7,
+        18,
+        19
+      ],
+      "critical": false,
+      "flexible": false,
+      "allowed_hours": []
+    },
+    {
+      "name": "DC refrigerator ~100 L, daytime cooling",
+      "power_w": 25,
+      "quantity": 1,
+      "use_hours": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "critical": true,
+      "flexible": false,
+      "allowed_hours": []
+    },
+    {
+      "name": "DC refrigerator ~100 L, night cooling",
+      "power_w": 17.5,
+      "quantity": 1,
+      "use_hours": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "critical": true,
+      "flexible": false,
+      "allowed_hours": []
+    },
+    {
+      "name": "DC refrigerator ~100 L, shiftable cooling (pre-cooling)",
+      "power_w": 16.25,
+      "quantity": 1,
+      "use_hours": [
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "critical": true,
+      "flexible": true,
+      "allowed_hours": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "note": "30% of the fridge's night energy (97.5 Wh/day). The standard controller runs it in the evening; the smart controller moves it to midday (pre-cooling, the fridge's thermal mass stores the cold). Same energy in both cases, so the comparison is fair; in reality pre-cooling in the midday heat costs a little more (TO CONFIRM)."
+    }
+  ],
+  "night_hours": [
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "sources": {
+    "fans": "CLASP / Efficiency for Access, 2021 Appliance Data Trends: tested pedestal fans 14-34 W; efficient 12 V BLDC fan <= 15 W; about 9 h/day of use in hot seasons. 20 W chosen as a mid value.",
+    "tv": "CLASP / EforA Solar Appliance Technology Brief: Televisions (May 2021): most efficient 32-inch model 8 W, market 32-inch TVs 20-40 W. 20 W = efficient model sold in SHS bundles.",
+    "fridge": "CLASP / EforA Solar Appliance Technology Brief: Refrigerators (June 2021): median VeraSol-tested refrigerator 0.5 kWh/24h; field tests in Uganda found 80-124% above lab values for medium and large units. 0.6 kWh/day (+20%) chosen for Maiduguri heat, TO CONFIRM.",
+    "lights_phones_radio": "Typical solar home system ratings (3 W LED bulbs, 5 W phone charging, 3 W radio). Phone energy 10 Wh/day per phone. TO CONFIRM against a vendor datasheet.",
+    "usage_hours": "Assumed daily routine for a 5-person household in Maiduguri (sunset ~18:00, hot nights). TO CONFIRM; no field survey available."
+  },
+  "fridge_note": "Fridge = 0.6 kWh/day (25 W average), split into three entries so that the flexible part has as many allowed hours as usual hours and no energy is lost when it is moved."
+}

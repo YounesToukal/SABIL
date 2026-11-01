@@ -1,119 +1,88 @@
-# src/aging_model.py                    (owner: Youcef)
-#
-# INTERIM MODEL written by Younes so results exist before Youcef's file arrives.
-# Same two functions and arguments as the integration contract, plus two optional
-# hooks that simulate.py calls only if they exist: reset() at the start of a run and
-# observe_soc(soc_end) once per step (the true end-of-step SoC, for cycle counting).
-# Youcef: review it, or replace this whole file with yours. Nothing else needs to change.
-#
-# Semi-empirical LFP/graphite model (Sony/Murata US26650FTC1), superposition of:
-#   calendar:  q_cal = k_T(T) * k_SoC(SoC) * t^0.5               t in seconds, q as a fraction
-#              k_T   = k_ref * exp(-Ea/R * (1/T - 1/T_ref)),  k_SoC = a (SoC - 0.5)^3 + b
-#              Naumann et al., J. Energy Storage 17 (2018) 153-169, doi:10.1016/j.est.2018.01.019
-#   cycle:     q_cyc = k_C(C) * k_DOD(DOD) * FEC^0.5 / 100        per half-cycle
-#              k_C = a C + b,  k_DOD = c (DOD - 0.6)^3 + d,  FEC of a half-cycle = DOD / 2
-#              Naumann et al., J. Power Sources 451 (2020) 227666
-# Implementation mirrors the authors' open-source SimSES (TU Munich, PyPI 'simses' 2.1.1,
-# simses/model/degradation/sony_lfp_calendar.py and sony_lfp_cyclic.py,
-# simses/degradation/cycle_detector.py): identical coefficients, "virtual time" / "virtual
-# FEC" continuation under changing stress, and half-cycles closed at each SoC reversal.
-# Verified by src/validate_aging.py. Coefficients live in battery.json -> "aging".
-import math
+"""Battery ageing entry point used by the simulation (owner: Youcef).
 
-R_GAS = 8.3144598
-_s = {}
+Two LFP/graphite ageing models, fitted on different experimental datasets, behind the
+interface fixed by the integration contract. battery.json -> aging.model picks one:
+
+  "naumann_sony"   (default) TU Munich data, Naumann et al. 2018/2020; implementation
+                   checked against the authors' SimSES code (src/aging_naumann.py, Younes)
+  "nrel_prismatic" large-format prismatic cells, NREL BLAST-Lite model; implementation
+                   checked against NREL's code (src/aging_nrel.py, Youcef)
+
+The default is the more conservative of the two (faster fade). Running both is how the
+robustness of every ageing conclusion is checked (src/robustness_aging.py).
+
+Battery temperature (shared by both models):
+  default   outdoor air + indoor offset + steady-state self-heating from conversion losses,
+            T = T_air + offset + R_th * |P| * (1 - efficiency)                    (Youcef)
+  "rc"      if battery.json -> thermal.model is "rc": two-node lumped model of the room and
+            the pack, with the placement (outdoor box, room under a metal roof...) setting the
+            room time constant and offset; used by the placement study            (Younes)
+"""
+import aging_naumann
+import aging_nrel
+
+R_GAS = aging_naumann.R_GAS             # used by the optimal-control benchmark (controllers.Oracle)
+_MODELS = {"naumann_sony": aging_naumann, "nrel_prismatic": aging_nrel}
+_active = aging_naumann
+_th = {"t_room": None, "t_bat": None}     # state of the RC thermal model
+
+
+def _model(battery):
+    return _MODELS[battery.get("aging", {}).get("model", "naumann_sony")]
 
 
 def reset():
-    """Fresh battery: no accumulated loss, empty half-cycle detector, thermal state unset."""
-    _s.clear()
-    _s.update(q_cal=0.0, q_cyc=0.0, fec=0.0, prev=None, start=None, direction=0,
-              hours=0.0, pending=[], t_room=None, t_bat=None)
-
-
-reset()
+    """Start a new battery in every model (called by simulate.py at the start of a run)."""
+    aging_naumann.reset()
+    aging_nrel.reset()
+    _th.update(t_room=None, t_bat=None)
 
 
 def observe_soc(soc_end, dt_h=1.0):
-    """Half-cycle detector (SimSES HalfCycleDetector): closes a half-cycle at each reversal."""
-    s = _s
-    if s["prev"] is None:
-        s["prev"] = s["start"] = soc_end
-        return
-    delta = soc_end - s["prev"]
-    if abs(delta) < 1e-12:
-        return                                   # rest: no cycle, no elapsed time
-    d = 1 if delta > 0 else -1
-    if s["direction"] == 0 or d == s["direction"]:
-        s["direction"] = d
-        s["hours"] += dt_h
-        s["prev"] = soc_end
-        return
-    dod = abs(s["prev"] - s["start"])            # reversal: close the half-cycle
-    c_rate = dod / s["hours"] if s["hours"] > 0 else 0.0
-    s["pending"].append((dod, c_rate))
-    s["start"], s["direction"], s["hours"], s["prev"] = s["prev"], d, dt_h, soc_end
+    """End-of-step SoC for half-cycle counting (used by the TU Munich model)."""
+    aging_naumann.observe_soc(soc_end, dt_h)
+
+
+def _rc(battery):
+    th = battery.get("thermal") or {}
+    return th if th.get("model") == "rc" else None
 
 
 def battery_temp(ambient_c, power_kw, battery):
-    """Battery temperature during one hour, in °C.
-    Default: outdoor air + a fixed offset (contract version).
-    If battery.json has a "thermal" block with "model": "rc", a two-node lumped model is used:
-      room:    T_room += dt/tau_room * (T_out - T_room)      (+ room_offset_c: roof gain or ground cooling)
-      battery: C dT/dt = UA (T_room - T_bat) + I^2 R,  I = P / V_nominal   (self-heating)
-    The placement (outdoor box, indoor room, cool interior...) sets tau_room and room_offset_c.
-    This version keeps state, so it must be called exactly once per simulated hour."""
-    th = battery.get("thermal")
-    if not th or th.get("model") != "rc":
-        return ambient_c + battery["temp_offset_c"]
+    """Battery temperature during one hour, in degC.
+    Default: stateless (outdoor air + offset + self-heating).
+    RC model: room  T_room += dt/tau_room * (T_out + room_offset - T_room)
+              pack  C dT/dt = UA (T_room - T_bat) + I^2 R,  I = P / V_nominal
+    The RC version keeps state, so it must be called exactly once per simulated hour."""
+    th = _rc(battery)
+    if th is None:
+        return aging_nrel.battery_temp(ambient_c, power_kw, battery)
     pl = th["placements"][th["placement"]]
-    s = _s
-    if s["t_room"] is None:
-        s["t_room"] = s["t_bat"] = ambient_c + pl["room_offset_c"]
-    dt_s = 3600.0
-    s["t_room"] += min(1.0, 1.0 / pl["tau_room_h"]) * (ambient_c + pl["room_offset_c"] - s["t_room"])
+    if _th["t_room"] is None:
+        _th["t_room"] = _th["t_bat"] = ambient_c + pl["room_offset_c"]
+    _th["t_room"] += min(1.0, 1.0 / pl["tau_room_h"]) * (ambient_c + pl["room_offset_c"] - _th["t_room"])
     current = abs(power_kw) * 1000.0 / th["v_nominal"]
     q_heat = current ** 2 * th["r_internal_ohm"]
     c_j_k = th["mass_kg"] * th["cp_j_kg_k"]
-    s["t_bat"] += dt_s / c_j_k * (pl["ua_w_k"] * (s["t_room"] - s["t_bat"]) + q_heat)
-    return s["t_bat"]
+    _th["t_bat"] += 3600.0 / c_j_k * (pl["ua_w_k"] * (_th["t_room"] - _th["t_bat"]) + q_heat)
+    return _th["t_bat"]
 
 
 def battery_temp_estimate(ambient_c, battery):
     """Stateless estimate for the controller's planning (does not advance the thermal state)."""
-    th = battery.get("thermal")
-    if not th or th.get("model") != "rc":
-        return ambient_c + battery["temp_offset_c"]
+    th = _rc(battery)
+    if th is None:
+        return aging_nrel.battery_temp(ambient_c, 0.0, battery)
     return ambient_c + th["placements"][th["placement"]]["room_offset_c"]
 
 
 def step_loss(dt_h, soc, temp_c, throughput_kwh, capacity_kwh, battery):
     """Capacity lost during one step, as a fraction of the INITIAL capacity (>= 0)."""
-    a, s = battery["aging"], _s
-    # calendar, every step
-    T, T_ref = temp_c + 273.15, a["cal_t_ref_k"]
-    k = a["cal_k_ref_per_sqrt_s"] * math.exp(-a["cal_ea_j_mol"] / R_GAS * (1.0 / T - 1.0 / T_ref)) \
-        * (a["cal_soc_a"] * (soc - 0.5) ** 3 + a["cal_soc_b"])
-    d_cal = 0.0
-    if k > 0:
-        t_virtual = (s["q_cal"] / k) ** 2
-        d_cal = k * math.sqrt(t_virtual + dt_h * 3600.0) - s["q_cal"]
-        s["q_cal"] += d_cal
-    # cycle, for every half-cycle closed since the last step
-    d_cyc = 0.0
-    for dod, c_rate in s["pending"]:
-        dfec = dod / 2.0
-        kc = (a["cyc_c_a"] * c_rate + a["cyc_c_b"]) * (a["cyc_dod_c"] * (dod - 0.6) ** 3 + a["cyc_dod_d"])
-        if dfec > 0 and kc > 0:
-            fec_virtual = (s["q_cyc"] * 100.0 / kc) ** 2
-            dq = kc * math.sqrt(fec_virtual + dfec) / 100.0 - s["q_cyc"]
-            s["q_cyc"] += dq
-            d_cyc += dq
-            s["fec"] += dfec
-    s["pending"].clear()
-    return max(0.0, d_cal) + max(0.0, d_cyc)
+    global _active
+    _active = _model(battery)
+    return _active.step_loss(dt_h, soc, temp_c, throughput_kwh, capacity_kwh, battery)
 
 
 def breakdown():
-    """Accumulated calendar and cycle losses (fractions of initial capacity) and FEC."""
-    return {"calendar_loss_frac": _s["q_cal"], "cycle_loss_frac": _s["q_cyc"], "fec": _s["fec"]}
+    """Calendar and cycle losses of the model used in the current run."""
+    return _active.breakdown()

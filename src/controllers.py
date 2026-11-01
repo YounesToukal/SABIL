@@ -139,6 +139,9 @@ class Smart:
         start = next((k for k in range(12, H) if pv_ac[k] < load[k]), H)
         end = next((k for k in range(max(start, 24), H) if pv_ac[k] >= load[k]), H)
         e_night = deficit[start:end].sum()
+        # cloudy-day buffer (Youcef, sizing review): a "sunny tomorrow" forecast can be wrong,
+        # so the capped charge keeps part of one day of critical energy in reserve
+        e_night += self.s.get("cloudy_day_buffer", 0.0) * crit[24:48].sum()
 
         # 4. reserve: critical energy needed over the next dark period after hour h
         #    (during the day this protects tonight's lights, phones and fan)

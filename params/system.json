@@ -1,0 +1,74 @@
+{
+  "system_type": "24 V DC solar home system (DC appliances, MPPT charge controller, LFP battery, no AC inverter)",
+  "pv_kwp": 0.4,
+  "pv_derate": 0.92,
+  "pv_temp_coeff_per_c": -0.0035,
+  "noct_c": 45,
+  "inverter_eff": 0.95,
+  "design_inputs": {
+    "design_psh_h": 5.07,
+    "annual_psh_h": 5.92,
+    "pv_temp_loss_design": 0.105,
+    "pv_oversize_factor": 1.1,
+    "pv_rounding_wp": 50,
+    "battery_window_soc": [
+      0.1,
+      1.0
+    ],
+    "battery_eol_capacity_frac": 0.8,
+    "battery_module_kwh": 1.28,
+    "battery_module_label": "LFP 25.6 V 50 Ah",
+    "sun_source": "NASA POWER hourly GHI, Maiduguri, 2014-2023 (10 years, data/): lowest long-term monthly mean = month 8 at 5.07 kWh/m2/day; annual mean 5.92; worst single month 8/2022 at 4.72. Horizontal irradiance, as in the PV model.",
+    "monthly_ghi_kwh_m2_day": {
+      "1": 5.96,
+      "2": 6.35,
+      "3": 6.39,
+      "4": 6.6,
+      "5": 6.23,
+      "6": 5.79,
+      "7": 5.32,
+      "8": 5.07,
+      "9": 5.6,
+      "10": 6.02,
+      "11": 6.07,
+      "12": 5.7
+    },
+    "battery_kwh_selected": 1.92,
+    "battery_module_label_selected": "LFP 25.6 V 75 Ah",
+    "battery_selection_reason": "Selected from src/sizing_map.py on NASA POWER 2014-2023 with both ageing models: 400 Wp + 1.92 kWh gives the SABIL controller 13 hours of lost critical power in 10 years (0 in 8 of the 10 years) against 110 for the standard controller; adding PV is cheaper than adding battery to ride through the cloudiest rainy seasons (2022). Energy balance alone gives 350 Wp + 1.28 kWh.",
+    "worst_single_month_kwh_m2_day": {
+      "year": 2022,
+      "month": 8,
+      "value": 4.72
+    },
+    "pv_wp_selected": 400
+  },
+  "sizing_results": {
+    "daily_load_wh": 1164,
+    "night_load_wh": 766,
+    "sun_hours_load_wh": 398,
+    "critical_load_wh": 952,
+    "critical_night_load_wh": 677,
+    "peak_load_w": 99,
+    "pv_wp": 350,
+    "pv_wp_selected": 400,
+    "battery_kwh": 1.28,
+    "battery_modules": 1,
+    "nightly_dod_new_battery": 0.433,
+    "nightly_dod_end_of_life": 0.541,
+    "peak_c_rate_per_h": 0.054,
+    "pv_margin_worst_season": 0.145,
+    "night_load_wh_with_smart_shift": 618,
+    "generated_by": "src/sizing.py",
+    "battery_kwh_energy_balance_minimum": 1.28,
+    "battery_kwh_selected": 1.92
+  },
+  "notes": {
+    "pv_derate": "Losses NOT modelled hourly: soiling incl. Harmattan dust 5% x DC wiring and mismatch 3% = 0.92. Temperature loss is modelled hourly from NOCT and pv_temp_coeff_per_c, so it is not in pv_derate.",
+    "inverter_eff": "DC system, so this is the distribution efficiency between battery/PV bus and appliances: MPPT 0.97 x wiring and DC-DC 0.98 = 0.95. Key name kept for the integration contract.",
+    "design_psh_h": "Lowest monthly mean of daily horizontal irradiation, computed by sizing.py from the NASA POWER hourly year (see design_inputs.sun_source). Replaced the earlier profilesolar.com estimate (5.8 h), which was optimistic.",
+    "pv_temp_loss_design": "Design-month estimate only: cell ~55 C in operation (NOCT 45 C, ambient ~30 C), (55-25) x 0.35%/C = 10.5%. The hourly simulation computes it exactly.",
+    "pv_temp_coeff_per_c": "Typical mono-PERC datasheet value -0.35 %/C. TO CONFIRM with the chosen module datasheet.",
+    "battery_eol_capacity_frac": "The battery is sized so that at end of life (80% capacity) it still covers the night load. This links sizing to the ageing model."
+  }
+}

@@ -1,12 +1,12 @@
 {
   "n": 24,
-  "gain_years_median": 2.0999999999999996,
-  "gain_years_p5": 2.09,
-  "gain_years_p95": 2.1099999999999994,
+  "gain_years_median": 1.25,
+  "gain_years_p5": 1.2314999999999996,
+  "gain_years_p95": 1.2899999999999991,
   "share_smart_better": 1.0,
-  "critical_baseline_mean": 0.9934791666666666,
+  "critical_baseline_mean": 0.9988416666666667,
   "critical_smart_mean": 0.9998458333333334,
-  "critical_smart_min": 0.9997,
-  "unmet_baseline_mean": 5.2124999999999995,
-  "unmet_smart_mean": 14.74
+  "critical_smart_min": 0.9998,
+  "unmet_baseline_mean": 0.33208333333333334,
+  "unmet_smart_mean": 0.5541666666666667
 }

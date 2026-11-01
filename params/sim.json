@@ -27,7 +27,8 @@
       "load_shift": true,
       "heat_gentle": true,
       "critical_priority": true
-    }
+    },
+    "cloudy_day_buffer": 0.5
   },
   "demand": {
     "stochastic": false,
@@ -40,7 +41,7 @@
   "experiments": {
     "demand_seeds": 24,
     "placement_study": {
-      "thermal": {"model": "rc", "v_nominal": 51.2, "r_internal_ohm": 0.025, "mass_kg": 45.0, "cp_j_kg_k": 1100.0},
+      "thermal": {"model": "rc", "v_nominal": 25.6, "r_internal_ohm": 0.015, "mass_kg": 18.0, "cp_j_kg_k": 1100.0},
       "placements": {
         "outdoor_shaded_box": {"tau_room_h": 1.0, "room_offset_c": 3.0, "ua_w_k": 3.0,
                                "why": "metal box outside in the shade: follows air temperature, enclosure adds heat"},
@@ -51,7 +52,7 @@
         "cool_interior_floor": {"tau_room_h": 24.0, "room_offset_c": -2.0, "ua_w_k": 2.0,
                                 "why": "on the floor of the coolest interior room, ground-coupled"}
       },
-      "sources": "Lumped two-node thermal model. Pack: 51.2 V, 100 Ah LFP, ~45 kg, cp ~1100 J/(kg K), ~25 mOhm. Placement time constants and offsets are scenario assumptions (engineering judgement), to be measured with a temperature logger in pilot homes."
+      "sources": "Lumped two-node thermal model. Pack: the selected kit's 25.6 V, 75 Ah LFP module (1.92 kWh), ~18 kg, cp ~1100 J/(kg K), ~15 mOhm (8 prismatic cells + busbars and BMS; first placement study used the 51.2 V, 100 Ah, ~45 kg, ~25 mOhm placeholder pack). Placement time constants and offsets are scenario assumptions (engineering judgement), to be measured with a temperature logger in pilot homes."
     },
     "sweep_soc_cap_hot": [0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0],
     "monte_carlo_samples": 96,
@@ -77,11 +78,11 @@
   "oracle": {
     "lambda_critical": 50.0,
     "lambda_noncritical": 1.0,
-    "lambda_degradation": 3700.0,
+    "lambda_degradation": 1400.0,
     "lambda_degradation_sweep": [0, 1500, 3700, 10000, 30000, 100000],
     "grid_levels": 61,
     "horizon_h": 48,
-    "sources": "Benchmark only. Costs in kWh-equivalents of non-critical energy (valued at diesel generation, ~USD 1/kWh: NGN 3,277/L x 0.5 L/kWh at ~NGN 1,550/USD). Critical energy weighted 50x. lambda_degradation = value of the whole capacity fraction: replacing a 5.12 kWh LFP pack at ~USD 150/kWh (~USD 770) when 20% is lost -> ~USD 3,850 per unit fraction -> ~3,700 kWh-equivalents. TO CONFIRM against Youcef's costs.json."
+    "sources": "Benchmark only. Costs in kWh-equivalents of non-critical energy (valued at diesel generation, ~USD 1/kWh: NGN 3,277/L x 0.5 L/kWh at ~NGN 1,550/USD). Critical energy weighted 50x. lambda_degradation = value of the whole capacity fraction: replacing the selected 1.92 kWh LFP module at ~USD 150/kWh (~USD 290) when 20% is lost -> ~USD 1,440 per unit fraction -> ~1,400 kWh-equivalents (3,700 for the 5.12 kWh placeholder pack used first). TO CONFIRM against Youcef's costs.json."
   },
   "forecast_lab": {
     "trees": 200,
@@ -103,5 +104,5 @@
     "dry_months": [11, 12, 1, 2, 3, 4],
     "wet_months": [6, 7, 8, 9]
   },
-  "sources": "Site from the team contract. Weather: NASA POWER hourly 2014-2023 (multi_year mode uses each real year once; repeat mode repeats repeat_year as in the original contract). CO2: IPCC 2006 Guidelines default for diesel/gas oil, 74,100 kg CO2/TJ x 43.0 TJ/Gg x 0.84 kg/L = 2.68 kg CO2/L. Smart-controller thresholds are design choices, justified by the soc_cap_hot sweep (results/experiments). Uncertainty ranges are engineering judgement, stated per input."
+  "sources": "Site from the team contract. Weather: NASA POWER hourly 2014-2023 (multi_year mode uses each real year once; repeat mode repeats repeat_year as in the original contract). CO2: IPCC 2006 Guidelines default for diesel/gas oil, 74,100 kg CO2/TJ x 43.0 TJ/Gg x 0.84 kg/L = 2.68 kg CO2/L. Smart-controller thresholds are design choices, justified by the soc_cap_hot sweep (results/experiments). Uncertainty ranges are engineering judgement, stated per input. cloudy_day_buffer (Youcef, sizing review 31 Oct): share of tomorrow's critical energy kept in the capped charge, so a wrong 'sunny tomorrow' forecast does not cut critical loads; 0.5 removed lost critical hours in the 64-case reliability map."
 }

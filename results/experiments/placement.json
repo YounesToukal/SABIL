@@ -3,40 +3,40 @@
     {
       "placement": "outdoor_shaded_box",
       "why": "metal box outside in the shade: follows air temperature, enclosure adds heat",
-      "avg_battery_temp_c": 32.0,
-      "life_baseline": 6.23,
-      "life_smart": 8.31,
-      "critical_baseline": 0.9924,
+      "avg_battery_temp_c": 31.53,
+      "life_baseline": 6.41,
+      "life_smart": 7.75,
+      "critical_baseline": 0.9988,
       "critical_smart": 0.9999
     },
     {
       "placement": "indoor_metal_roof",
       "why": "room under a corrugated metal roof: some damping, roof heat gain",
-      "avg_battery_temp_c": 31.27,
-      "life_baseline": 6.56,
-      "life_smart": 8.33,
-      "critical_baseline": 0.9926,
+      "avg_battery_temp_c": 30.57,
+      "life_baseline": 6.85,
+      "life_smart": 7.96,
+      "critical_baseline": 0.9989,
       "critical_smart": 0.9999
     },
     {
       "placement": "indoor_masonry",
       "why": "thick mud-brick or block room: daily swing damped, same mean",
-      "avg_battery_temp_c": 29.27,
-      "life_baseline": 7.17,
-      "life_smart": 8.42,
-      "critical_baseline": 0.9928,
-      "critical_smart": 1.0
+      "avg_battery_temp_c": 28.57,
+      "life_baseline": 7.54,
+      "life_smart": 8.37,
+      "critical_baseline": 0.999,
+      "critical_smart": 0.9999
     },
     {
       "placement": "cool_interior_floor",
       "why": "on the floor of the coolest interior room, ground-coupled",
-      "avg_battery_temp_c": 27.26,
-      "life_baseline": 7.69,
-      "life_smart": 8.67,
-      "critical_baseline": 0.993,
+      "avg_battery_temp_c": 26.57,
+      "life_baseline": 8.3,
+      "life_smart": 8.88,
+      "critical_baseline": 0.9991,
       "critical_smart": 1.0
     }
   ],
   "forecast": "persistence",
-  "sources": "Lumped two-node thermal model. Pack: 51.2 V, 100 Ah LFP, ~45 kg, cp ~1100 J/(kg K), ~25 mOhm. Placement time constants and offsets are scenario assumptions (engineering judgement), to be measured with a temperature logger in pilot homes."
+  "sources": "Lumped two-node thermal model. Pack: the selected kit's 25.6 V, 75 Ah LFP module (1.92 kWh), ~18 kg, cp ~1100 J/(kg K), ~15 mOhm (8 prismatic cells + busbars and BMS; first placement study used the 51.2 V, 100 Ah, ~45 kg, ~25 mOhm placeholder pack). Placement time constants and offsets are scenario assumptions (engineering judgement), to be measured with a temperature logger in pilot homes."
 }

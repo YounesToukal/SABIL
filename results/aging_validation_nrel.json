@@ -1,0 +1,150 @@
+{
+  "closed_form": {
+    "calendar_1y_25C_soc50": {
+      "model": 0.011016423572857474,
+      "closed_form": 0.011016423572855863,
+      "rel_error": 1.4628686873962297e-13
+    },
+    "then_1y_45C": {
+      "model": 0.03818471140517971,
+      "virtual_time_closed_form": 0.03818471140517318,
+      "rel_error": 1.7099773504356248e-13
+    }
+  },
+  "calendar_fade_1y_pct": {
+    "25C": {
+      "soc30": 0.81,
+      "soc50": 1.1,
+      "soc80": 1.56,
+      "soc100": 1.71
+    },
+    "35C": {
+      "soc30": 1.52,
+      "soc50": 2.04,
+      "soc80": 2.85,
+      "soc100": 3.12
+    },
+    "45C": {
+      "soc30": 2.72,
+      "soc50": 3.63,
+      "soc80": 5.02,
+      "soc100": 5.48
+    }
+  },
+  "datasheet_like_25C": {
+    "years_to_80pct": null,
+    "efc_to_80pct": null,
+    "split_after_20y": {
+      "calendar": 0.057,
+      "cycle": 0.109
+    }
+  },
+  "scenarios": {
+    "A_standard": {
+      "ceiling_soc": 1.0,
+      "dawn_soc": 0.567,
+      "mean_soc": 0.838,
+      "capacity_after_10y": 0.87,
+      "years_to_80pct": ">15",
+      "calendar_share_of_fade": 0.74,
+      "efc_per_year": 142
+    },
+    "B_charge_later_95": {
+      "ceiling_soc": 0.95,
+      "dawn_soc": 0.517,
+      "mean_soc": 0.706,
+      "capacity_after_10y": 0.88,
+      "years_to_80pct": ">15",
+      "calendar_share_of_fade": 0.74,
+      "efc_per_year": 143
+    },
+    "C_ceiling_capped": {
+      "ceiling_soc": 0.683,
+      "dawn_soc": 0.25,
+      "mean_soc": 0.439,
+      "capacity_after_10y": 0.903,
+      "years_to_80pct": ">15",
+      "calendar_share_of_fade": 0.67,
+      "efc_per_year": 146
+    },
+    "D_capped_plus_load_shift": {
+      "ceiling_soc": 0.599,
+      "dawn_soc": 0.25,
+      "mean_soc": 0.403,
+      "capacity_after_10y": 0.912,
+      "years_to_80pct": ">15",
+      "calendar_share_of_fade": 0.7,
+      "efc_per_year": 119
+    },
+    "E_standard_at_25C_reference": {
+      "ceiling_soc": 1.0,
+      "dawn_soc": 0.567,
+      "mean_soc": 0.838,
+      "capacity_after_10y": 0.91,
+      "years_to_80pct": ">15",
+      "calendar_share_of_fade": 0.58,
+      "efc_per_year": 147
+    },
+    "F_standard_battery_offset_0C": {
+      "ceiling_soc": 1.0,
+      "dawn_soc": 0.567,
+      "mean_soc": 0.838,
+      "capacity_after_10y": 0.883,
+      "years_to_80pct": ">15",
+      "calendar_share_of_fade": 0.69,
+      "efc_per_year": 143
+    },
+    "G_standard_battery_offset_6C": {
+      "ceiling_soc": 1.0,
+      "dawn_soc": 0.567,
+      "mean_soc": 0.838,
+      "capacity_after_10y": 0.854,
+      "years_to_80pct": ">15",
+      "calendar_share_of_fade": 0.79,
+      "efc_per_year": 140
+    },
+    "H_standard_lowgrade_cells_x2": {
+      "ceiling_soc": 1.0,
+      "dawn_soc": 0.567,
+      "mean_soc": 0.838,
+      "capacity_after_10y": 0.746,
+      "years_to_80pct": 6.6,
+      "calendar_share_of_fade": 0.76,
+      "efc_per_year": 126
+    },
+    "I_smart_lowgrade_cells_x2": {
+      "ceiling_soc": 0.599,
+      "dawn_soc": 0.25,
+      "mean_soc": 0.403,
+      "capacity_after_10y": 0.828,
+      "years_to_80pct": 12.9,
+      "calendar_share_of_fade": 0.72,
+      "efc_per_year": 110
+    },
+    "summary": {
+      "fade_10y_standard_pct": 13.0,
+      "fade_10y_smart_pct": 8.8,
+      "fade_reduction_pct": 32.0,
+      "dod_standard": 0.433,
+      "dod_smart": 0.349,
+      "reserve_soc_at_dawn_smart": 0.25
+    }
+  },
+  "cross_check_blast_lite_30C": {
+    "year_1": {
+      "blast_lite": 0.9741,
+      "ours": 0.974,
+      "diff_pct_points": -0.01
+    },
+    "year_5": {
+      "blast_lite": 0.9328,
+      "ours": 0.9325,
+      "diff_pct_points": -0.03
+    },
+    "year_10": {
+      "blast_lite": 0.8977,
+      "ours": 0.8972,
+      "diff_pct_points": -0.05
+    }
+  }
+}

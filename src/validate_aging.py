@@ -14,7 +14,7 @@ import math
 
 import numpy as np
 
-import aging_model as am
+import aging_naumann as am  # the TU Munich model checked against SimSES
 from params_io import ROOT, load_all
 
 

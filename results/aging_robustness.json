@@ -1,0 +1,52 @@
+{
+  "kit": {
+    "pv_kwp": 0.4,
+    "battery_kwh": 1.92
+  },
+  "forecast": "persistence",
+  "naumann_sony, cells as tested": {
+    "baseline": {
+      "capacity_after_10y": 0.7462,
+      "battery_life_years": 6.24,
+      "battery_life_note": "reached in simulation",
+      "critical_hours_lost_worst_year": 32
+    },
+    "smart": {
+      "capacity_after_10y": 0.7663,
+      "battery_life_years": 7.51,
+      "battery_life_note": "reached in simulation",
+      "critical_hours_lost_worst_year": 9
+    },
+    "fade_reduction_pct": 7.9
+  },
+  "nrel_prismatic, cells as tested": {
+    "baseline": {
+      "capacity_after_10y": 0.8739,
+      "battery_life_years": 19.0,
+      "battery_life_note": "extrapolated with the last simulated year's fade rate (conservative for square-root ageing)",
+      "critical_hours_lost_worst_year": 13
+    },
+    "smart": {
+      "capacity_after_10y": 0.8871,
+      "battery_life_years": 21.69,
+      "battery_life_note": "extrapolated with the last simulated year's fade rate (conservative for square-root ageing)",
+      "critical_hours_lost_worst_year": 9
+    },
+    "fade_reduction_pct": 10.5
+  },
+  "nrel_prismatic, cells x2 faster": {
+    "baseline": {
+      "capacity_after_10y": 0.7489,
+      "battery_life_years": 6.82,
+      "battery_life_note": "reached in simulation",
+      "critical_hours_lost_worst_year": 29
+    },
+    "smart": {
+      "capacity_after_10y": 0.768,
+      "battery_life_years": 7.88,
+      "battery_life_note": "reached in simulation",
+      "critical_hours_lost_worst_year": 9
+    },
+    "fade_reduction_pct": 7.6
+  }
+}

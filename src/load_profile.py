@@ -32,6 +32,9 @@ def build(household, hours_of_day, demand=None):
     for a in household["appliances"]:
         kw = a["power_w"] * a["quantity"] / 1000.0 * scale
         if a.get("flexible") and a.get("allowed_hours"):
+            if len(a["allowed_hours"]) < len(a["use_hours"]):
+                raise ValueError(f"{a['name']}: fewer allowed_hours than use_hours, "
+                                 "moving it would lose energy")
             flex.append({"name": a["name"], "kw": kw, "n_hours": len(a["use_hours"]),
                          "use_hours": list(a["use_hours"]), "allowed_hours": list(a["allowed_hours"]),
                          "critical": bool(a.get("critical"))})
